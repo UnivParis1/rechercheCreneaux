@@ -1,0 +1,9 @@
+url test fb:
+
+https://echange.univ-paris1.fr/kronolith/fb.php?u=prigaux
+
+
+url wsgroup : 
+
+http://wsgroups.univ-paris1.fr/web-widget/test-search-user.html
+
