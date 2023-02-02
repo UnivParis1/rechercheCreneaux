@@ -34,7 +34,7 @@ $event1 = $vcalendar->newVevent()
     // place the event
     ->setLocation( 'Kafé Ekorren Stockholm' )
     ->setGeo( '59.32206', '18.12485' )
-    // set the time
+    // set the timeuse Kigkonsult\Icalcreator\Vcalendar;
     ->setDtstart(
         new DateTime(
             '20190421T090000',

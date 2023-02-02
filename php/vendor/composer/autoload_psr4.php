@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'League\\Period\\' => array($vendorDir . '/league/period/src'),
     'Kigkonsult\\Icalcreator\\' => array($vendorDir . '/kigkonsult/icalcreator/src', $vendorDir . '/kigkonsult/icalcreator/src/Util', $vendorDir . '/kigkonsult/icalcreator/src/Traits'),
 );

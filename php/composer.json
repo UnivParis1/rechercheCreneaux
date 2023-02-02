@@ -1,5 +1,7 @@
 {
     "require": {
-        "kigkonsult/icalcreator": ">=2.40"
+        "kigkonsult/icalcreator": ">=2.40",
+        "league/period": "^5.1",
+        "nette/utils": "^3.2"
     }
 }
