@@ -7,3 +7,11 @@ url wsgroup :
 
 http://wsgroups.univ-paris1.fr/web-widget/test-search-user.html
 
+test vcalendar busy:
+
+
+Librairie à implémenter : 
+https://period.thephpleague.com/
+
+https://doc.nette.org/en/utils/type
+
