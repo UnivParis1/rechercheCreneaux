@@ -57,26 +57,21 @@ class FBUser {
      * @return void
      */
     public function __construct(String $uid) {
-        $this->uid = $uid;        
-
-        $fd = fopen($this::$url . $uid, "r");
-
+        $this->uid = $uid;
         $contents = '';
 
+        $fd = fopen($this::$url . $uid, "r");
         while (!feof($fd)) {
             $contents .= fread($fd, 8192);
         }
         fclose($fd);
 
-        $vcal = Vcalendar::factory();
-
-        $vcal->parse($contents);
+        $vcal = Vcalendar::factory()->parse($contents);
 
         $this->content = $contents;
-
         $this->fbusys = $vcal->getComponent()->getAllFreebusy();
     }
-    
+
     /**
      * factory
      *
@@ -122,6 +117,10 @@ class FBUser {
     
     private function _sortSequence($sequence) {
         $sequence->sort(function (Period $period1, Period $period2): int {
+            if ($period1->startDate == $period2->startDate && $period1->endDate == $period2->endDate) {
+                $this->sequence->remove($period2);
+                return 0;
+            }
             return $period1->startDate <=> $period2->startDate;
         });
         
@@ -132,9 +131,8 @@ class FBUser {
 
         $duration = self::getDuration();
 
-        $index=0;
         $isChanged = false;
-        foreach ($this->sequence as $period) {
+        foreach ($this->sequence as $key => $period) {
 
             $periodDuration = $period->withDurationAfterStart($duration);
             
@@ -144,12 +142,12 @@ class FBUser {
                 case 1:
                     # duration < creneau
                     $isChanged = true;
-                    $this->_normCreneauxInferieurDuree($period, $index);
+                    $this->_normCreneauxInferieurDuree($period, $key);
                     break;
                 case -1:
                     # duration > creneau
                     $isChanged = true;
-                    $this->sequence->remove($index);
+                    $this->sequence->remove($key);
                     break;
                 case 0:
                     # duration == creneau
@@ -158,7 +156,6 @@ class FBUser {
                     throw new Exception("Erreur comparaison creneau _normCreneaux");
                     break;
             }
-            $index++;
         }
         if ($isChanged) {
             $this->sequence = $this->_sortSequence($this->sequence);
@@ -170,7 +167,8 @@ class FBUser {
 
         $arrayNewPeriods = array();
         foreach ($periodToSplit->dateRangeForward($duration) as $datetime) {
-            $endDate = $datetime->add($duration->dateInterval)->sub(new DateInterval("PT1M"));
+            $endDate = $datetime->add($duration->dateInterval);
+//          enlève 1 minute, IncludeStartExcludeEnd  $endDate = $datetime->add($duration->dateInterval)->sub(new DateInterval("PT1M"));
 
             $p = Period::fromDate($datetime, $endDate);
             $arrayNewPeriods[] = $p;
@@ -180,7 +178,7 @@ class FBUser {
 
         $indexNew = $indexSequence;
         foreach ($arrayNewPeriods as $newPeriod) {
-            $this->sequence->insert($indexSequence, $newPeriod);
+            $this->sequence->insert($indexNew, $newPeriod);
             $indexNew++;
         }
     }

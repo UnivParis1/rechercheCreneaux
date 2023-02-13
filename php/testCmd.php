@@ -12,9 +12,6 @@ $fbUsers = array();
 foreach ($users as $user) {
     $fbUser = FBUser::factory($user);
     $fbUsers[] = $fbUser;
-    
-//    $dataset = new Chart\Dataset([['period', $fbUser->getSequence()->length()], ['sequence', $fbUser->getSequence()]]);
-//    (new Chart\GanttChart())->stroke($dataset);
 }
 
 $fbCompare = new FBCompare($fbUsers);
