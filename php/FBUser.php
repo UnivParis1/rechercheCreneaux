@@ -94,37 +94,10 @@ class FBUser {
 
     private function _initSequence() : void {
         $duration = self::$duration;
-        $sequence = new Sequence();
 
-        foreach ($this->fbusys as $fbusy) {
-
-            $fbusdate = $fbusy[0];
-
-            $t1DateTime = $fbusdate[0];
-            $t2DateTime = $fbusdate[1];
-
-            $t1DatePoint = DatePoint::fromDate($t1DateTime);
-            $t2DatePoint = DatePoint::fromDate($t2DateTime);
-
-            $period = Period::fromDate($t1DatePoint, $t2DatePoint);
-            
-            $sequence->push($period);
-        }
-
+        $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys);
         // trie par date de début
-        $this->sequence = $this->_sortSequence($sequence);
-    }
-    
-    private function _sortSequence($sequence) {
-        $sequence->sort(function (Period $period1, Period $period2): int {
-            if ($period1->startDate == $period2->startDate && $period1->endDate == $period2->endDate) {
-                $this->sequence->remove($period2);
-                return 0;
-            }
-            return $period1->startDate <=> $period2->startDate;
-        });
-        
-        return $sequence;
+        $this->sequence = FBUtils::sortSequence($sequence);
     }
     
     private function _instanceCreneaux() : void {
@@ -158,7 +131,7 @@ class FBUser {
             }
         }
         if ($isChanged) {
-            $this->sequence = $this->_sortSequence($this->sequence);
+            $this->sequence = FBUtils::sortSequence($this->sequence);
         }
     }
 
