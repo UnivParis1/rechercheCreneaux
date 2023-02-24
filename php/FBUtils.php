@@ -22,10 +22,10 @@ class FBUtils {
         (new Chart\GanttChart())->stroke($dataset);
     }
     
-    public static function sortSequence(Sequence $sequence) {
+    public static function sortSequence(Sequence &$sequence) {
         $sequence->sort(function (Period $period1, Period $period2): int {
             if ($period1->startDate == $period2->startDate && $period1->endDate == $period2->endDate) {
-                $this->sequence->remove($period2);
+                $sequence->remove($period2);
                 return 0;
             }
             return $period1->startDate <=> $period2->startDate;
