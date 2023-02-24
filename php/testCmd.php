@@ -3,24 +3,31 @@
 require 'paramsTest.php';
 
 require 'vendor/autoload.php';
+require 'FBUtils.php';
 require 'FBUser.php';
 require 'FBCompare.php';
 
 FBUser::setDuration($dureeMinutes);
+FBUser::setUrl($url);
 
 $fbUsers = array();
 foreach ($users as $user) {
     $fbUser = FBUser::factory($user);
     $fbUsers[] = $fbUser;
+    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
 }
 
 $fbCompare = new FBCompare($fbUsers);
 
-$period = $fbCompare->compareSequences();
+$periods = $fbCompare->compareSequences();
 
-if (!$period) {
+if (!$periods) {
     echo "pas de créneau";
     return -1;
 }
 
-die(var_dump($period));
+FBUtils::drawSequence($periods);
+
+FBUtils::drawSequence($fbUsers[0]->getSequence()->jsonSerialize());
+
+exit;

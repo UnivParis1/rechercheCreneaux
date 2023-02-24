@@ -23,7 +23,7 @@ class FBUser {
     /**
      * @var string url
      */
-    private static String $url = "https://echange.univ-paris1.fr/kronolith/fb.php?u=";
+    private static String $url;
                     
     /**
      * @var Duration duration
@@ -39,6 +39,10 @@ class FBUser {
      */
     private String $content;
 
+    /**
+     * @var Vcalendar vcal
+     */
+    private Vcalendar $vcal;
     /**
      * @var array fbusys
      */
@@ -66,10 +70,7 @@ class FBUser {
         }
         fclose($fd);
 
-        $vcal = Vcalendar::factory()->parse($contents);
-
         $this->content = $contents;
-        $this->fbusys = $vcal->getComponent()->getAllFreebusy();
     }
 
     /**
@@ -86,10 +87,23 @@ class FBUser {
 
         $fbUser = new self($uid);
 
+        $fbUser->_selectFreebusy();
         $fbUser->_initSequence();
         $fbUser->_instanceCreneaux();
 
         return $fbUser;
+    }
+
+    private function _selectFreebusy() {
+
+        $vcal = Vcalendar::factory()->parse($this->content);
+
+//      TODO : Requête filtrant les sorties
+//        $comps = $vcal->selectComponents(2023, 02, 24, 2023, 04, 24, "vfreebusy", false, true, true);
+
+        $component = $vcal->getComponent();
+        $this->fbusys = $component->getAllFreebusy();
+        $this->vcal = $vcal;
     }
 
     private function _initSequence() : void {
@@ -175,6 +189,10 @@ class FBUser {
     public static function setDuration(int $dureeMinutes) : void {
         $dateInterval = new DateInterval("PT".$dureeMinutes."M");
         self::$duration = Duration::fromDateInterval($dateInterval);
+    }
+
+    public static function setUrl(String $urlSet) : void {
+        self::$url = $urlSet;
     }
 
     /**
