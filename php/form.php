@@ -3,9 +3,9 @@ $uid = isset($_GET['person']) ? $_GET['person'] : null;
 $uids = isset($_GET['listuids']) ? $_GET['listuids'] : null;
 $creneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
 
-if ($uids && $creneaux) {
+if ($uids && sizeof($uids) > 1 && $creneaux) {
     $js_uids = json_encode($uids);
-    
+
     $listDate = array();
 
     for ($i = 0; $i < 3; $i++) {
@@ -17,13 +17,18 @@ if ($uids && $creneaux) {
 <html>
     <head>
         <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <style>
+            .alertrequire {
+                color: red;                
+            }
+        </style>
     </head>
     <body>
-        <form action="">
+        <form id="form" action="">
             <div>
                 <table>
                 <tr>
-                    <td>                        
+                    <td>
                         <p>Uid de l'utisateur</p>
                         <script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
                         <input id="person" name="person" placeholder="Nom et/ou prenom" />
@@ -35,51 +40,70 @@ if ($uids && $creneaux) {
                             
                             $(function() {
                                 setOptionsUid(jsuids);
+                                
+                                if (jsuids.length < 2) {
+                                    $(".alertrequire").show();
+                                }
                             });
                             
                             <?php } ?>
-                            
+
                             var urlwsgroup = 'https://wsgroups.univ-paris1.fr/searchUser';
-                            
-                            var idpersonselect = "#personselect";
+
+                            var idpersonselect = "#personselect";                              
                             var divpersonselect = "#divpersonselect";
-                            
+
                             function getCurrentOptions() {
                                 var getVals = new Array();
                                 $(idpersonselect + " option:selected").each(function(idx, option) {
                                     getVals[idx] = option.value;
                                 });
-                                
+
                                 return getVals;
                             }
-                            
+
                             function setOptionsUid(jsuids) {
                                 for (uid of jsuids) {
                                     addOptionWithUid(uid);
                                 }
                             }
-                            
-                            function addOptionWithUid(uid) {                                
-                                var newOption = $('<option>');
+
+                            function addOptionWithUid(uid) {
+                                var newOption = $('<option>');                    
                                 newOption.attr('value',uid).attr('selected', '').text(uid);
                                 $(idpersonselect).append(newOption);
                                 $(divpersonselect).show();
-                            }                            
-                            
+                            }
+
                             function addOptionUid() {
-                                var uid=this.value;                                
-                                
-                                if (getCurrentOptions().indexOf(uid) == -1) {
-                                    addOptionWithUid(uid);                                    
+                                var uid=this.value;
+                                var vals = getCurrentOptions();
+                                if (vals.indexOf(uid) == -1) {
+                                    addOptionWithUid(uid);
+                                }
+                                if (vals.length > 1) {
+                                    $(".alertrequire").hide();
                                 }
                             }
-                            
+
                             $("#person").autocompleteUser(
                                     urlwsgroup, {
                                     select: addOptionUid
                                     }
                             );
                     
+                            $("#form").on( "submit", function(e) {
+                                e.preventDefault();
+                                
+                                var vals = getCurrentOptions();
+                                                    
+                                if (vals.length > 1) {
+                                    this.submit();
+                                }
+                                else {
+                                    $(".alertrequire").show();
+                                }
+                            });
                         </script>
                     </td>
                     <td>
@@ -96,7 +120,8 @@ if ($uids && $creneaux) {
                         <div id="divpersonselect" hidden>
                             <br />
                             <p>Séléction des Users<br />(uid) suivants</p>
-                            <select id="personselect" multiple="multiple" name="listuids[]">
+                            <p class="alertrequire" hidden>Séléction minimum de 2 utilisateurs</p>
+                            <select id="personselect" multiple="multiple" name="listuids[]" required>
                                 <optgroup id="personselectopt" label="Uid" />
                             </select>
                         </div>
