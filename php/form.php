@@ -14,27 +14,48 @@ if ($uids && sizeof($uids) > 1 && $creneaux) {
 }
 ?>
 
-<html>
+<!DOCTYPE html>
     <head>
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
         <style>
             .alertrequire {
-                color: red;                
+                color: red;
             }
+/*            ul {
+                padding: 0;
+                margin: 0;
+                dislay: table;
+                border-spacing: .3em;
+            }
+            li {
+                list-style: none;
+                display: table-row;
+            }
+            label, button {
+                display: table-cell;
+            }
+            button {
+                border: 2px outset #aaa;
+                border-radius: 4px;
+            }*/
         </style>
-    </head>
+        
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+        <script type='text/javascript' src='./form.js'></script>
+    </head>    
     <body>
         <form id="form" action="">
             <div>
                 <table>
                 <tr>
                     <td>
-                        <p>Uid de l'utisateur</p>
-                        <script src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+                        <p>Recherche de l'utisateur</p>                        
                         <input id="person" name="person" placeholder="Nom et/ou prenom" />
                         
                         <script>
-                            
                             <?php if ($uids && isset($js_uids)) { ?>
                             var jsuids=<?php echo "$js_uids" ?>;
                             
@@ -47,63 +68,6 @@ if ($uids && sizeof($uids) > 1 && $creneaux) {
                             });
                             
                             <?php } ?>
-
-                            var urlwsgroup = 'https://wsgroups.univ-paris1.fr/searchUser';
-
-                            var idpersonselect = "#personselect";                              
-                            var divpersonselect = "#divpersonselect";
-
-                            function getCurrentOptions() {
-                                var getVals = new Array();
-                                $(idpersonselect + " option:selected").each(function(idx, option) {
-                                    getVals[idx] = option.value;
-                                });
-
-                                return getVals;
-                            }
-
-                            function setOptionsUid(jsuids) {
-                                for (uid of jsuids) {
-                                    addOptionWithUid(uid);
-                                }
-                            }
-
-                            function addOptionWithUid(uid) {
-                                var newOption = $('<option>');                    
-                                newOption.attr('value',uid).attr('selected', '').text(uid);
-                                $(idpersonselect).append(newOption);
-                                $(divpersonselect).show();
-                            }
-
-                            function addOptionUid() {
-                                var uid=this.value;
-                                var vals = getCurrentOptions();
-                                if (vals.indexOf(uid) == -1) {
-                                    addOptionWithUid(uid);
-                                }
-                                if (vals.length > 1) {
-                                    $(".alertrequire").hide();
-                                }
-                            }
-
-                            $("#person").autocompleteUser(
-                                    urlwsgroup, {
-                                    select: addOptionUid
-                                    }
-                            );
-                    
-                            $("#form").on( "submit", function(e) {
-                                e.preventDefault();
-                                
-                                var vals = getCurrentOptions();
-                                                    
-                                if (vals.length > 1) {
-                                    this.submit();
-                                }
-                                else {
-                                    $(".alertrequire").show();
-                                }
-                            });
                         </script>
                     </td>
                     <td>
@@ -117,13 +81,12 @@ if ($uids && sizeof($uids) > 1 && $creneaux) {
                 </tr>
                 <tr>
                     <td>
-                        <div id="divpersonselect" hidden>
+                        <div id="divpersonselect">
                             <br />
                             <p>Séléction des Users<br />(uid) suivants</p>
                             <p class="alertrequire" hidden>Séléction minimum de 2 utilisateurs</p>
-                            <select id="personselect" multiple="multiple" name="listuids[]" required>
-                                <optgroup id="personselectopt" label="Uid" />
-                            </select>
+                            <ul id="person_ul">
+                            </ul>
                         </div>
                     </td>
                 </tr>
