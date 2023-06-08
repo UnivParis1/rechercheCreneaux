@@ -61,10 +61,7 @@ function wsCallbackUid(event, ui) {
 
     addOptionUid(uid, displayName);
     
-    event.currentTarget.onmouseout = function() {
-        $("#person").val('');
-        this.onmouseout=null;
-    }
+    return false;
 }
 
 $(function() {
