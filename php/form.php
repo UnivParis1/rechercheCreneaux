@@ -52,7 +52,7 @@ if ($uids && sizeof($uids) > 1 && $creneaux) {
                 <table>
                 <tr>
                     <td>
-                        <p>Recherche de l'utisateur</p>                        
+                        <p>Recherche de l'utisateur</p>
                         <input id="person" name="person" placeholder="Nom et/ou prenom" />
                         
                         <script>
@@ -95,17 +95,16 @@ if ($uids && sizeof($uids) > 1 && $creneaux) {
         </form>
 
 
+        <?php if (isset($listDate)) { ?>
         <div>
             <p>Résultats</p>
             <ul>
-                <?php if (isset($listDate)) { ?>
                     <?php foreach ($listDate as $date) { ?>
                         <li>
                             <time><?php echo $date; ?></time>
                         </li>
-                        <?php
-                    }
-                }
+                        <?php } ?>
+                <?php }
                 ?>
             </ul>
         </div>

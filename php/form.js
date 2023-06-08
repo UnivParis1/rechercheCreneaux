@@ -14,7 +14,15 @@ function getCurrentOptions() {
 
 function setOptionsUid(jsuids) {
     for (uid of jsuids) {
-        addOptionWithUid(uid);
+        $.ajax({
+            url: urlwsgroup,
+            jsonp : "callback",
+            data: {'token' : uid, 'maxRows' : 1, 'attrs' : "uid,displayName"},
+            dataType: 'jsonp',
+            success: function (response) {
+                addOptionWithUid(uid, response[0].displayName);
+            }
+        });
     }
 }
 
@@ -25,7 +33,7 @@ function addOptionWithUid(uid, displayName) {
 
     var newLi = $('<li>');
     var label = $('<input>');
-    label.attr('type', 'radio').attr('name', 'listuid[]').val(uid).css('display', 'none');
+    label.attr('type', 'checkbox').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none');
 
     newLi.append(label);
     newLi.append(displayName);
@@ -38,7 +46,7 @@ function addOptionWithUid(uid, displayName) {
     button.on("click", function () {
         $(this).parent().remove();
 
-        if (getCurrentOptions().length == 0)
+        if (getCurrentOptions().length === 0)
             $(divpersonselect).hide();
     });
 }
@@ -46,7 +54,7 @@ function addOptionWithUid(uid, displayName) {
 function addOptionUid(uid, displayName) {
     //var uid=this.value;
     var vals = getCurrentOptions();
-    if (vals.indexOf(uid) == -1) {
+    if (vals.indexOf(uid) === -1) {
         addOptionWithUid(uid, displayName);
     }
     if (vals.length > 1) {
@@ -60,7 +68,9 @@ function wsCallbackUid(event, ui) {
     var displayName = ui.item.displayName;
 
     addOptionUid(uid, displayName);
-    
+
+    $(event.target).val('');
+
     return false;
 }
 
