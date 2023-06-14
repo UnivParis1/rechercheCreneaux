@@ -2,6 +2,15 @@ var urlwsgroup = 'https://wsgroups.univ-paris1.fr/searchUser';
 var divpersonselect = "#divpersonselect";
 var idperson_ul = "#person_ul";
 
+function errorShow(toShow) {
+    if (toShow === true) {
+        $(".alertrequire").css('display', 'inherit');
+    }
+    if (toShow === false) {
+        $(".alertrequire").css('display', 'none');
+    }
+}
+
 function getCurrentOptions() {
     var getVals = new Array();
 
@@ -20,7 +29,7 @@ function setOptionsUid(jsuids) {
             data: {'token' : uid, 'maxRows' : 1, 'attrs' : "uid,displayName"},
             dataType: 'jsonp',
             success: function (response) {
-                addOptionWithUid(uid, response[0].displayName);
+                addOptionWithUid(response[0].uid, response[0].displayName);
             }
         });
     }
@@ -46,8 +55,12 @@ function addOptionWithUid(uid, displayName) {
     button.on("click", function () {
         $(this).parent().remove();
 
-        if (getCurrentOptions().length === 0)
+        var optnb = getCurrentOptions();
+
+        if (optnb.length === 0)
             $(divpersonselect).hide();
+        if (optnb.length < 2) 
+            errorShow(true);
     });
 }
 
@@ -57,8 +70,9 @@ function addOptionUid(uid, displayName) {
     if (vals.indexOf(uid) === -1) {
         addOptionWithUid(uid, displayName);
     }
+    vals = getCurrentOptions();
     if (vals.length > 1) {
-        $(".alertrequire").hide();
+        errorShow(false);
     }
 }
 
@@ -90,7 +104,7 @@ $(function() {
         if (vals.length > 1)
             this.submit();
         else
-            $(".alertrequire").show();
+            errorShow(true);
     });
     
     $('#divpersonselect').hide();

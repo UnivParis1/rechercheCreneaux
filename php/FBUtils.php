@@ -28,7 +28,7 @@ class FBUtils {
                 $sequence->remove($period2);
                 return 0;
             }
-            return $period1->startDate <=> $period2->startDate;
+            return $period1->startDate <=> $period2->startDate; 
         });
 
         return $sequence;

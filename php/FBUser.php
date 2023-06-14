@@ -98,11 +98,14 @@ class FBUser {
 
         $vcal = Vcalendar::factory()->parse($this->content);
 
-//      TODO : Requête filtrant les sorties
-//        $comps = $vcal->selectComponents(2023, 02, 24, 2023, 04, 24, "vfreebusy", false, true, true);
+        if ($vcal->countComponents() !== 1) {
+            throw new Exception("FBUser: component !== 1");
+        }
 
         $component = $vcal->getComponent();
-        $this->fbusys = $component->getAllFreebusy();
+        $fbusys = $component->getAllFreebusy();
+
+        $this->fbusys = $fbusys;
         $this->vcal = $vcal;
     }
 
@@ -119,7 +122,7 @@ class FBUser {
         $duration = self::getDuration();
 
         $isChanged = false;
-        foreach ($this->sequence as $key => $period) {
+        foreach ($this->sequence as $period) {
 
             $periodDuration = $period->withDurationAfterStart($duration);
             
@@ -129,12 +132,12 @@ class FBUser {
                 case 1:
                     # duration < creneau
                     $isChanged = true;
-                    $this->_normCreneauxInferieurDuree($period, $key);
+                    $this->_normCreneauxInferieurDuree($period);
                     break;
                 case -1:
                     # duration > creneau
                     $isChanged = true;
-                    $this->sequence->remove($key);
+                    $this->sequence->remove($this->sequence->indexOf($period));
                     break;
                 case 0:
                     # duration == creneau
@@ -149,7 +152,7 @@ class FBUser {
         }
     }
 
-    private function _normCreneauxInferieurDuree($periodToSplit, $indexSequence) : void {
+    private function _normCreneauxInferieurDuree($periodToSplit) : void {
         $duration = self::getDuration();
 
         $arrayNewPeriods = array();
@@ -161,9 +164,14 @@ class FBUser {
             $arrayNewPeriods[] = $p;
         }
 
-        $this->sequence->remove($indexSequence);
+        $sequence = $this->getSequence();
 
-        $indexNew = $indexSequence;
+        $offset = $sequence->indexOf($periodToSplit);
+
+        $sequence->remove($offset);
+        $this->sequence = $sequence;
+
+        $indexNew = $offset;
         foreach ($arrayNewPeriods as $newPeriod) {
             $this->sequence->insert($indexNew, $newPeriod);
             $indexNew++;
@@ -174,7 +182,7 @@ class FBUser {
      * Get creneauMinute
      *
      * @return  Duration
-     */ 
+     */
     public static function getDuration() : Duration {
         return self::$duration;
     }
