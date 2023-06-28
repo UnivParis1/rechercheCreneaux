@@ -5,6 +5,8 @@ require 'FBUtils.php';
 require 'FBUser.php';
 require 'FBCompare.php';
 
+setlocale(LC_TIME, "fr_FR");
+
 $uids = isset($_GET['listuids']) ? $_GET['listuids'] : null;
 $creneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
 $duree = isset($_GET['duree']) ? $_GET['duree'] : null;
@@ -30,7 +32,7 @@ if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
 
         for ($i = 0; $i < $creneaux; $i++) {
             if ($np = next($periods))
-                $listDate[] = $np->startDate->format('m.d.y H\Hi');
+                $listDate[] = $np;
         }
     }
 //echo "<pre>";
@@ -55,12 +57,12 @@ if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
         <script type='text/javascript' src='./form.js'></script>
     </head>
     <body>
+        <h1>Recherche de disponibilités</h1>
         <form id="form" action="">
-            <div>
                 <table>
                 <tr>
                     <td>
-                        <p>Recherche de l'utisateur</p>
+                        <p>Séléction des Users</p>
                         <input id="person" name="person" placeholder="Nom et/ou prenom" />
                         
                         <script>
@@ -95,7 +97,7 @@ if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
                     <td>
                         <div id="divpersonselect">
                             <br />
-                            <p>Séléction des Users<br />(uid) suivants</p>
+                            <p>Utilisateurs sélectionnés</p>
                             <p class="alertrequire">Séléction minimum de 2 utilisateurs</p>
                             <ul id="person_ul">
                             </ul>
@@ -103,25 +105,33 @@ if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
                     </td>
                 </tr>
                 </table>
-            </div>
         </form>
 
 
         <?php if (isset($listDate)) { ?>
         <div>
-            <p>Résultats</p>
+            <p>Créneaux disponibles</p>
             <ul>
-                    <?php foreach ($listDate as $date) { ?>
+                    <?php
+                    setlocale(LC_ALL, "fr_FR");
+                    $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
+                    $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
+
+                    /* var $date League\Period\Period */
+                    foreach ($listDate as $date) {
+                         //$date = new League\Period\Period();
+                        ?>
                         <li>
-                            <time><?php echo $date; ?></time>
+                            <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
                         </li>
                         <?php } ?>
             </ul>
         </div>
-        <?php } elseif (sizeof($periods) == 0) { ?>
+        <?php } elseif (isset($periods) && sizeof($periods) == 0) { ?>
             <div>
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
             </div>
         <?php } ?>
     </body>
 </html>
+
