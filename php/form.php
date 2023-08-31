@@ -1,42 +1,56 @@
 <?php
 
 require 'vendor/autoload.php';
-require 'FBUtils.php';
-require 'FBUser.php';
-require 'FBCompare.php';
+require_once('FBUser.php');
+require_once('FBUtils.php');
+require_once('FBCompare.php');
 
 setlocale(LC_TIME, "fr_FR");
+
+date_default_timezone_set('Europe/Paris');
+$dtz = date_default_timezone_get();
+$url = 'https://echange.univ-paris1.fr/kronolith/fb.php?u=';
+
+$vars = filter_var_array($_GET);
 
 $uids = isset($_GET['listuids']) ? $_GET['listuids'] : null;
 $creneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
 $duree = isset($_GET['duree']) ? $_GET['duree'] : null;
+$plagesHoraires = isset($_GET['plagesHoraires']) ? $_GET['plagesHoraires'] : array('9-12', '14-17');
 
-if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
+if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $creneaux && $duree) {
     $js_uids = json_encode($uids);
 
-    $url = "https://echange.univ-paris1.fr/kronolith/fb.php?u=";
-    FBUser::setDuration($duree);
-    FBUser::setUrl($url);
+    $heuresPlage = FBUtils::parsePlagesHoraires($plagesHoraires);
+
+    $creneaux = FBUtils::getDefaultsCreneaux($duree, $heuresPlage);
+    $seqgen = FBUtils::createSequenceFromDT($creneaux, $duree);
 
     $fbUsers = array();
     foreach ($uids as $uid) {
-        $fbUser = FBUser::factory($uid);
+        $fbUser = FBUser::factory($uid, $dtz, $url, $duree, $seqgen);
         $fbUsers[] = $fbUser;
     }
 
     $fbCompare = new FBCompare($fbUsers);
-    $periods = $fbCompare->compareSequences();
+
+// Ancienne version avant inversion FREE/BUSY
+//    $periods = $fbCompare->compareSequences();
+
+    $periodsMerged = $fbCompare->mergeSequences();
+    $seq = FBUtils::addTimezoneToLeaguePeriods($periodsMerged, $dtz);
+
+    $periods = $seqgen->subtract($seq);
 
     if (sizeof($periods) > 0) {
         $listDate = array();
 
+        $it = $periods->getIterator();
         for ($i = 0; $i < $creneaux; $i++) {
-            if ($np = next($periods))
+            if ($np = $it->next())
                 $listDate[] = $np;
         }
     }
-//echo "<pre>";
-//    die(var_dump($periods));
 }
 ?>
 
@@ -113,7 +127,6 @@ if ($uids && sizeof($uids) > 1 && $creneaux && $duree) {
             <p>Créneaux disponibles</p>
             <ul>
                     <?php
-                    setlocale(LC_ALL, "fr_FR");
                     $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
                     $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
 

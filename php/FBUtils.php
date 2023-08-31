@@ -4,6 +4,7 @@ use League\Period\Period;
 use League\Period\Sequence;
 use League\Period\DatePoint;
 use League\Period\Chart;
+use RRule\RRule;
 
 
 /**
@@ -34,7 +35,7 @@ class FBUtils {
         return $sequence;
     }
     
-    public static function createSequenceFromArrayFbusy(array $fbusys) {
+    public static function createSequenceFromArrayFbusy(array $fbusys, $dtz) {
         
         $sequence = new Sequence();
         
@@ -45,30 +46,94 @@ class FBUtils {
             $t1DateTime = $fbusdate[0];
             $t2DateTime = $fbusdate[1];
 
-            $t1DatePoint = DatePoint::fromDate($t1DateTime);
-            $t2DatePoint = DatePoint::fromDate($t2DateTime);
+            $dstart = DateTimeImmutable::createFromMutable($fbusdate[0]);
+            $dstart = $dstart->setTimezone($dtz);
+            $dend = DateTimeImmutable::createFromMutable($fbusdate[1]);
+            $dend = $dend->setTimezone($dtz);
 
-            $period = Period::fromDate($t1DatePoint, $t2DatePoint);
+            $period = Period::fromDate($dstart, $dend);
             
             $sequence->push($period);
         }
 
         return $sequence;
     }
-    
-    public static function createSequenceFromArrayPeriods(array $periods) {
-        $sequence = new Sequence();
         
+    /**
+     * createSequenceFromArrayPeriods
+     *
+     * @param  array{League\Period\Period} $periods
+     * @return League\Period\Sequence $sequence
+     */
+    public static function createSequenceFromArrayPeriods($periods) {
+        $sequence = new Sequence();
+
         foreach ($periods as $period) {
             $sequence->push($period);
         }
-        
+
         return $sequence;
     }
     
-//    public static function createCSV($name, array $periods) {
-//        $writer = Writer::createFromPath("./$name.csv", 'w+');
-//        
-//        $writer->insertAll($periods);        
-//    }
+    public static function createSequenceFromDT(array $creneaux, $duree) {
+
+        $seqgen = new \League\Period\Sequence();
+
+        foreach ($creneaux as $creneau) {
+            $dateend = DateTimeImmutable::createFromMutable($creneau);
+            $end = $dateend->add(new DateInterval('PT'. $duree . 'M'));
+            $period = \League\Period\Period::fromDate($creneau, $end);
+
+            $seqgen->push($period);
+        }
+
+        return $seqgen;
+    }
+
+    public static function addTimezoneToLeaguePeriods($periods, DateTimeZone $dateTimeZone) {
+        $seq = new \League\Period\Sequence();
+
+        foreach ($periods as $period) {
+            $dstart = DateTime::createFromImmutable($period->startDate);
+            $dstart->setTimezone($dateTimeZone);
+            $dend = DateTime::createFromImmutable($period->endDate);
+            $dend->setTimezone($dateTimeZone);
+
+            $newPeriod = \League\Period\Period::fromDate($dstart, $dend);
+            $seq->push($newPeriod);
+        }
+        return $seq;
+    }
+
+    private static function generateCreneaux($dtstart, $until, $duree, $hours, $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
+        $r = new RRule([
+            'FREQ' => 'MINUTELY',
+            'DTSTART' => $dtstart, // '2023-07-12'
+            'UNTIL' => $until, // '2023-10-23'
+            'INTERVAL' => $duree,
+            'BYHOUR' => $hours,
+            'BYDAY' => $days
+        ]);
+
+        return $r->getOccurrences();
+    }
+
+    public static function getDefaultsCreneaux($dureeEnMinutes, $hours = [9, 10, 11, 14, 15, 16], $addXmonth = 1) {
+        $dateBeginCreneau = date('Y-m-d');
+        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
+                ->add(new DateInterval('P'. $addXmonth .'M'))
+                ->format('Y-m-d');
+
+        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, $dureeEnMinutes, $hours);
+    }
+
+    public static function parsePlagesHoraires(array $plagesHoraires) {
+        $arrHours = array();
+        foreach ($plagesHoraires as $plages) {
+            $pt = explode('-', $plages);
+            for ($i = (int) $pt[0]; $i < $pt[1]; $i++)
+                $arrHours[] = $i;
+        }
+        return $arrHours;
+    }
 }

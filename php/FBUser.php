@@ -24,15 +24,25 @@ class FBUser {
      * @var string url
      */
     private static String $url;
-                    
+
     /**
      * @var Duration duration
      */
     private static Duration $duration;
+
+    private static League\Period\Sequence $creneauxGenerated;
+
     /**
      * @var string uid
      */
     private String $uid;
+
+    /**
+     * @var string dtz
+     */
+    private String $dtz;
+
+    private DateTimeZone $dateTimeZone;
 
     /**
      * @var string content
@@ -60,8 +70,12 @@ class FBUser {
      *
      * @return void
      */
-    public function __construct(String $uid) {
+    private function __construct(String $uid, String $dtz, String $url) {
         $this->uid = $uid;
+        $this->dtz = $dtz;
+        $this->setDateTimeZone($dtz);
+        $this::$url = $url;
+
         $contents = '';
 
         $fd = fopen($this::$url . $uid, "r");
@@ -80,12 +94,13 @@ class FBUser {
      *
      * @return FBUser
      */
-    public static function factory(String $uid) : FBUser {
-        if (!isset(self::$duration)) {
-            throw new Exception("Le créneau doit être renseigné");
-        }
+    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux) : FBUser {
+        if (!isset(self::$duration))
+            self::setDuration($dureeEnMinutes);
+        if (!isset(self::$creneauxGenerated))
+            self::setCreneauxGenerated($creneaux);
 
-        $fbUser = new self($uid);
+        $fbUser = new self($uid, $dtz, $url);
 
         $fbUser->_selectFreebusy();
         $fbUser->_initSequence();
@@ -112,7 +127,7 @@ class FBUser {
     private function _initSequence() : void {
         $duration = self::$duration;
 
-        $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys);
+        $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
         // trie par date de début
         $this->sequence = FBUtils::sortSequence($sequence);
     }
@@ -120,31 +135,38 @@ class FBUser {
     private function _instanceCreneaux() : void {
 
         $duration = self::getDuration();
+        $sequence = $this->getSequence();
 
         $isChanged = false;
-        foreach ($this->sequence as $period) {
+        foreach ($sequence as $period) {
+
+            if (! $this->getCreneauxGenerated()->contains($period) ) {
+                $sequence->remove($sequence->indexOf($period));
+                $isChanged = true;
+                continue;
+            }
 
             $periodDuration = $period->withDurationAfterStart($duration);
-            
+
             $comparePeriod = $period->durationCompare($periodDuration);
 
             switch ($comparePeriod) {
                 case 1:
-                    # duration < creneau
-                    $isChanged = true;
+                    # duration > creneau
                     $this->_normCreneauxInferieurDuree($period);
+                    $isChanged = true;
                     break;
                 case -1:
-                    # duration > creneau
+                    # duration < creneau
+                    $idx = $this->sequence->indexOf($period);
+                    $period->moveEndDate($duration);
                     $isChanged = true;
-                    $this->sequence->remove($this->sequence->indexOf($period));
                     break;
                 case 0:
                     # duration == creneau
                     break;
                 default:
                     throw new Exception("Erreur comparaison creneau _normCreneaux");
-                    break;
             }
         }
         if ($isChanged) {
@@ -152,7 +174,7 @@ class FBUser {
         }
     }
 
-    private function _normCreneauxInferieurDuree($periodToSplit) : void {
+    private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit) : void {
         $duration = self::getDuration();
 
         $arrayNewPeriods = array();
@@ -213,4 +235,36 @@ class FBUser {
         return $this->sequence;
     }
 
+    public function getDateTimeZone()
+    {
+        return $this->dateTimeZone;
+    }
+
+    public function setDateTimeZone(String $dtz)
+    {
+        $this->dateTimeZone = new DateTimeZone($dtz);
+    }
+
+    /**
+     * Get the value of creneauxGenerated
+     */
+    public function getCreneauxGenerated()
+    {
+        if (isset(self::$creneauxGenerated))
+            return self::$creneauxGenerated;
+        else
+            return false;
+    }
+
+    /**
+     * Set the value of creneauxGenerated
+     *
+     * @return  self
+     */
+    public static function setCreneauxGenerated(&$creneauxGenerated)
+    {
+        self::$creneauxGenerated = $creneauxGenerated;
+
+        return self::$creneauxGenerated;
+    }
 }
