@@ -8,7 +8,7 @@ require_once('FBCompare.php');
 setlocale(LC_TIME, "fr_FR");
 
 date_default_timezone_set('Europe/Paris');
-$dtz = date_default_timezone_get();
+$s_dtz = date_default_timezone_get();
 $url = 'https://echange.univ-paris1.fr/kronolith/fb.php?u=';
 
 $vars = filter_var_array($_GET);
@@ -28,7 +28,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
     $fbUsers = array();
     foreach ($uids as $uid) {
-        $fbUser = FBUser::factory($uid, $dtz, $url, $duree, $seqgen);
+        $fbUser = FBUser::factory($uid, $s_dtz, $url, $duree, $seqgen);
         $fbUsers[] = $fbUser;
     }
 
@@ -38,7 +38,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 //    $periods = $fbCompare->compareSequences();
 
     $periodsMerged = $fbCompare->mergeSequences();
-    $seq = FBUtils::addTimezoneToLeaguePeriods($periodsMerged, $dtz);
+    $seq = FBUtils::addTimezoneToLeaguePeriods($periodsMerged, new DateTimeZone($s_dtz));
 
     $periods = $seqgen->subtract($seq);
 

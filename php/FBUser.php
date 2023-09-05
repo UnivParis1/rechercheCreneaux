@@ -133,37 +133,31 @@ class FBUser {
     }
     
     private function _instanceCreneaux() : void {
-
         $duration = self::getDuration();
-        $sequence = $this->getSequence();
+        $busySeq = $this->getSequence();
+        $creneaugenSeq = $this->getCreneauxGenerated();
 
         $isChanged = false;
-        foreach ($sequence as $period) {
-
-            if (! $this->getCreneauxGenerated()->contains($period) ) {
-                $sequence->remove($sequence->indexOf($period));
+        foreach ($busySeq as $busyPeriod) {
+            $cmpBusyCreneau = $this->_cmpCreneaugensToBusyperiod($busyPeriod);
+            if ($cmpBusyCreneau  == 0 ) {
+                $busySeq->remove($busySeq->indexOf($busyPeriod));
                 $isChanged = true;
                 continue;
             }
 
-            $periodDuration = $period->withDurationAfterStart($duration);
-
-            $comparePeriod = $period->durationCompare($periodDuration);
-
-            switch ($comparePeriod) {
+            switch ($cmpBusyCreneau) {
                 case 1:
-                    # duration > creneau
-                    $this->_normCreneauxInferieurDuree($period);
+                    // creneau < busy
+                    $this->_normCreneauxInferieurDuree($busyPeriod);
                     $isChanged = true;
                     break;
                 case -1:
-                    # duration < creneau
-                    $idx = $this->sequence->indexOf($period);
-                    $period->moveEndDate($duration);
+                    // creneau > busy
+                    $idx = $this->sequence->indexOf($busyPeriod);
+                    $busyPeriod = $busyPeriod->moveEndDate($duration);
+                    $this->sequence->insert($idx, $busyPeriod);
                     $isChanged = true;
-                    break;
-                case 0:
-                    # duration == creneau
                     break;
                 default:
                     throw new Exception("Erreur comparaison creneau _normCreneaux");
@@ -174,29 +168,39 @@ class FBUser {
         }
     }
 
+    private function _cmpCreneaugensToBusyperiod(League\Period\Period $periodToCompare ) : int {
+        foreach ($this->getCreneauxGenerated() as $period) {
+            // creneau > busy
+            if ($period->contains($periodToCompare)) {
+                return -1;
+            }elseif ($periodToCompare->contains($period)) {// creneau < busy
+                return 1;
+            }
+        }
+        return 0;
+    }
+
     private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit) : void {
+        $offset = $this->sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
 
         $arrayNewPeriods = array();
         foreach ($periodToSplit->dateRangeForward($duration) as $datetime) {
             $endDate = $datetime->add($duration->dateInterval);
-//          enlève 1 minute, IncludeStartExcludeEnd  $endDate = $datetime->add($duration->dateInterval)->sub(new DateInterval("PT1M"));
-
             $p = Period::fromDate($datetime, $endDate);
             $arrayNewPeriods[] = $p;
         }
 
-        $sequence = $this->getSequence();
-
-        $offset = $sequence->indexOf($periodToSplit);
-
-        $sequence->remove($offset);
-        $this->sequence = $sequence;
+        $this->sequence->remove($offset);
 
         $indexNew = $offset;
         foreach ($arrayNewPeriods as $newPeriod) {
-            $this->sequence->insert($indexNew, $newPeriod);
-            $indexNew++;
+            // vérifie si les busys normalisés sont bien dans les creneaux au cas ou la periode > plusieurs jours
+            $cmpIsInCreneau = $this->_cmpCreneaugensToBusyperiod($newPeriod);
+            if ($cmpIsInCreneau !== 0) {
+                $this->sequence->insert($indexNew, $newPeriod);
+                $indexNew++;
+            }
         }
     }
 
@@ -248,7 +252,7 @@ class FBUser {
     /**
      * Get the value of creneauxGenerated
      */
-    public function getCreneauxGenerated()
+    public function getCreneauxGenerated() : League\Period\Sequence
     {
         if (isset(self::$creneauxGenerated))
             return self::$creneauxGenerated;
