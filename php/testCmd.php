@@ -15,10 +15,7 @@ date_default_timezone_set('Europe/Paris');
 $dtz = 'Europe/Paris';
 
 $plagesHoraires = array('9-12', '14-17');
-$heuresPlage = FBUtils::parsePlagesHoraires($plagesHoraires);
-
-$creneaux = FBUtils::getDefaultsCreneaux($duree, $heuresPlage);
-$creneauxGenerated = FBUtils::createSequenceFromDT($creneaux, $duree);
+$creneauxGenerated = (new FBCreneauxGeneres($duree, $plagesHoraires, $dtz))->getCreneauxSeq();
 
 $fbUsers = array();
 foreach ($users as $uid) {
@@ -26,8 +23,7 @@ foreach ($users as $uid) {
 //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
 }
 
-$fbCompare = new FBCompare($fbUsers, $creneauxGenerated);
-$creneauxFinaux = $fbCompare->substractBusysFromCreneaux();
+$creneauxFinaux = (new FBCompare($fbUsers, $creneauxGenerated))->substractBusysFromCreneaux();
 
 if ($creneauxFinaux->length() === null) {
     echo "pas de creneaux trouvés";

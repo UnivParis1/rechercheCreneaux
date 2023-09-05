@@ -1,55 +1,42 @@
 <?php
 
 require 'vendor/autoload.php';
+
 require_once('FBUser.php');
 require_once('FBUtils.php');
 require_once('FBCompare.php');
+require_once('FBCreneauxGeneres.php');
 
 setlocale(LC_TIME, "fr_FR");
 
 date_default_timezone_set('Europe/Paris');
-$s_dtz = date_default_timezone_get();
+$dtz = date_default_timezone_get();
 $url = 'https://echange.univ-paris1.fr/kronolith/fb.php?u=';
 
 $vars = filter_var_array($_GET);
 
 $uids = isset($_GET['listuids']) ? $_GET['listuids'] : null;
-$creneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
+$nbcreneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
 $duree = isset($_GET['duree']) ? $_GET['duree'] : null;
 $plagesHoraires = isset($_GET['plagesHoraires']) ? $_GET['plagesHoraires'] : array('9-12', '14-17');
 
-if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $creneaux && $duree) {
+if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
 
-    $heuresPlage = FBUtils::parsePlagesHoraires($plagesHoraires);
-
-    $creneaux = FBUtils::getDefaultsCreneaux($duree, $heuresPlage);
-    $seqgen = FBUtils::createSequenceFromDT($creneaux, $duree);
+    $creneauxGenerated = (new FBCreneauxGeneres($duree, $plagesHoraires, $dtz))->getCreneauxSeq();
 
     $fbUsers = array();
     foreach ($uids as $uid) {
-        $fbUser = FBUser::factory($uid, $s_dtz, $url, $duree, $seqgen);
-        $fbUsers[] = $fbUser;
+        $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated);
+    //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
     }
+    $creneauxFinauxList = (new FBCompare($fbUsers, $creneauxGenerated))->substractBusysFromCreneaux()->toList();
+    $sizeFinal = sizeof($creneauxFinauxList);
+    $nbDisplay = ($nbcreneaux > $sizeFinal) ? $sizeFinal : $nbcreneaux;
 
-    $fbCompare = new FBCompare($fbUsers);
-
-// Ancienne version avant inversion FREE/BUSY
-//    $periods = $fbCompare->compareSequences();
-
-    $periodsMerged = $fbCompare->mergeSequences();
-    $seq = FBUtils::addTimezoneToLeaguePeriods($periodsMerged, new DateTimeZone($s_dtz));
-
-    $periods = $seqgen->subtract($seq);
-
-    if (sizeof($periods) > 0) {
-        $listDate = array();
-
-        $it = $periods->getIterator();
-        for ($i = 0; $i < $creneaux; $i++) {
-            if ($np = $it->next())
-                $listDate[] = $np;
-        }
+    $listDate = array();
+    for ($i = 0; $i < $nbDisplay; $i++) {
+        $listDate[] = $creneauxFinauxList[$i];
     }
 }
 ?>
@@ -122,7 +109,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </form>
 
 
-        <?php if (isset($listDate)) { ?>
+        <?php if (isset($listDate) && sizeof($listDate) > 0) { ?>
         <div>
             <p>Créneaux disponibles</p>
             <ul>
@@ -140,7 +127,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                         <?php } ?>
             </ul>
         </div>
-        <?php } elseif (isset($periods) && sizeof($periods) == 0) { ?>
+        <?php } elseif (isset($listDate) && sizeof($listDate) == 0) { ?>
             <div>
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
             </div>
