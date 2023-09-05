@@ -18,30 +18,24 @@ $plagesHoraires = array('9-12', '14-17');
 $heuresPlage = FBUtils::parsePlagesHoraires($plagesHoraires);
 
 $creneaux = FBUtils::getDefaultsCreneaux($duree, $heuresPlage);
-$seqgen = FBUtils::createSequenceFromDT($creneaux, $duree);
+$creneauxGenerated = FBUtils::createSequenceFromDT($creneaux, $duree);
 
 $fbUsers = array();
 foreach ($users as $uid) {
-   $fbUser = FBUser::factory($uid, $dtz, $url, $duree, $seqgen);
-    $fbUsers[] = $fbUser;
+    $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated);
 //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
 }
 
-$fbCompare = new FBCompare($fbUsers);
+$fbCompare = new FBCompare($fbUsers, $creneauxGenerated);
+$creneauxFinaux = $fbCompare->substractBusysFromCreneaux();
 
-$periods = $fbCompare->mergeSequences();
-
-if (!$periods) {
-    echo "pas de créneau";
+if ($creneauxFinaux->length() === null) {
+    echo "pas de creneaux trouvés";
     return -1;
 }
 
-$seq = FBUtils::addTimezoneToLeaguePeriods($periods, $dtz);
-
-// fonction à optimiser
-$newseq = $seqgen->subtract($seq);
-
-die(var_dump($newseq));
+echo '<pre>';
+die(var_export($creneauxFinaux));
 
 //$seqgen->subtract($seq);
 
