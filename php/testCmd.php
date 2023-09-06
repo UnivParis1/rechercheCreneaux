@@ -4,11 +4,12 @@ require 'vendor/autoload.php';
 require 'FBUtils.php';
 require 'FBUser.php';
 require 'FBCompare.php';
+require 'FBCreneauxGeneres.php';
 
 use RRule\RRule;
 
-$duree = 30;
-$users = array("aanli", "prigaux");
+$duree = 27;
+$users = array("aanli", "gurret");
 $url = "https://echange.univ-paris1.fr/kronolith/fb.php?u=";
 
 date_default_timezone_set('Europe/Paris');
@@ -23,7 +24,7 @@ foreach ($users as $uid) {
 //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
 }
 
-$creneauxFinaux = (new FBCompare($fbUsers, $creneauxGenerated))->substractBusysFromCreneaux();
+$creneauxFinaux = (new FBCompare($fbUsers, $creneauxGenerated, $dtz))->substractBusysFromCreneaux();
 
 if ($creneauxFinaux->length() === null) {
     echo "pas de creneaux trouvés";

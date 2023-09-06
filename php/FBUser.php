@@ -61,7 +61,9 @@ class FBUser {
     /**
      * @var Sequence sequence
      */
-    private Sequence $sequence;
+    private ?Sequence $sequence;
+
+    private bool $isChanged;
 
     /**
      * __construct
@@ -75,6 +77,7 @@ class FBUser {
         $this->dtz = $dtz;
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
+        $this->isChanged = false;
 
         $contents = '';
 
@@ -134,54 +137,52 @@ class FBUser {
     
     private function _instanceCreneaux() : void {
         $duration = self::getDuration();
-        $busySeq = $this->getSequence();
         $creneaugenSeq = $this->getCreneauxGenerated();
 
-        $isChanged = false;
-        foreach ($busySeq as $busyPeriod) {
-            $cmpBusyCreneau = $this->_cmpCreneaugensToBusyperiod($busyPeriod);
-            if ($cmpBusyCreneau  == 0 ) {
-                $busySeq->remove($busySeq->indexOf($busyPeriod));
-                $isChanged = true;
+        foreach ($this->sequence as $busyPeriod) {
+            $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
+            $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
+            if ($cmpBusyCreneau  == 0 &&  $cmpOverlapCreneau == 0) {
+                $this->_removePeriod($busyPeriod);
                 continue;
+            }
+
+            die("work in progress");
+            switch ($cmpOverlapCreneau) {
+                case 1:
+                    //to continue
+                    exit;
+                    break;
+                case 2:
+                    //to continue
+                    exit;
+                    break;
+                default:
+                    throw new Exception("Erreur comparaison creneau _normCreneaux");
             }
 
             switch ($cmpBusyCreneau) {
                 case 1:
                     // creneau < busy
                     $this->_normCreneauxInferieurDuree($busyPeriod);
-                    $isChanged = true;
                     break;
                 case -1:
                     // creneau > busy
-                    $idx = $this->sequence->indexOf($busyPeriod);
-                    $busyPeriod = $busyPeriod->moveEndDate($duration);
-                    $this->sequence->insert($idx, $busyPeriod);
-                    $isChanged = true;
+                    $this->_normCreneauxSuperieurDuree($busyPeriod);
                     break;
                 default:
                     throw new Exception("Erreur comparaison creneau _normCreneaux");
             }
         }
-        if ($isChanged) {
+        if ($this->isChanged) {
             $this->sequence = FBUtils::sortSequence($this->sequence);
         }
     }
 
-    private function _cmpCreneaugensToBusyperiod(League\Period\Period $periodToCompare ) : int {
-        foreach ($this->getCreneauxGenerated() as $period) {
-            // creneau > busy
-            if ($period->contains($periodToCompare)) {
-                return -1;
-            }elseif ($periodToCompare->contains($period)) {// creneau < busy
-                return 1;
-            }
-        }
-        return 0;
-    }
-
     private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit) : void {
-        $offset = $this->sequence->indexOf($periodToSplit);
+        $creneauxGenerated = $this->getCreneauxGenerated();
+        $sequence = $this->getSequence();
+        $offset = $sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
 
         $arrayNewPeriods = array();
@@ -191,17 +192,39 @@ class FBUser {
             $arrayNewPeriods[] = $p;
         }
 
-        $this->sequence->remove($offset);
+        $sequence->remove($offset);
 
         $indexNew = $offset;
         foreach ($arrayNewPeriods as $newPeriod) {
             // vérifie si les busys normalisés sont bien dans les creneaux au cas ou la periode > plusieurs jours
-            $cmpIsInCreneau = $this->_cmpCreneaugensToBusyperiod($newPeriod);
+            $cmpIsInCreneau = FBUtils::_cmpSeqContainPeriod($creneauxGenerated, $newPeriod);
             if ($cmpIsInCreneau !== 0) {
-                $this->sequence->insert($indexNew, $newPeriod);
+                $sequence->insert($indexNew, $newPeriod);
                 $indexNew++;
             }
         }
+
+        $this->sequence = $sequence;
+        $this->isChanged = true;
+    }
+
+    private function _normCreneauxSuperieurDuree(League\Period\Period $period) : void {
+        $sequence = $this->getSequence();
+        $idx = $sequence->indexOf($period);
+        $duration = $this->getDuration();
+        $sequence->remove($idx);
+        $newPeriod = $period->withDurationAfterStart($duration);
+        $sequence->insert($idx, $newPeriod);
+
+        $this->sequence = $sequence;
+        $this->isChanged = true;
+    }
+
+    private function _removePeriod(League\Period\Period $period) : void {
+        $sequence = $this->getSequence();
+        $idx = $sequence->indexOf($period);
+        $sequence->remove($idx);
+        $this->isChanged = true;
     }
 
     /**
@@ -267,7 +290,7 @@ class FBUser {
      */
     public static function setCreneauxGenerated(&$creneauxGenerated)
     {
-        self::$creneauxGenerated = $creneauxGenerated;
+        self::$creneauxGenerated =& $creneauxGenerated;
 
         return self::$creneauxGenerated;
     }

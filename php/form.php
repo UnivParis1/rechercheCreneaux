@@ -13,12 +13,12 @@ date_default_timezone_set('Europe/Paris');
 $dtz = date_default_timezone_get();
 $url = 'https://echange.univ-paris1.fr/kronolith/fb.php?u=';
 
-$vars = filter_var_array($_GET);
+$varsHTTPGet = filter_var_array($_GET);
 
-$uids = isset($_GET['listuids']) ? $_GET['listuids'] : null;
-$nbcreneaux = isset($_GET['creneaux']) ? $_GET['creneaux'] : null;
-$duree = isset($_GET['duree']) ? $_GET['duree'] : null;
-$plagesHoraires = isset($_GET['plagesHoraires']) ? $_GET['plagesHoraires'] : array('9-12', '14-17');
+$uids = isset($varsHTTPGet['listuids']) ? $varsHTTPGet['listuids'] : null;
+$nbcreneaux = isset($varsHTTPGet['creneaux']) ? $varsHTTPGet['creneaux'] : null;
+$duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
+$plagesHoraires = isset($varsHTTPGet['plagesHoraires']) ? $varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
@@ -30,12 +30,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated);
     //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
     }
-    $creneauxFinauxList = (new FBCompare($fbUsers, $creneauxGenerated))->substractBusysFromCreneaux()->toList();
+    $creneauxFinauxList = (new FBCompare($fbUsers, $creneauxGenerated, $dtz))->substractBusysFromCreneaux()->toList();
     $sizeFinal = sizeof($creneauxFinauxList);
-    $nbDisplay = ($nbcreneaux > $sizeFinal) ? $sizeFinal : $nbcreneaux;
+    $nbResultatsAffichés = ($nbcreneaux > $sizeFinal) ? $sizeFinal : $nbcreneaux;
 
     $listDate = array();
-    for ($i = 0; $i < $nbDisplay; $i++) {
+    for ($i = 0; $i < $nbResultatsAffichés; $i++) {
         $listDate[] = $creneauxFinauxList[$i];
     }
 }

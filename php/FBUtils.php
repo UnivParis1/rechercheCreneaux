@@ -136,4 +136,34 @@ class FBUtils {
         }
         return $arrHours;
     }
+
+    public static function _cmpSeqContainPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : int {
+        foreach ($sequence as $period) {
+
+            $test1 = $period->contains($periodToCompare);
+            $test2 = $periodToCompare->contains($period);
+            // creneau > busy
+            if ($test1) {
+                return -1;
+            }elseif ($test2) {// creneau < busy
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    public static function _cmpSeqOverlapPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : int {
+        foreach ($sequence as $period) {
+
+            $test1 = $period->overlaps($periodToCompare);
+            $test2 = $periodToCompare->overlaps($period);
+            // creneau > busy
+            if ($test1) {
+                return -1;
+            }elseif ($test2) {// creneau < busy
+                return 1;
+            }
+        }
+        return 0;
+    }
 }

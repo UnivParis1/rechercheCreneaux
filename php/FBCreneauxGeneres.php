@@ -12,7 +12,7 @@ class FBCreneauxGeneres {
     private string $dtz;
     private array $plagesHoraires;
     private int $dureeMinutes;
-    private League\Period\Sequence $creneauxSeq;
+    private ?League\Period\Sequence $creneauxSeq;
 
     public function __construct(int $dureeMinutes, array $plagesHoraires, string $dtz) {
         $this->dureeMinutes = $dureeMinutes;
