@@ -157,13 +157,25 @@ class FBUtils {
 
             $test1 = $period->overlaps($periodToCompare);
             $test2 = $periodToCompare->overlaps($period);
-            // creneau > busy
+            // creneau > busy | creneau déborde sur busy
             if ($test1) {
                 return -1;
-            }elseif ($test2) {// creneau < busy
+            }elseif ($test2) {// busy > creneau | busy déborde sur créneau
+                die("tmp1");
                 return 1;
             }
         }
         return 0;
+    }
+
+    public static function _cmpGetIdxOverlapCreneauBusy(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : array {
+        $array = array();
+        foreach ($sequence as $period) {
+            $testDebut = $period->overlaps($periodToCompare);
+            if ($testDebut) {
+                $array[] = $sequence->indexOf($period);
+            }
+        }
+        return $array;
     }
 }

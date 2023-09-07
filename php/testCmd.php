@@ -8,7 +8,7 @@ require 'FBCreneauxGeneres.php';
 
 use RRule\RRule;
 
-$duree = 27;
+$duree = 12;
 $users = array("aanli", "gurret");
 $url = "https://echange.univ-paris1.fr/kronolith/fb.php?u=";
 
