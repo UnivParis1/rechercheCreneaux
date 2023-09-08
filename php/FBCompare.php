@@ -16,15 +16,32 @@ class FBCompare {
     private Sequence $creneauxGenerated;
     private Sequence $mergedBusys;
     private DateTimeZone $dateTimeZone;
+    private int $nbcreneaux;
+    private Sequence $creneauxFinaux;
+    private int $nbResultatsAffichés;
+    private array $arrayCreneauxAffiches;
 
-    public function __construct(&$arrayFBUsers, League\Period\Sequence &$creneauxGenerated, $dtz) {
+    public function __construct(&$arrayFBUsers, League\Period\Sequence &$creneauxGenerated, $dtz, $nbcreneaux) {
         $this->arrayFBUsers =& $arrayFBUsers;
         $this->creneauxGenerated =& $creneauxGenerated;
         $this->dateTimeZone = new DateTimeZone($dtz);
+        $this->nbcreneaux = $nbcreneaux;
+        $this->arrayCreneauxAffiches = array();
         $this->mergedBusys = $this->_getMergedBusysSequence();
+        $this->creneauxFinaux = $this->_substractBusysFromCreneaux();
+        $this->nbResultatsAffichés = $this->_calcNbResultats();
+        $this->arrayCreneauxAffiches = $this->_arrayCreneauxAffiches();
     }
 
-    public function substractBusysFromCreneaux() {
+    public function getArrayCreneauxAffiches() {
+        return $this->arrayCreneauxAffiches;
+    }
+
+    public function getNbResultatsAffichés() {
+        return $this->nbResultatsAffichés;
+    }
+
+    private function _substractBusysFromCreneaux() : Sequence {
         $busySeq = $this->mergedBusys;
         $creneauxGenerated = $this->creneauxGenerated;
 
@@ -95,6 +112,31 @@ class FBCompare {
         return $seq;
     }
 
+    private function _calcNbResultats() {
+        $sequence = $this->creneauxFinaux;
+        $nbCreneaux = $this->nbcreneaux;
+
+        $sizeFinal = $sequence->count();
+        return ($nbCreneaux > $sizeFinal) ? $sizeFinal : $nbCreneaux;
+    }
+
+    private function _arrayCreneauxAffiches() : array {
+        $sequence = $this->creneauxFinaux;
+        $now = new DateTime('now', $this->dateTimeZone);
+
+        $arrayCreneauxAffiches = array();
+        foreach($sequence as $period) {
+            if ($period->startDate->getTimestamp() > $now->getTimestamp()) {
+                $arrayCreneauxAffiches[] = $period;
+            }
+        }
+
+        if (($nbcount = count($arrayCreneauxAffiches)) < $this->nbResultatsAffichés) {
+            $this->nbResultatsAffichés = $nbcount;
+        }
+
+        return $arrayCreneauxAffiches;
+    }
 
 /*     public function compareSequences() {
         $arrayPeriodsIntersected = $this->arrayFBUsers[0]->getSequence()->jsonSerialize();

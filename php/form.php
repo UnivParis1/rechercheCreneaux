@@ -30,13 +30,15 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated);
     //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
     }
-    $creneauxFinauxList = (new FBCompare($fbUsers, $creneauxGenerated, $dtz))->substractBusysFromCreneaux()->toList();
-    $sizeFinal = sizeof($creneauxFinauxList);
-    $nbResultatsAffichés = ($nbcreneaux > $sizeFinal) ? $sizeFinal : $nbcreneaux;
+    $fbCompare = new FBCompare($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux);
+    $nbResultatsAffichés = $fbCompare->getNbResultatsAffichés();
+    $creneauxFinauxArray = $fbCompare->getArrayCreneauxAffiches();
 
     $listDate = array();
     for ($i = 0; $i < $nbResultatsAffichés; $i++) {
-        $listDate[] = $creneauxFinauxList[$i];
+        $creneauTmp = $creneauxFinauxArray[$i];
+
+        $listDate[] = $creneauxFinauxArray[$i];
     }
 }
 ?>

@@ -10,6 +10,7 @@ use RRule\RRule;
 
 $duree = 12;
 $users = array("aanli", "gurret");
+$nbcreneaux = 10;
 $url = "https://echange.univ-paris1.fr/kronolith/fb.php?u=";
 
 date_default_timezone_set('Europe/Paris');
@@ -24,15 +25,16 @@ foreach ($users as $uid) {
 //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
 }
 
-$creneauxFinaux = (new FBCompare($fbUsers, $creneauxGenerated, $dtz))->substractBusysFromCreneaux();
+$fbCompare = new FBCompare($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux);
+$creneauxFinauxArray = $fbCompare->getArrayCreneauxAffiches();
 
-if ($creneauxFinaux->length() === null) {
+if (count($creneauxFinauxArray) == 0) {
     echo "pas de creneaux trouvés";
     return -1;
 }
 
 echo '<pre>';
-die(var_export($creneauxFinaux));
+die(var_export($creneauxFinauxArray));
 
 //$seqgen->subtract($seq);
 
