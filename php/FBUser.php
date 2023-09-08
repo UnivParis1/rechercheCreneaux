@@ -144,13 +144,13 @@ class FBUser {
 
             $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod);
 
-            if ($sequence->indexOf($busyPeriod))
+            if ($sequence->indexOf($busyPeriod) !== false)
                 $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod);
             else
                 $busyOverlap = false;
 
             // Suppression des busys lorsqu'ils sont hors des periodes générées
-            if ($busyInclus == false && $busyOverlap == false) {
+            if ($busyInclus === false && $busyOverlap === false) {
                 $this->_removePeriod($busyPeriod);
                 continue;
             }
@@ -172,23 +172,11 @@ class FBUser {
     private function _instanceCreneauxBusysOverlap(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod) : bool {
         $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
 
-        if ($cmpOverlapCreneau === 0) {
-            return false;
+        if ($cmpOverlapCreneau) {
+            $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
+            $this->sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen);
         }
-
-        switch ($cmpOverlapCreneau) {
-            case 1:
-                die("debug code en cours overlap 1");
-                break;
-            case -1:
-                $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
-                $this->sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen);
-//                die('testdebug');
-                break;
-            default:
-                throw new Exception("Erreur comparaison creneau _normCreneaux");
-        }
-        return true;
+        return false;
     }
 
     private function _replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen) {
@@ -261,7 +249,7 @@ class FBUser {
             $testInCreneau = FBUtils::_cmpSeqContainPeriod($creneauxGenerated, $newPeriod);
             $testOverlap = FBUtils::_cmpSeqOverlapPeriod($creneauxGenerated, $newPeriod);
 
-            if ($testInCreneau !== 0 || $testOverlap !== 0) {
+            if ($testInCreneau !== 0 || $testOverlap === false) {
                 $sequence->insert($indexNew, $newPeriod);
                 $indexNew++;
             }
