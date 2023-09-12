@@ -249,10 +249,10 @@ class FBUser {
             $testInCreneau = FBUtils::_cmpSeqContainPeriod($creneauxGenerated, $newPeriod);
             $testOverlap = FBUtils::_cmpSeqOverlapPeriod($creneauxGenerated, $newPeriod);
 
-            if ($testInCreneau !== 0 || $testOverlap === false) {
+//            if ($testInCreneau !== 0) { // || $testOverlap === false) {
                 $sequence->insert($indexNew, $newPeriod);
                 $indexNew++;
-            }
+//            }
         }
 
         $this->sequence = $sequence;

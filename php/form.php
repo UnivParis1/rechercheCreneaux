@@ -85,7 +85,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     </td>
                     <td>
                         <p>Nombre de créneaux</p>
-                        <input id="creneaux" name="creneaux" type="number" value="3" />
+                        <input id="creneaux" name="creneaux" type="number" value="<?php print($nbcreneaux ? $nbcreneaux : 3) ?>" />
                     </td>
                     <td>
                         <p>Durée des créneaux (minutes)</p>
