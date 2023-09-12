@@ -60,56 +60,59 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         <script type='text/javascript' src='./form.js'></script>
     </head>
     <body>
-        <h1>Recherche de disponibilités</h1>
-        <form id="form" action="">
-                <table>
-                <tr>
-                    <td>
-                        <p>Séléction des Users</p>
-                        <input id="person" name="person" placeholder="Nom et/ou prenom" />
-                        
-                        <script>
-                            <?php if ($uids && isset($js_uids)) { ?>
-                            var jsuids=<?php echo "$js_uids" ?>;
+        <div id="titre">
+            <h1>Recherche de disponibilités</h1>
+        </div>
+        <div id="formulaire">
+            <form id="form" action="">
+                    <table>
+                    <tr>
+                        <td>
+                            <p>Séléction des Users</p>
+                            <input id="person" name="person" placeholder="Nom et/ou prenom" />
                             
-                            $(function() {
-                                setOptionsUid(jsuids);
-                                
-                                if (jsuids.length < 2) {
-                                    errorShow(true);
-                                }
-                            });
-                            
-                            <?php } ?>
-                        </script>
-                    </td>
-                    <td>
-                        <p>Nombre de créneaux</p>
-                        <input id="creneaux" name="creneaux" type="number" value="<?php print($nbcreneaux ? $nbcreneaux : 3) ?>" />
-                    </td>
-                    <td>
-                        <p>Durée des créneaux (minutes)</p>
-                        <input id="duree" name="duree" type="number" value="<?php print($duree ? $duree : 30) ?>" />
-                    </td>
-                    <td>
-                        <p>Envoyer requête</p>
-                        <input type="submit" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div id="divpersonselect">
-                            <br />
-                            <p>Utilisateurs sélectionnés</p>
-                            <p class="alertrequire">Séléction minimum de 2 utilisateurs</p>
-                            <ul id="person_ul">
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                </table>
-        </form>
+                            <script>
+                                <?php if ($uids && isset($js_uids)) { ?>
+                                var jsuids=<?php echo "$js_uids" ?>;
 
+                                $(function() {
+                                    setOptionsUid(jsuids);
+
+                                    if (jsuids.length < 2) {
+                                        errorShow(true);
+                                    }
+                                });
+
+                                <?php } ?>
+                            </script>
+                        </td>
+                        <td>
+                            <p>Nombre de créneaux</p>
+                            <input id="creneaux" name="creneaux" type="number" value="<?php print($nbcreneaux ? $nbcreneaux : 3) ?>" />
+                        </td>
+                        <td>
+                            <p>Durée des créneaux (minutes)</p>
+                            <input id="duree" name="duree" type="number" value="<?php print($duree ? $duree : 30) ?>" />
+                        </td>
+                        <td>
+                            <p>Envoyer requête</p>
+                            <input type="submit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divpersonselect">
+                                <br />
+                                <p>Utilisateurs sélectionnés</p>
+                                <p class="alertrequire">Séléction minimum de 2 utilisateurs</p>
+                                <ul id="person_ul">
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </table>
+            </form>
+        </div>
 
         <?php if (isset($listDate) && sizeof($listDate) > 0) { ?>
         <div>
