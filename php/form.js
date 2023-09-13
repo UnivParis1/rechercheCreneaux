@@ -47,7 +47,7 @@ function addOptionWithUid(uid, displayName) {
     newLi.append(label);
     newLi.append(displayName);
 
-    var button = $('<button>').text('delete');
+    var button = $('<button>').text('supprimer');
 
     newLi.append(button);
     $(idperson_ul).append(newLi);
