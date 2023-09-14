@@ -53,12 +53,16 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </style>
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
-        <link href="form.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
         <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
         <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
-        <script type='text/javascript' src='./form.js'></script>
+
+        <link href="./css/form.css" rel="stylesheet" />
+        <script type='text/javascript' src='./js/form.js'></script>
+
+        <link href="./css/nouislider.min.css" rel="stylesheet">
+        <script src="./js/nouislider.min.js"></script>
     </head>
     <body>
         <div id="titre">
@@ -73,6 +77,28 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <input id="person" name="person" placeholder="Nom et/ou prenom" />
                             
                             <script>
+                                var jsduree=<?php echo (is_null($duree) ? 30:$duree); ?>
+
+                                $(function() {
+                                    var slider = document.getElementById('slider');
+
+                                    noUiSlider.create(slider, {
+                                        start: [20, 80],
+                                        connect: true,
+                                        range: {
+                                            'min': 0,
+                                            'max': 100
+                                        }
+                                    });
+                                });
+
+                                <?php if (isset($duree) && !is_null($duree)) { ?>
+
+                                $(function() {
+                                    $('#duree option[value="<?php echo $duree ?>"').prop('selected', true);
+                                });
+                                <?php } ?>
+
                                 <?php if ($uids && isset($js_uids)) { ?>
                                 var jsuids=<?php echo "$js_uids" ?>;
 
@@ -92,12 +118,26 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <input id="creneaux" name="creneaux" type="number" value="<?php print($nbcreneaux ? $nbcreneaux : 3) ?>" />
                         </td>
                         <td>
-                            <p>Durée des créneaux (minutes)</p>
-                            <input id="duree" name="duree" type="number" value="<?php print($duree ? $duree : 30) ?>" />
+                            <p>Durée des créneaux</p>
+
+                            <select id="duree" name="duree" required=true>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1h</option>
+                                <option value="90">1h30</option>
+                                <option value="120">2h</option>
+                                <option value="150">2h30</option>
+                                <option value="180">3h</option>
+                                <option value="210">3h30</option>
+                                <option value="240">4h</option>
+                            </select>
+                        </td>
+                        <td>
+                            <p>Plage horaire</p>
+                            <div id="slider"></div>
                         </td>
                         <td>
                             <p>Envoyer requête</p>
-                            <input type="submit" />
+                            <input type="submit" value="Trouver les créneaux" />
                         </td>
                     </tr>
                     <tr>
