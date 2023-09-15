@@ -106,6 +106,36 @@ $(function() {
         else
             errorShow(true);
     });
-    
+
     $('#divpersonselect').hide();
+
+    var slider = document.getElementById('slider');
+
+    var selectorPlagesHoraires = "input:hidden[name='plagesHoraires[]']";
+    var p1a = $(selectorPlagesHoraires)[0].value.split('-');
+    var p2a = $(selectorPlagesHoraires)[1].value.split('-');
+
+// création du slider pour la séléction des plages horaires
+    noUiSlider.create(slider, {
+        start: p1a.concat(p2a),
+        step: 1,
+        connect: [false, true, false, true, false],
+        tooltips: {
+            to: function(valueString) {
+                return valueString + "H00";
+            },
+        },
+        range: {
+            'min': [7],
+            'max': [20]
+        }
+    });
+
+    slider.noUiSlider.on('update', function (arrayValues) {
+        p1val = arrayValues[0].replace('.00', '') + "-" + arrayValues[1].replace('.00', '');
+        p2val = arrayValues[2].replace('.00', '') + "-" + arrayValues[3].replace('.00', '');
+        $(selectorPlagesHoraires).first().val(p1val);
+        $(selectorPlagesHoraires).last().val(p2val);
+    });
+
 });

@@ -61,7 +61,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         <link href="./css/form.css" rel="stylesheet" />
         <script type='text/javascript' src='./js/form.js'></script>
 
-        <link href="./css/nouislider.min.css" rel="stylesheet">
+        <link href="./css/nouislider.min.css" rel="stylesheet" />
         <script src="./js/nouislider.min.js"></script>
     </head>
     <body>
@@ -75,22 +75,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                         <td>
                             <p>Séléction des Users</p>
                             <input id="person" name="person" placeholder="Nom et/ou prenom" />
-                            
+
                             <script>
                                 var jsduree=<?php echo (is_null($duree) ? 30:$duree); ?>
-
-                                $(function() {
-                                    var slider = document.getElementById('slider');
-
-                                    noUiSlider.create(slider, {
-                                        start: [20, 80],
-                                        connect: true,
-                                        range: {
-                                            'min': 0,
-                                            'max': 100
-                                        }
-                                    });
-                                });
 
                                 <?php if (isset($duree) && !is_null($duree)) { ?>
 
@@ -132,10 +119,6 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             </select>
                         </td>
                         <td>
-                            <p>Plage horaire</p>
-                            <div id="slider"></div>
-                        </td>
-                        <td>
                             <p>Envoyer requête</p>
                             <input type="submit" value="Trouver les créneaux" />
                         </td>
@@ -149,6 +132,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                 <ul id="person_ul">
                                 </ul>
                             </div>
+                        </td>
+                        <td colspan="2">
+                            <p>Plage horaire</p>
+                            <div id="slider"></div>
+                            <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[0]; ?>" />
+                            <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[1]; ?>" />
                         </td>
                     </tr>
                     </table>
