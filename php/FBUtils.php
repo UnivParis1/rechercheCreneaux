@@ -131,7 +131,11 @@ class FBUtils {
         $arrHours = array();
         foreach ($plagesHoraires as $plages) {
             $pt = explode('-', $plages);
-            for ($i = (int) $pt[0]; $i < $pt[1]; $i++)
+            // en cas de minute supplémentaire sur la plage: ex 17H30, générer les créneaux -> 18h. 
+            // Les créneaux entre 17h30 et 18h seront filtrés par la suite.
+            $end = (strlen($pt[1]) > 3) ? ((int) $pt[1]) + 1 : (int) $pt[1];
+
+            for ($i = (int) $pt[0]; $i < $end; $i++)
                 $arrHours[] = $i;
         }
         return $arrHours;

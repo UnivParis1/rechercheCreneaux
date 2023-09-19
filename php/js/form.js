@@ -115,9 +115,29 @@ $(function() {
     var p1a = $(selectorPlagesHoraires)[0].value.split('-');
     var p2a = $(selectorPlagesHoraires)[1].value.split('-');
 
+    var formatter = function(valueString) {
+                        if (valueString.search('H30') != -1) {
+                            return Number(valueString.replace('H30', '.5'));
+                        }
+                        if (valueString.search('H00') != -1){
+                            return Number(valueString.replace('H00', ''));
+                        }
+                        if (valueString.search('H') != -1){
+                            return Number(valueString.replace('H', ''));
+                        }
+                        return Number(valueString);
+                    };
+
+    var plagesStrings = p1a.concat(p2a);
+
+    var arrayStart = Array();
+    for (plage of plagesStrings) {
+        arrayStart.push(formatter(plage));
+    }
+
 // création du slider pour la séléction des plages horaires
     noUiSlider.create(slider, {
-        start: p1a.concat(p2a),
+        start: arrayStart,
         step: 0.5,
         connect: [false, true, false, true, false],
         tooltips: {
@@ -130,13 +150,7 @@ $(function() {
                     return value + "H00";
                 }
             },
-            from: function(valueString) {
-                if (valueString.search('H30')) {
-                    return Number(valueString.replace('H30', '.5'));
-                } else {
-                    return Number(valueString.replace('H', ''));
-                }
-            }
+            from: formatter
         },
         range: {
             'min': [7],
