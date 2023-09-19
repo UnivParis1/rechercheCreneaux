@@ -118,12 +118,25 @@ $(function() {
 // création du slider pour la séléction des plages horaires
     noUiSlider.create(slider, {
         start: p1a.concat(p2a),
-        step: 1,
+        step: 0.5,
         connect: [false, true, false, true, false],
         tooltips: {
-            to: function(valueString) {
-                return valueString + "H00";
+            to: function(value) {
+                if (value % 1 != 0) {
+                    var valueEntier = value - 0.5;
+                    return valueEntier + "H30";
+                }
+                else {
+                    return value + "H00";
+                }
             },
+            from: function(valueString) {
+                if (valueString.search('H30')) {
+                    return Number(valueString.replace('H30', '.5'));
+                } else {
+                    return Number(valueString.replace('H', ''));
+                }
+            }
         },
         range: {
             'min': [7],
@@ -132,10 +145,29 @@ $(function() {
     });
 
     slider.noUiSlider.on('update', function (arrayValues) {
-        p1val = arrayValues[0].replace('.00', '') + "-" + arrayValues[1].replace('.00', '');
-        p2val = arrayValues[2].replace('.00', '') + "-" + arrayValues[3].replace('.00', '');
-        $(selectorPlagesHoraires).first().val(p1val);
-        $(selectorPlagesHoraires).last().val(p2val);
-    });
 
+        if (arrayValues[0] == "NaN")
+            return;
+
+        inputFirst = $(selectorPlagesHoraires).first();
+        inputSecond = $(selectorPlagesHoraires).last();
+
+        idx = 0;
+        for (value of arrayValues) {
+            if (Number(value) % 1 != 0)
+                valueStrNew = value.replace('.50', 'H30');
+            else
+                valueStrNew = value.replace('.00', 'H00');
+
+            if (idx < 2)
+                input = inputFirst;
+            else
+                input = inputSecond;
+            if (idx % 2 == 0)
+                valueComplete = valueStrNew + "-";
+            else
+                input.val(valueComplete.concat(valueStrNew));
+            idx++;
+        }
+    });
 });
