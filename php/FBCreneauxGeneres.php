@@ -3,6 +3,9 @@
 //use FBUtils;
 use League\Period\Sequence as Sequence;
 use League\Period\Period as Period;
+use League\Period\Duration as Duration;
+use League\Period\Bounds as Bounds;
+use RRule\RRule;
 
 /**
  * Description of FBCreneauxGeneres
@@ -14,21 +17,25 @@ class FBCreneauxGeneres {
     private string $dtz;
     private array $plagesHoraires;
     private int $dureeMinutes;
-    private ?League\Period\Sequence $creneauxSeq;
+    private static Duration $duration;
+    private League\Period\Sequence $creneauxSeq;
 
     public function __construct(int $dureeMinutes, array $plagesHoraires, string $dtz) {
         $this->dureeMinutes = $dureeMinutes;
+        $this->setDuration($dureeMinutes);
         $this->plagesHoraires = $plagesHoraires;
         $this->dtz = $dtz;
 
-        $heuresPlage = FBUtils::parsePlagesHoraires($plagesHoraires);
+        $arrPlage = $this->parsePlagesHoraires($plagesHoraires);
 
-        $creneaux = FBUtils::getDefaultsCreneaux($dureeMinutes, $heuresPlage);
+        $firstCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i']);
+        $secondCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i']);
 
-        $creneauxSeq = FBUtils::createSequenceFromDT($creneaux, $dureeMinutes);
+        $this->creneauxSeq = new Sequence();
+        $this->generateSequence($firstCreneau, $dureeMinutes, $arrPlage[0], $arrPlage[1]);
+        $this->generateSequence($secondCreneau, $dureeMinutes, $arrPlage[2], $arrPlage[3]);
 
-        // Necessaire si la plage demandée n'est pas spécifique aux heures pleines (ex: 9H30-11H, 9H-11H30 etc...)
-        $this->creneauxSeq = $this->_filtrerDemieHeure($creneauxSeq);
+        $this->creneauxSeq = FBUtils::sortSequence($this->creneauxSeq);
     }
 
     /**
@@ -40,67 +47,87 @@ class FBCreneauxGeneres {
         return $this->creneauxSeq;
     }
 
-    /**
-     * _filterDemieHeure
-     *
-     * Cette méthode a pour but d'enlever les creneaux générés avant les demie heure:
-     * Exemple: pour une plage 9h30-14. La génération des créneaux se fait à partir de 9H. Donc on enleve les créneaux générés entre 9H et 9H30
-     *
-     * @param  Sequence $creneauxSeq
-     * @return Sequence
-     */
-    private function _filtrerDemieHeure(Sequence $creneauxSeq) : Sequence {
-        $testHI = array(array('h'=>9, 'i'=>30), array('h' => 12, 'i'=>30), array('h' => 13, 'i' => 30), array('h'=>17, 'i'=>30));
+    private function generateCreneaux($dtstart, $until, $hours, $minutely = [0], $days = ['MO', 'TU', 'WE', 'TH', 'FR'], $interval = 1) {
+        $arrayParams = [
+            'FREQ' => 'DAILY',
+            'DTSTART' => $dtstart, // '2023-07-12'
+            'UNTIL' => $until, // '2023-10-23'
+            'INTERVAL' => $interval,
+            'BYHOUR' => $hours,
+            'BYMINUTE' => $minutely,
+            'BYDAY' => $days];
 
-        $testHI = $this->_getArrayPlages();
+        $r = new RRule($arrayParams);
 
-        $newSeq = $creneauxSeq->filter(function (Period $interval) use ($testHI) : bool {
-            $startDate = $interval->startDate;
-            $endDate = $interval->endDate;
-
-            $debut = clone $startDate;
-            $debut = $debut->setTime($testHI[0]['h'], $testHI[0]['i']);
-
-            $fin = $interval->endDate;
-            $fin = $fin->setTime($testHI[3]['h'], $testHI[3]['i']);
-
-            $milieudebut = clone $startDate;
-            $milieudebut = $milieudebut->setTime($testHI[1]['h'], $testHI[1]['i']);
-
-            $milieufin = clone $startDate;
-            $milieufin = $milieufin->setTime($testHI[2]['h'], $testHI[2]['i']);
-
-            $fin = $interval->endDate;
-            $fin = $fin->setTime($testHI[3]['h'], $testHI[3]['i']);
-
-            if ($startDate < $debut)
-                return false;
-            if ($endDate > $fin)
-                return false;
-
-            if ($startDate >= $milieudebut && $endDate <= $milieufin)
-                return false;
-
-            return true;
-        });
-
-        return $newSeq;
+        return $r->getOccurrences();
     }
 
-    private function _getArrayPlages() {
-        $plagesHoraires = $this->plagesHoraires;
-        $array = array();
-        foreach ($plagesHoraires as $plages) {
-            $arrayPlages = explode('-', $plages);
-            foreach ($arrayPlages as $plage) {
-                $arrayHeures = explode('H', $plage);
-                if (sizeof($arrayHeures) > 1)
-                    $minute = (int) $arrayHeures[1];
-                else
-                    $minute = 0;
-                $array[] = array('h' => (int) $arrayHeures[0], 'i' => $minute);
+    private function generateSequence(array $creneaux, $dureeMinutes, array $minTime, array $maxTime) {
+
+        foreach ($creneaux as $creneau) {
+            $dtCreneau = DateTimeImmutable::createFromMutable($creneau);
+            $dateEndMax =  clone $dtCreneau;
+            $dateEndMax = $dateEndMax->setTime($maxTime['h'], $maxTime['i']);
+
+            $dateMinMax =  clone $dtCreneau;
+            $dateMinMax = $dateEndMax->setTime($minTime['h'], $minTime['i']);
+
+            $interval = Period::fromDateRange(new DatePeriod(
+                $dateMinMax,
+                new DateInterval('PT'. $dureeMinutes.'M'),
+                $dateEndMax));
+
+            foreach ($interval->dateRangeForward($this->getDuration()) as $newCreneau) {
+                $newCreneauEnd = $newCreneau->add($this->getDuration()->dateInterval);
+                if ($newCreneauEnd > $dateEndMax)
+                    continue;
+                $this->creneauxSeq->push(Period::fromDate($newCreneau, $newCreneau->add($this->getDuration()->dateInterval)));
             }
         }
-        return $array;
+    }
+
+    public function getDefaultsCreneaux($dureeEnMinutes, int $hours, int $minutely, $addXmonth = 1) {
+        $dateBeginCreneau = date('Y-m-d');
+        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
+                ->add(new DateInterval('P'. $addXmonth .'M'))
+                ->format('Y-m-d');
+
+        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, array($hours), array($minutely));
+    }
+
+    public function parsePlagesHoraires(array $plagesHoraires) {
+        $arrHours = array();
+        foreach ($plagesHoraires as $plages) {
+            $heures = explode('-', $plages);
+            foreach ($heures as $heure) {
+                $hs = explode('H', $heure);
+                if (count($hs) > 1) {
+                    $arrHours[] = ['h' => (int)$hs[0], 'i' => (int) $hs[1]];
+                }
+                else {
+                    $arrHours[] = ['h' => (int)$hs[0], 'i' => 0];
+                }
+            }
+        }
+        return $arrHours;
+    }
+
+    /**
+     * Get the value of duration
+     */
+    public function getDuration()
+    {
+        return self::$duration;
+    }
+
+    /**
+     * Set the value of duration
+     *
+     * @return  self
+     */
+    public function setDuration($dureeMinutes)
+    {
+        $dateInterval = new DateInterval("PT".$dureeMinutes."M");
+        self::$duration = Duration::fromDateInterval($dateInterval);
     }
 }

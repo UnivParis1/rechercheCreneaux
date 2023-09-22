@@ -106,9 +106,8 @@ class FBUser {
         $fbUser = new self($uid, $dtz, $url);
 
         $fbUser->_selectFreebusy();
-        $fbUser->_initSequence();
-        $fbUser->_instanceCreneaux();
-
+        $sequence = $fbUser->_initSequence();
+        $fbUser->sequence = $fbUser->_instanceCreneaux($sequence);
         return $fbUser;
     }
 
@@ -127,37 +126,39 @@ class FBUser {
         $this->vcal = $vcal;
     }
 
-    private function _initSequence() : void {
+    private function _initSequence() : Sequence {
         $duration = self::$duration;
 
         $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
         // trie par date de début
-        $this->sequence = FBUtils::sortSequence($sequence);
+        $sequence = FBUtils::sortSequence($sequence);
+
+        return $sequence;
     }
 
-    private function _instanceCreneaux() : void {
+    private function _instanceCreneaux(&$sequence) : Sequence {
         $duration = self::getDuration();
         $creneaugenSeq = $this->getCreneauxGenerated();
-        $sequence = $this->getSequence();
 
         foreach ($sequence as $busyPeriod) {
 
-            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod);
+            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $sequence);
 
             if ($sequence->indexOf($busyPeriod) !== false)
-                $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod);
+                $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $sequence);
             else
                 $busyOverlap = false;
 
             // Suppression des busys lorsqu'ils sont hors des periodes générées
             if ($busyInclus === false && $busyOverlap === false) {
-                $this->_removePeriod($busyPeriod);
+                $sequence = $this->_removePeriod($busyPeriod, $sequence);
                 continue;
             }
         }
         if ($this->isChanged) {
-            $this->sequence = FBUtils::sortSequence($sequence);
+            $sequence = FBUtils::sortSequence($sequence);
         }
+        return $sequence;
     }
 
     /**
@@ -169,18 +170,17 @@ class FBUser {
      * @param  mixed $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysOverlap(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod) : bool {
+    private function _instanceCreneauxBusysOverlap(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod, &$sequence) : bool {
         $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
 
         if ($cmpOverlapCreneau) {
             $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
-            $this->sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen);
+            $sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, $sequence);
         }
         return false;
     }
 
-    private function _replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen) {
-        $sequence = $this->getSequence();
+    private function _replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, &$sequence) : Sequence {
         $creneauxGenerated = $this->getCreneauxGenerated();
 
         $offset = $sequence->indexOf($busyPeriod);
@@ -205,7 +205,7 @@ class FBUser {
      * @param  mixed $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysInclus(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod) : bool {
+    private function _instanceCreneauxBusysInclus(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod, &$sequence) : bool {
         $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
 
         if ($cmpBusyCreneau === 0) {
@@ -215,11 +215,11 @@ class FBUser {
         switch ($cmpBusyCreneau) {
             case 1:
                 // creneau < busy
-                $this->_normCreneauxInferieurDuree($busyPeriod);
+                $sequence = $this->_normCreneauxInferieurDuree($busyPeriod, $sequence);
                 break;
             case -1:
                 // creneau > busy
-                $this->_normCreneauxSuperieurDuree($busyPeriod);
+                $sequence = $this->_normCreneauxSuperieurDuree($busyPeriod, $sequence);
                 break;
             default:
                 throw new Exception("Erreur comparaison creneau _normCreneaux");
@@ -228,9 +228,8 @@ class FBUser {
         return true;
     }
 
-    private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit) : void {
+    private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit, &$sequence) : Sequence {
         $creneauxGenerated = $this->getCreneauxGenerated();
-        $sequence = $this->getSequence();
         $offset = $sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
 
@@ -254,28 +253,25 @@ class FBUser {
                 $indexNew++;
 //            }
         }
-
-        $this->sequence = $sequence;
         $this->isChanged = true;
+        return $sequence;
     }
 
-    private function _normCreneauxSuperieurDuree(League\Period\Period $period) : void {
-        $sequence = $this->getSequence();
+    private function _normCreneauxSuperieurDuree(League\Period\Period $period, &$sequence) : Sequence {
         $idx = $sequence->indexOf($period);
         $duration = $this->getDuration();
         $sequence->remove($idx);
         $newPeriod = $period->withDurationAfterStart($duration);
         $sequence->insert($idx, $newPeriod);
-
-        $this->sequence = $sequence;
         $this->isChanged = true;
+        return $sequence;
     }
 
-    private function _removePeriod(League\Period\Period $period) : void {
-        $sequence = $this->getSequence();
+    private function _removePeriod(League\Period\Period $period, &$sequence) : Sequence {
         $idx = $sequence->indexOf($period);
         $sequence->remove($idx);
         $this->isChanged = true;
+        return $sequence;
     }
 
     /**
@@ -311,6 +307,10 @@ class FBUser {
     public function getSequence()
     {
         return $this->sequence;
+    }
+
+    protected function setSequence(&$sequence) {
+        $this->sequence = $sequence;
     }
 
     public function getDateTimeZone()

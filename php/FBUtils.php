@@ -4,7 +4,6 @@ use League\Period\Period;
 use League\Period\Sequence;
 use League\Period\DatePoint;
 use League\Period\Chart;
-use RRule\RRule;
 
 
 /**
@@ -24,9 +23,8 @@ class FBUtils {
     }
     
     public static function sortSequence(Sequence &$sequence) {
-        $sequence->sort(function (Period $period1, Period $period2): int {
+        $sequence->sort(function (Period $period1, Period $period2) : int {
             if ($period1->startDate == $period2->startDate && $period1->endDate == $period2->endDate) {
-                $sequence->remove($period2);
                 return 0;
             }
             return $period1->startDate <=> $period2->startDate; 
@@ -52,7 +50,7 @@ class FBUtils {
             $dend = $dend->setTimezone($dtz);
 
             $period = Period::fromDate($dstart, $dend);
-            
+
             $sequence->push($period);
         }
 
@@ -103,42 +101,6 @@ class FBUtils {
             $seq->push($newPeriod);
         }
         return $seq;
-    }
-
-    private static function generateCreneaux($dtstart, $until, $duree, $hours, $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
-        $r = new RRule([
-            'FREQ' => 'MINUTELY',
-            'DTSTART' => $dtstart, // '2023-07-12'
-            'UNTIL' => $until, // '2023-10-23'
-            'INTERVAL' => $duree,
-            'BYHOUR' => $hours,
-            'BYDAY' => $days
-        ]);
-
-        return $r->getOccurrences();
-    }
-
-    public static function getDefaultsCreneaux($dureeEnMinutes, $hours = [9, 10, 11, 14, 15, 16], $addXmonth = 1) {
-        $dateBeginCreneau = date('Y-m-d');
-        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
-                ->add(new DateInterval('P'. $addXmonth .'M'))
-                ->format('Y-m-d');
-
-        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, $dureeEnMinutes, $hours);
-    }
-
-    public static function parsePlagesHoraires(array $plagesHoraires) {
-        $arrHours = array();
-        foreach ($plagesHoraires as $plages) {
-            $pt = explode('-', $plages);
-            // en cas de minute supplémentaire sur la plage: ex 17H30, générer les créneaux -> 18h. 
-            // Les créneaux entre 17h30 et 18h seront filtrés par la suite.
-            $end = (strlen($pt[1]) > 3) ? ((int) $pt[1]) + 1 : (int) $pt[1];
-
-            for ($i = (int) $pt[0]; $i < $end; $i++)
-                $arrHours[] = $i;
-        }
-        return $arrHours;
     }
 
     public static function _cmpSeqContainPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : int {
