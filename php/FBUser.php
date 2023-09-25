@@ -176,6 +176,7 @@ class FBUser {
         if ($cmpOverlapCreneau) {
             $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
             $sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, $sequence);
+            return true;
         }
         return false;
     }
