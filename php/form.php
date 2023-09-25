@@ -19,11 +19,12 @@ $uids = isset($varsHTTPGet['listuids']) ? $varsHTTPGet['listuids'] : null;
 $nbcreneaux = isset($varsHTTPGet['creneaux']) ? $varsHTTPGet['creneaux'] : null;
 $duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
 $plagesHoraires = isset($varsHTTPGet['plagesHoraires']) ? $varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
+$joursDemandes = isset($varsHTTPGet['joursCreneaux']) ? $varsHTTPGet['joursCreneaux'] : array('MO', 'TU', 'WE', 'TH', 'FR');
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
 
-    $creneauxGenerated = (new FBCreneauxGeneres($duree, $plagesHoraires, $dtz))->getCreneauxSeq();
+    $creneauxGenerated = (new FBCreneauxGeneres($duree, $plagesHoraires, $dtz, $joursDemandes))->getCreneauxSeq();
 
     $fbUsers = array();
     foreach ($uids as $uid) {
@@ -134,10 +135,23 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             </div>
                         </td>
                         <td colspan="2">
-                            <p>Plage horaire</p>
-                            <div id="slider"></div>
-                            <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[0]; ?>" />
-                            <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[1]; ?>" />
+                            <div id="divjours">
+                                <p>Jours séléctionnés</p>
+                                <fieldset>
+                                    <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if(in_array('MO', $joursDemandes)) echo 'checked'?>>Lundi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if(in_array('TU', $joursDemandes)) echo 'checked'?>>Mardi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if(in_array('WE', $joursDemandes)) echo 'checked'?>>Mercredi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if(in_array('TH', $joursDemandes)) echo 'checked'?>>Jeudi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if(in_array('FR', $joursDemandes)) echo 'checked'?>>Vendredi</input>
+                                </fieldset>
+                                <br />
+                            </div>
+                            <div id="divplagehoraire">
+                                <p>Plage horaire</p>
+                                <div id="slider"></div>
+                                <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[0]; ?>" />
+                                <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[1]; ?>" />
+                            </div>
                         </td>
                     </tr>
                     </table>

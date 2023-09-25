@@ -16,20 +16,22 @@ class FBCreneauxGeneres {
 
     private string $dtz;
     private array $plagesHoraires;
+    private array $days;
     private int $dureeMinutes;
     private static Duration $duration;
     private League\Period\Sequence $creneauxSeq;
 
-    public function __construct(int $dureeMinutes, array $plagesHoraires, string $dtz) {
+    public function __construct(int $dureeMinutes, array $plagesHoraires, string $dtz, array $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
         $this->dureeMinutes = $dureeMinutes;
         $this->setDuration($dureeMinutes);
         $this->plagesHoraires = $plagesHoraires;
         $this->dtz = $dtz;
+        $this->days = $days;
 
         $arrPlage = $this->parsePlagesHoraires($plagesHoraires);
 
-        $firstCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i']);
-        $secondCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i']);
+        $firstCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $days);
+        $secondCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $days);
 
         $this->creneauxSeq = new Sequence();
         $this->generateSequence($firstCreneau, $dureeMinutes, $arrPlage[0], $arrPlage[1]);
@@ -47,7 +49,16 @@ class FBCreneauxGeneres {
         return $this->creneauxSeq;
     }
 
-    private function generateCreneaux($dtstart, $until, $hours, $minutely = [0], $days = ['MO', 'TU', 'WE', 'TH', 'FR'], $interval = 1) {
+    public function getDefaultsCreneaux($dureeEnMinutes, int $hours, int $minutely, array $days, int $addXmonth = 1) {
+        $dateBeginCreneau = date('Y-m-d');
+        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
+                ->add(new DateInterval('P'. $addXmonth .'M'))
+                ->format('Y-m-d');
+
+        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, array($hours), $days, array($minutely));
+    }
+
+    private function generateCreneaux($dtstart, $until, $hours, $days, $minutely = [0], $interval = 1) {
         $arrayParams = [
             'FREQ' => 'DAILY',
             'DTSTART' => $dtstart, // '2023-07-12'
@@ -84,15 +95,6 @@ class FBCreneauxGeneres {
                 $this->creneauxSeq->push(Period::fromDate($newCreneau, $newCreneau->add($this->getDuration()->dateInterval)));
             }
         }
-    }
-
-    public function getDefaultsCreneaux($dureeEnMinutes, int $hours, int $minutely, $addXmonth = 1) {
-        $dateBeginCreneau = date('Y-m-d');
-        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
-                ->add(new DateInterval('P'. $addXmonth .'M'))
-                ->format('Y-m-d');
-
-        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, array($hours), array($minutely));
     }
 
     public function parsePlagesHoraires(array $plagesHoraires) {
