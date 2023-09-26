@@ -14,14 +14,16 @@ use RRule\RRule;
  */
 class FBCreneauxGeneres {
 
-    private string $dtz;
+    private String $startDate;
+    private String $dtz;
     private array $plagesHoraires;
     private array $days;
     private int $dureeMinutes;
     private static Duration $duration;
     private League\Period\Sequence $creneauxSeq;
 
-    public function __construct(int $dureeMinutes, array $plagesHoraires, string $dtz, array $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
+    public function __construct(String $startDate, int $dureeMinutes, array $plagesHoraires, string $dtz, array $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
+        $this->startDate = $startDate;
         $this->dureeMinutes = $dureeMinutes;
         $this->setDuration($dureeMinutes);
         $this->plagesHoraires = $plagesHoraires;
@@ -30,8 +32,8 @@ class FBCreneauxGeneres {
 
         $arrPlage = $this->parsePlagesHoraires($plagesHoraires);
 
-        $firstCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $days);
-        $secondCreneau = $this->getDefaultsCreneaux($dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $days);
+        $firstCreneau = $this->getDefaultsCreneaux($startDate, $dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $days);
+        $secondCreneau = $this->getDefaultsCreneaux($startDate, $dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $days);
 
         $this->creneauxSeq = new Sequence();
         $this->generateSequence($firstCreneau, $dureeMinutes, $arrPlage[0], $arrPlage[1]);
@@ -49,13 +51,12 @@ class FBCreneauxGeneres {
         return $this->creneauxSeq;
     }
 
-    public function getDefaultsCreneaux($dureeEnMinutes, int $hours, int $minutely, array $days, int $addXmonth = 1) {
-        $dateBeginCreneau = date('Y-m-d');
-        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $dateBeginCreneau)
+    public function getDefaultsCreneaux($startDate, $dureeEnMinutes, int $hours, int $minutely, array $days, int $addXmonth = 1) {
+        $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $startDate)
                 ->add(new DateInterval('P'. $addXmonth .'M'))
                 ->format('Y-m-d');
 
-        return self::generateCreneaux($dateBeginCreneau, $dateEndCreneau, array($hours), $days, array($minutely));
+        return self::generateCreneaux($startDate, $dateEndCreneau, array($hours), $days, array($minutely));
     }
 
     private function generateCreneaux($dtstart, $until, $hours, $days, $minutely = [0], $interval = 1) {

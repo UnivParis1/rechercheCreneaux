@@ -20,11 +20,12 @@ $nbcreneaux = isset($varsHTTPGet['creneaux']) ? $varsHTTPGet['creneaux'] : null;
 $duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
 $plagesHoraires = isset($varsHTTPGet['plagesHoraires']) ? $varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
 $joursDemandes = isset($varsHTTPGet['joursCreneaux']) ? $varsHTTPGet['joursCreneaux'] : array('MO', 'TU', 'WE', 'TH', 'FR');
+$fromDate = isset($varsHTTPGet['fromDate']) ? $varsHTTPGet['fromDate'] : (new DateTime())->format('Y-m-d');
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
 
-    $creneauxGenerated = (new FBCreneauxGeneres($duree, $plagesHoraires, $dtz, $joursDemandes))->getCreneauxSeq();
+    $creneauxGenerated = (new FBCreneauxGeneres($fromDate, $duree, $plagesHoraires, $dtz, $joursDemandes))->getCreneauxSeq();
 
     $fbUsers = array();
     foreach ($uids as $uid) {
@@ -151,6 +152,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                 <div id="slider"></div>
                                 <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[0]; ?>" />
                                 <input type='hidden' name="plagesHoraires[]" value="<?php echo $plagesHoraires[1]; ?>" />
+                            </div>
+                        </td>
+                        <td>
+                            <div id="divfromdate">
+                                <p>A partir du</p>
+                                <input type="date" name="fromDate" value="<?php echo $fromDate; ?>"/>
                             </div>
                         </td>
                     </tr>
