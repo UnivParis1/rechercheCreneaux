@@ -4,10 +4,12 @@ var idperson_ul = "#person_ul";
 
 function errorShow(toShow) {
     if (toShow === true) {
-        $(".alertrequire").css('display', 'inherit');
+        if ($(divpersonselect).is(":hidden"))
+            $(divpersonselect).show();
+        $(divpersonselect + " .alertrequire").css('display', 'inherit');
     }
     if (toShow === false) {
-        $(".alertrequire").css('display', 'none');
+        $(divpersonselect + " .alertrequire").css('display', 'none');
     }
 }
 

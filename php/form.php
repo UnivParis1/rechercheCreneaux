@@ -21,6 +21,8 @@ $duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
 $plagesHoraires = isset($varsHTTPGet['plagesHoraires']) ? $varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
 $joursDemandes = isset($varsHTTPGet['joursCreneaux']) ? $varsHTTPGet['joursCreneaux'] : array('MO', 'TU', 'WE', 'TH', 'FR');
 $fromDate = isset($varsHTTPGet['fromDate']) ? $varsHTTPGet['fromDate'] : (new DateTime())->format('Y-m-d');
+$descriptionEvent = isset($varsHTTPGet['summarycreneau']) ? $varsHTTPGet['summarycreneau'] : null;
+$lieuEvent = isset($varsHTTPGet['lieucreneau']) ? $varsHTTPGet['lieucreneau'] : null;
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
@@ -47,17 +49,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
 <!DOCTYPE html>
     <head>
-        <style>
-            .alertrequire {
-                color: red;
-                display: none;
-            }
-        </style>
+        <link href="./css/bootstrap.min.css" rel="stylesheet" />
+        <script src="./js/bootstrap.bundle.min.js"></script>
 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <script src="./js/jquery.min.js"></script>
         <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
 
         <link href="./css/form.css" rel="stylesheet" />
@@ -65,7 +60,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
         <link href="./css/nouislider.min.css" rel="stylesheet" />
         <script src="./js/nouislider.min.js"></script>
-    </head>
+ </head>
     <body>
         <div id="titre">
             <h1>Recherche de disponibilités</h1>
@@ -75,7 +70,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     <table>
                     <tr>
                         <td>
-                            <p>Séléction des Users</p>
+                            <p>Séléction des utilisateurs</p>
                             <input id="person" name="person" placeholder="Nom et/ou prenom" />
 
                             <script>
@@ -161,6 +156,35 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             </div>
                         </td>
                     </tr>
+
+                        <!-- Modal -->
+                        <div class="modal fade creneaumail" id="modalInput" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalInputLabel">Envoi invitations participants</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Envoi invitation aux participants </p>
+                                        <form class="form-vertical">
+                                            <div class="form-group my-3">
+                                                <p class="alertrequire">Description de l'évenement à renseigner pour un envoi d'invitation</p>
+                                                <input class="form-control-plaintext" placeholder="Description" name="summarycreneau" value="<?php echo $descriptionEvent; ?>" />
+                                            </div>
+                                            <div class="form-group my-3">
+                                                <p class="alertrequire">Lieu de l'évenement à renseigner pour un envoi d'invitation</p>
+                                                <input class="form-control-plaintext" placeholder="Lieu de l'évenement" name="lieucreneau" value="<?php echo $lieuEvent; ?>" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        <button type="button" class="btn btn-primary">Envoyer les invitations</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </table>
             </form>
         </div>
@@ -173,12 +197,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
                     $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
 
-                    /* var $date League\Period\Period */
                     foreach ($listDate as $date) {
-                         //$date = new League\Period\Period();
                         ?>
                         <li>
-                            <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
+                            <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time><a href="#" data-bs-toggle="modal" data-bs-target="#modalInput">Envoyer une invitation aux participants</a>
                         </li>
                         <?php } ?>
             </ul>
