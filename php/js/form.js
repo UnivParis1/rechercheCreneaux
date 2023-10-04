@@ -186,4 +186,15 @@ $(function() {
             idx++;
         }
     });
+
+    $('#creneauMailInput').on('shown.bs.modal', function () {
+        $("#creneauMailInput input[type='text']").attr('disabled', false);
+        $("#creneauMailInput input[type='text']").attr('required', true);
+    });
+
+    $('#creneauMailInput').on('hidden.bs.modal', function () {
+        $("#creneauMailInput input[type='text']").attr('disabled', true);
+        $("#creneauMailInput input[type='text']").attr('required', false);
+    });
+
 });
