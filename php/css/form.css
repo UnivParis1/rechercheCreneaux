@@ -22,14 +22,12 @@ table td { border: 1px #666 dotted; border-right:none; font-size : 14px; padding
  
 div#reponse, div#formulaire {max-width:1200px;  margin-left: auto;margin-right: auto;}
 
-
-
 input[type="submit"] {
-    color: white; 
-    background-color: #20558ae6; 
-    border : 2px #2a6fb4 solid; 
+    color: white;
+    background-color: #20558ae6;
+    border : 2px #2a6fb4 solid;
     width:105px;
-    border-radius : 4px; 
+    border-radius : 4px;
 }
 
 input[type="submit"]:hover {
@@ -46,13 +44,50 @@ li a {
 }
 
 li time { color: green; border-bottom: 1px dotted #999; margin-bottom:7px;
-    max-width: 300px; 
+    max-width: 300px;
 }
-
 
 input#person {width: 200px;}
 input#creneaux {width: 80px;}
 input#duree {width: 80px;}
-#person_ul li button { margin-left : 10px;} 
+#person_ul li button { margin-left : 10px;}
 
 #slider{margin-top: 45px}
+
+/*#creneauBoxDesc { border-left: 1px dotted #999 }*/
+
+#creneauBoxInput {
+    border-left: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#creneauBoxInput label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#creneauBoxInput input {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+#creneauBoxDesc {
+    margin-left: 15px;
+}
+
+#creneauBoxDesc time {
+    /* width: 300px; */
+    width: 200px;
+    max-width: 100%;
+    display: inline-block;
+}
+
+.modal-footer {
+    margin-right: 15px;
+}
+
+#creneauBoxFooter {
+    border-top: none;
+}

@@ -10,6 +10,13 @@
         "rlanvin/php-rrule": "^2.4",
         "components/jquery": "^3.7",
         "leongersen/nouislider": "^15.7",
-        "twbs/bootstrap": "^5.3"
+        "twbs/bootstrap": "^5.3",
+        "timrwood/moment": "^2.29"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "oomphinc/composer-installers-extender": true
+        }
     }
 }

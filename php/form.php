@@ -60,6 +60,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
         <link href="./css/nouislider.min.css" rel="stylesheet" />
         <script src="./js/nouislider.min.js"></script>
+
+        <script src="./js/min/moment.js"></script>
+        <script src="./js/min/moment-with-locales.js"></script>
  </head>
     <body>
         <div id="titre">
@@ -158,25 +161,32 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     </tr>
 
                     <!-- Modal -->
-                    <div class="modal fade" id="creneauMailInput" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
+                    <div class="modal fade" id="creneauMailInput" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true" >
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="modalInputLabel">Envoi invitation aux participants</h5>
+                                    <p>Envoi invitation aux participants</p>
                                 </div>
-                                <div class="modal-body">
-                                    <div class="my-3">
-                                        <input type="text" disabled placeholder="Description" name="summarycreneau" value="<?php echo $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"/>
+                                <div class="row">
+                                    <div class="col-sm-6" id="creneauBoxDesc">
+                                        <p>Créneau</p>
+                                        <span id="creneauInfo" class="text-nowrap text-break"></span>
+                                        <hr>
+                                        <p>Participants</p>
+                                        <ul id="creneauMailParticipant_ul" />
                                     </div>
-                                    <div class="my-3">
-                                        <input type="text" disabled placeholder="Lieu de l'évenement" name="lieucreneau" value="<?php echo $lieuEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un lieu pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
+                                    <div class="col-sm-5 align-content-between" id="creneauBoxInput">
+                                            <p>Description :</p>
+                                            <input id="summarycreneau" type="text" disabled placeholder="Description" name="summarycreneau" value="<?php echo $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"/>
+                                            <p>Lieu :</p>
+                                            <input id="lieucreneau" type="text" disabled placeholder="Lieu de l'évenement" name="lieucreneau" value="<?php echo $lieuEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un lieu pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                                     </div>
-<!--                                    <input type="datetime-local" name="modalCreneauStart" />-->
-<!--                                    <input type="datetime-local" name="modalCreneauEnd" />-->
+                                    <input type="datetime-local" disabled hidden="hidden" name="modalCreneauStart" />
+                                    <input type="datetime-local" disabled hidden="hidden" name="modalCreneauEnd" />
                                 </div>
-                                <div class="modal-footer">
+                                <div class="modal-footer" id="creneauBoxFooter">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                    <input type="submit" class="btn btn-primary" value="Envoyer les invitations" />
+                                    <input type="submit" class="btn btn-primary" value="Envoyer" />
                                 </div>
                             </div>
                         </div>
@@ -196,7 +206,8 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     foreach ($listDate as $date) {
                         ?>
                         <li>
-                            <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time><a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput">Envoyer une invitation aux participants</a>
+                            <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" timeStart="<?php echo $date->startDate->getTimestamp() ?>" timeEnd="<?php echo $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                         </li>
                         <?php } ?>
             </ul>

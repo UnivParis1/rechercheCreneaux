@@ -1,6 +1,7 @@
 var urlwsgroup = 'https://wsgroups.univ-paris1.fr/searchUser';
 var divpersonselect = "#divpersonselect";
 var idperson_ul = "#person_ul";
+var listDisplayname = Array();
 
 function errorShow(toShow) {
     if (toShow === true) {
@@ -38,6 +39,7 @@ function setOptionsUid(jsuids) {
 }
 
 function addOptionWithUid(uid, displayName) {
+    listDisplayname.push(displayName);
 
     if ($(divpersonselect).is(":hidden"))
         $(divpersonselect).show();
@@ -187,14 +189,44 @@ $(function() {
         }
     });
 
+    $("#reponse li a").on("click", function() {
+        var textTime =  this.previousSibling.textContent;
+        textTime=textTime.substring(0, textTime.indexOf(' - '));
+        textTime=textTime.substring(textTime.indexOf(' ')+1);
+
+        var ts=$(this).attr("timestart");
+        var te=$(this).attr("timeend");
+
+        var start = moment.unix(ts);
+        var end = moment.unix(te);
+
+        $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
+    });
+
+    // Set FR pour le formattage des dates avec la librairie moment.js
+    moment.locale('fr');
+
     $('#creneauMailInput').on('shown.bs.modal', function () {
         $("#creneauMailInput input[type='text']").attr('disabled', false);
         $("#creneauMailInput input[type='text']").attr('required', true);
+
+        $("#creneauMailInput input[type='datetime-local']").attr('disabled', false);
+        $("#creneauMailInput input[type='datetime-local']").attr('required', true);
+
+        ul = $("#creneauMailParticipant_ul");
+        ul.empty();
+        for (displayName of listDisplayname) {
+            var li=$('<li>');
+            li.text(displayName);
+            ul.append(li);
+        }w
     });
 
     $('#creneauMailInput').on('hidden.bs.modal', function () {
         $("#creneauMailInput input[type='text']").attr('disabled', true);
         $("#creneauMailInput input[type='text']").attr('required', false);
-    });
 
+        $("#creneauMailInput input[type='datetime-local']").attr('disabled', true);
+        $("#creneauMailInput input[type='datetime-local']").attr('required', false);
+    });
 });
