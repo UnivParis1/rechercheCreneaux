@@ -219,7 +219,7 @@ $(function() {
             var li=$('<li>');
             li.text(displayName);
             ul.append(li);
-        }w
+        }
     });
 
     $('#creneauMailInput').on('hidden.bs.modal', function () {

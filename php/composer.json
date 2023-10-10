@@ -11,7 +11,8 @@
         "components/jquery": "^3.7",
         "leongersen/nouislider": "^15.7",
         "twbs/bootstrap": "^5.3",
-        "timrwood/moment": "^2.29"
+        "timrwood/moment": "^2.29",
+        "vlucas/phpdotenv": "^5.5"
     },
     "config": {
         "allow-plugins": {

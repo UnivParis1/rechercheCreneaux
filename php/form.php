@@ -7,11 +7,13 @@ require_once('FBUtils.php');
 require_once('FBCompare.php');
 require_once('FBCreneauxGeneres.php');
 
-setlocale(LC_TIME, "fr_FR");
-
-date_default_timezone_set('Europe/Paris');
-$dtz = date_default_timezone_get();
-$url = 'https://echange.univ-paris1.fr/kronolith/fb.php?u=';
+// Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
+Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
+$env=(isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
+$url=$_ENV['URL_FREEBUSY'];
+$dtz=$_ENV['TIMEZONE'];
+setlocale(LC_TIME, $_ENV['LOCALE']);
+date_default_timezone_set($dtz);
 
 $varsHTTPGet = filter_var_array($_GET);
 
@@ -70,6 +72,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </div>
         <div id="formulaire">
             <form id="form" action="">
+                <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
             <table>
                     <tr>
                         <td>
