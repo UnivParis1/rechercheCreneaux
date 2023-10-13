@@ -1,4 +1,3 @@
-var urlwsgroup = 'https://wsgroups.univ-paris1.fr/searchUser';
 var divpersonselect = "#divpersonselect";
 var idperson_ul = "#person_ul";
 var listDisplayname = Array();
@@ -100,8 +99,10 @@ $(function() {
             }
     );
 
-    $("#form").on("submit", function (e) {
-        e.preventDefault();
+    $("#form").on("submit", function (event) {
+        // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
+        if (event.originalEvent.submitter.name == "submitModal")
+            $("input[name='actionFormulaireValider']").val("envoiInvitation");
 
         var vals = getCurrentOptions();
 
@@ -190,10 +191,6 @@ $(function() {
     });
 
     $("#reponse li a").on("click", function() {
-        var textTime =  this.previousSibling.textContent;
-        textTime=textTime.substring(0, textTime.indexOf(' - '));
-        textTime=textTime.substring(textTime.indexOf(' ')+1);
-
         var ts=$(this).attr("timestart");
         var te=$(this).attr("timeend");
 
@@ -201,6 +198,9 @@ $(function() {
         var end = moment.unix(te);
 
         $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
+
+        $("#creneauMailInput input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
+        $("#creneauMailInput input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
     });
 
     // Set FR pour le formattage des dates avec la librairie moment.js

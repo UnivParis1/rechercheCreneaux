@@ -4,6 +4,7 @@ use League\Period\Period;
 use League\Period\Sequence;
 use League\Period\DatePoint;
 use League\Period\Chart;
+use Kigkonsult\Icalcreator\Vcalendar;
 
 
 /**
@@ -136,5 +137,59 @@ class FBUtils {
             }
         }
         return $array;
+    }
+
+    public static function requestUidsNames($listUids, $url) {
+        $arrayReturn = array();
+
+        foreach ($listUids as $uid) {
+            $fp = fopen($url . "?token=$uid&maxRows=1&attrs=uid,displayName,mail", 'r');
+            $response = fread($fp, 1024);
+            fclose($fp);
+
+            $reqArray = json_decode($response);
+
+            if (sizeof($reqArray) == 1) {
+                array_push($arrayReturn, get_object_vars($reqArray[0]));
+            }
+        }
+        return $arrayReturn;
+    }
+
+    public static function icalCreationInvitation($listUids, $start, $end, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz) {
+
+        $listUserinfos = self::requestUidsNames($listUids, $urlwsgroup);
+
+        $vcalendar = Vcalendar::factory()
+            ->setMethod( Vcalendar::REQUEST )
+            ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[0]['displayName'] )
+            ->setXprop( Vcalendar::X_PROP, "Application Recherche créneaux" )
+            ->setXprop( Vcalendar::X_WR_TIMEZONE, $dtz );
+
+        $event1 = $vcalendar->newVevent()
+            ->setTransp( Vcalendar::OPAQUE )
+            ->setSummary( $descriptionEvent )
+            ->setDescription($descriptionEvent)
+            ->setLocation( $lieuEvent)
+            // set the time
+            ->setDtstart(new DateTime($start,new DateTimezone( $dtz)))
+            ->setDtend(new DateTime($end,new DateTimezone( $dtz)))
+            ->setOrganizer($listUserinfos[0]['mail'],
+                [ Vcalendar::CN =>  $listUserinfos[0]['displayName']]
+            );
+
+        foreach ($listUserinfos as $userinfo) {
+            $event1->setAttendee($userinfo['mail'],
+                [Vcalendar::ROLE     => Vcalendar::REQ_PARTICIPANT,
+                Vcalendar::PARTSTAT => Vcalendar::NEEDS_ACTION,
+                Vcalendar::RSVP     => Vcalendar::TRUE]);
+        }
+
+        $event1->setStatus(Vcalendar::CONFIRMED);
+        $event1 = $event1->setClass('PUBLIC');
+        $valarm = $event1->newValarm(\Kigkonsult\Icalcreator\IcalInterface::DISPLAY, '-PT120M');
+        $valarm->setDescription($descriptionEvent);
+
+        return $vcalendar->vtimezonePopulate()->createCalendar();
     }
 }

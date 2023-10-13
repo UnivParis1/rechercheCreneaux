@@ -12,11 +12,13 @@ Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
 $env=(isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 $url=$_ENV['URL_FREEBUSY'];
 $dtz=$_ENV['TIMEZONE'];
+$urlwsgroup=$_ENV['URLWSGROUP'];
 setlocale(LC_TIME, $_ENV['LOCALE']);
 date_default_timezone_set($dtz);
 
 $varsHTTPGet = filter_var_array($_GET);
 
+$actionFormulaireValider = isset($varsHTTPGet['actionFormulaireValider']) ? $varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
 $uids = isset($varsHTTPGet['listuids']) ? $varsHTTPGet['listuids'] : null;
 $nbcreneaux = isset($varsHTTPGet['creneaux']) ? $varsHTTPGet['creneaux'] : null;
 $duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
@@ -25,6 +27,8 @@ $joursDemandes = isset($varsHTTPGet['joursCreneaux']) ? $varsHTTPGet['joursCrene
 $fromDate = isset($varsHTTPGet['fromDate']) ? $varsHTTPGet['fromDate'] : (new DateTime())->format('Y-m-d');
 $descriptionEvent = isset($varsHTTPGet['summarycreneau']) ? $varsHTTPGet['summarycreneau'] : null;
 $lieuEvent = isset($varsHTTPGet['lieucreneau']) ? $varsHTTPGet['lieucreneau'] : null;
+$modalCreneauStart = isset($varsHTTPGet['modalCreneauStart']) ? $varsHTTPGet['modalCreneauStart'] : null;
+$modalCreneauEnd = isset($varsHTTPGet['modalCreneauEnd']) ? $varsHTTPGet['modalCreneauEnd'] : null;
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
@@ -46,6 +50,11 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
         $listDate[] = $creneauxFinauxArray[$i];
     }
+
+    if ($actionFormulaireValider == 'envoiInvitation' && is_null($descriptionEvent) == false && is_null($lieuEvent) == false && !is_null($modalCreneauStart) && !is_null($modalCreneauEnd)) {
+        $event = FBUtils::icalCreationInvitation($uids, $modalCreneauStart, $modalCreneauEnd, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz);
+        die(var_export($event));
+    }
 }
 ?>
 
@@ -65,7 +74,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
         <script src="./js/min/moment.js"></script>
         <script src="./js/min/moment-with-locales.js"></script>
- </head>
+    </head>
     <body>
         <div id="titre">
             <h1>Recherche de disponibilités</h1>
@@ -80,7 +89,8 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <input id="person" name="person" placeholder="Nom et/ou prenom" />
 
                             <script>
-                                var jsduree=<?php echo (is_null($duree) ? 30:$duree); ?>
+                                var jsduree=<?php echo (is_null($duree) ? 30:$duree); ?>;
+                                var urlwsgroup='<?php echo $urlwsgroup; ?>';
 
                                 <?php if (isset($duree) && !is_null($duree)) { ?>
 
@@ -180,7 +190,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                     </div>
                                     <div class="col-sm-5 align-content-between" id="creneauBoxInput">
                                             <p>Description :</p>
-                                            <input id="summarycreneau" type="text" disabled placeholder="Description" name="summarycreneau" value="<?php echo $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"/>
+                                            <input id="summarycreneau" type="text" disabled placeholdr="Description" name="summarycreneau" value="<?php echo $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"/>
                                             <p>Lieu :</p>
                                             <input id="lieucreneau" type="text" disabled placeholder="Lieu de l'évenement" name="lieucreneau" value="<?php echo $lieuEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un lieu pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                                     </div>
@@ -189,7 +199,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                 </div>
                                 <div class="modal-footer" id="creneauBoxFooter">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                    <input type="submit" class="btn btn-primary" value="Envoyer" />
+                                    <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
                                 </div>
                             </div>
                         </div>
