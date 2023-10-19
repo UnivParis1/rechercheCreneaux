@@ -58,7 +58,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
         $alertMailsEnvoyes = array();
         foreach ($listUserinfos as $userinfo) {
-            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : 'etienne.bohm@univ-paris1.fr';
+            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($varsHTTPGet['debugmail']) ? $varsHTTPGet['debugmail'] : '' );
 
             $headers = 'Content-Type: text/calendar; name="event.ics"; charset=utf-8' . "\r\n";
             $headers .= 'Content-Disposition: attachment; filename="event.ics"' . "\r\n";
@@ -110,14 +110,13 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                 var jsduree=<?php echo (is_null($duree) ? 30:$duree); ?>;
                                 var urlwsgroup='<?php echo $urlwsgroup; ?>';
 
-                                <?php if (isset($duree) && !is_null($duree)) { ?>
-
+                                <?php if (isset($duree) && !is_null($duree)) : ?>
                                 $(function() {
                                     $('#duree option[value="<?php echo $duree ?>"').prop('selected', true);
                                 });
-                                <?php } ?>
+                                <?php endif ?>
 
-                                <?php if ($uids && isset($js_uids)) { ?>
+                                <?php if ($uids && isset($js_uids)) : ?>
                                 var jsuids=<?php echo "$js_uids" ?>;
 
                                 $(function() {
@@ -127,8 +126,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                         errorShow(true);
                                     }
                                 });
-
-                                <?php } ?>
+                                <?php endif ?>
                             </script>
                         </td>
                         <td>
@@ -219,7 +217,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                                     <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
                                 </div>
-                                <div class="mod"
+                                <?php if ($env != 'prod'): ?>
+                                <div>
+                                    <p>DEBUG environnement. Mail recepteur des tests </p>
+                                    <input type="text" name="debugmail" />
+                                </div>
+                                <?php endif ?>
                             </div>
                         </div>
                     </div>
@@ -227,32 +230,30 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             </form>
         </div>
 
-        <?php if (isset($listDate) && sizeof($listDate) > 0) { ?>
+        <?php if (isset($listDate) && sizeof($listDate) > 0) : ?>
+        <?php $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
+              $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
         <div id="reponse">
             <p>Créneaux disponibles</p>
             <ul>
-                    <?php
-                    $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
-                    $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
-
-                    foreach ($listDate as $date) { ?>
+                    <?php foreach ($listDate as $date) : ?>
                         <li>
                             <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" timeStart="<?php echo $date->startDate->getTimestamp() ?>" timeEnd="<?php echo $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                         </li>
-                        <?php } ?>
+                    <?php endforeach ?>
             </ul>
         </div>
-        <?php } elseif (isset($listDate) && sizeof($listDate) == 0) { ?>
+        <?php  elseif (isset($listDate) && sizeof($listDate) == 0) : ?>
             <div>
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
             </div>
-        <?php } ?>
+        <?php endif ?>
 
-        <?php if ($actionFormulaireValider=='envoiInvitation' && isset($alertMailsEnvoyes) && sizeof($alertMailsEnvoyes) > 0) { ?>
+        <?php if ($actionFormulaireValider=='envoiInvitation' && isset($alertMailsEnvoyes) && sizeof($alertMailsEnvoyes) > 0) : ?>
             <script langage='javascript'>
             alert("Mails invitation envoyés à : <?php echo(implode(" - ", $alertMailsEnvoyes)) ?>");
             </script>
-        <?php } ?>
+        <?php endif ?>
     </body>
 </html>
