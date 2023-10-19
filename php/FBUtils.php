@@ -156,10 +156,7 @@ class FBUtils {
         return $arrayReturn;
     }
 
-    public static function icalCreationInvitation($listUids, $start, $end, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz) {
-
-        $listUserinfos = self::requestUidsNames($listUids, $urlwsgroup);
-
+    public static function icalCreationInvitation($listUserinfos, $start, $end, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz) {
         $vcalendar = Vcalendar::factory()
             ->setMethod( Vcalendar::REQUEST )
             ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[0]['displayName'] )

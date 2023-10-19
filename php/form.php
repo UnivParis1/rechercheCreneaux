@@ -52,8 +52,26 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     }
 
     if ($actionFormulaireValider == 'envoiInvitation' && is_null($descriptionEvent) == false && is_null($lieuEvent) == false && !is_null($modalCreneauStart) && !is_null($modalCreneauEnd)) {
-        $event = FBUtils::icalCreationInvitation($uids, $modalCreneauStart, $modalCreneauEnd, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz);
-        die(var_export($event));
+        $listUserinfos = FBUtils::requestUidsNames($uids, $urlwsgroup);
+        $icsData = FBUtils::icalCreationInvitation($listUserinfos, $modalCreneauStart, $modalCreneauEnd, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz);
+        $sujet = "Invitation évenement";
+
+        $alertMailsEnvoyes = array();
+        foreach ($listUserinfos as $userinfo) {
+            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : 'etienne.bohm@univ-paris1.fr';
+
+            $headers = 'Content-Type: text/calendar; name="event.ics"; charset=utf-8' . "\r\n";
+            $headers .= 'Content-Disposition: attachment; filename="event.ics"' . "\r\n";
+            $headers .= 'Content-Transfer-Encoding: base64' . "\r\n";
+
+            $envoiTest = mail($mailAddr, "Invitation à un evenement", base64_encode($icsData), $headers);
+
+            if (!$envoiTest) {
+                throw new Exception("erreur envoi mail");
+            } else {
+                $alertMailsEnvoyes[] = $userinfo['mail'];
+            }
+        }
     }
 }
 ?>
@@ -201,6 +219,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                                     <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
                                 </div>
+                                <div class="mod"
                             </div>
                         </div>
                     </div>
@@ -216,8 +235,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
                     $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
 
-                    foreach ($listDate as $date) {
-                        ?>
+                    foreach ($listDate as $date) { ?>
                         <li>
                             <time><?php echo $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" timeStart="<?php echo $date->startDate->getTimestamp() ?>" timeEnd="<?php echo $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
@@ -230,6 +248,11 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
             </div>
         <?php } ?>
+
+        <?php if ($actionFormulaireValider=='envoiInvitation' && isset($alertMailsEnvoyes) && sizeof($alertMailsEnvoyes) > 0) { ?>
+            <script langage='javascript'>
+            alert("Mails invitation envoyés à : <?php echo(implode(" - ", $alertMailsEnvoyes)) ?>");
+            </script>
+        <?php } ?>
     </body>
 </html>
-
