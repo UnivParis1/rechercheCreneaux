@@ -100,16 +100,21 @@ $(function() {
     );
 
     $("#form").on("submit", function (event) {
+        event.preventDefault();
         // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
-        if (event.originalEvent.submitter.name == "submitModal")
+        if (event.originalEvent.submitter.name == "submitModal") {
             $("input[name='actionFormulaireValider']").val("envoiInvitation");
+        }
 
         var vals = getCurrentOptions();
 
-        if (vals.length > 1)
+        if (vals.length > 1) {
             this.submit();
-        else
+            return true;
+        } else {
             errorShow(true);
+            return false;
+        }
     });
 
     $('#divpersonselect').hide();
@@ -199,19 +204,19 @@ $(function() {
 
         $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
 
-        $("#creneauMailInput input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
-        $("#creneauMailInput input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
+        $("#creneauBoxInput ~ input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
+        $("#creneauBoxInput ~ input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
     });
 
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
 
     $('#creneauMailInput').on('shown.bs.modal', function () {
-        $("#creneauMailInput input[type='text']").attr('disabled', false);
-        $("#creneauMailInput input[type='text']").attr('required', true);
+        $("#creneauBoxInput > input[type='text'],textarea").attr('disabled', false);
+        $("#creneauBoxInput > input[type='text'],textarea").attr('required', true);
 
-        $("#creneauMailInput input[type='datetime-local']").attr('disabled', false);
-        $("#creneauMailInput input[type='datetime-local']").attr('required', true);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
 
         ul = $("#creneauMailParticipant_ul");
         ul.empty();
@@ -223,10 +228,10 @@ $(function() {
     });
 
     $('#creneauMailInput').on('hidden.bs.modal', function () {
-        $("#creneauMailInput input[type='text']").attr('disabled', true);
-        $("#creneauMailInput input[type='text']").attr('required', false);
+        $("#creneauBoxInput > input[type='text'],textarea").attr('disabled', true);
+        $("#creneauBoxInput > input[type='text'],textarea").attr('required', false);
 
-        $("#creneauMailInput input[type='datetime-local']").attr('disabled', true);
-        $("#creneauMailInput input[type='datetime-local']").attr('required', false);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
     });
 });
