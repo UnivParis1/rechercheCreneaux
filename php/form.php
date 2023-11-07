@@ -149,7 +149,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                         </td>
                         <td>
                             <p>Envoyer requête</p>
-                            <input type="submit" value="Trouver les créneaux" />
+                            <input type="submit" name="submitRequete" value="Recherche de disponibilité" />
                         </td>
                     </tr>
                     <tr>
