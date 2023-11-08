@@ -22,6 +22,8 @@ table td { border: 1px #666 dotted; border-right:none; font-size : 14px; padding
  
 div#reponse, div#formulaire {max-width:1200px;  margin-left: auto;margin-right: auto;}
 
+div.invitationEnvoyée {display: inline;}
+
 form#form input[name="submitRequete"] {
     margin-right: -61px;
     width: 177px;
@@ -44,7 +46,7 @@ li {
     margin-bottom: 7px;
 }
 
-li a {
+li,div.invitationEnvoyée a {
     margin-left: 10px;
 }
 

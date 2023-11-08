@@ -139,6 +139,19 @@ class FBUtils {
         return $array;
     }
 
+    public static function getIdxCreneauxWithStartEnd(array $listDate, $start, $end) : int {
+        $dtStart = new DateTime($start);
+        $dtEnd = new DateTime($end);
+
+        for ($idx = 0; $idx < sizeof($listDate); $idx++) {
+            $date = $listDate[$idx];
+            if ($date->startDate == $dtStart && $date->endDate == $dtEnd) {
+                return $idx;
+            }
+        }
+        return -1;
+    }
+
     public static function requestUidsNames($listUids, $url) {
         $arrayReturn = array();
 
