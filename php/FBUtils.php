@@ -156,7 +156,7 @@ class FBUtils {
         return $arrayReturn;
     }
 
-    public static function icalCreationInvitation($listUserinfos, $start, $end, $descriptionEvent, $lieuEvent, $urlwsgroup, $dtz) {
+    public static function icalCreationInvitation($listUserinfos, $start, $end, $titleEvent, $descriptionEvent, $lieuEvent, $dtz) {
         $vcalendar = Vcalendar::factory()
             ->setMethod( Vcalendar::REQUEST )
             ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[0]['displayName'] )
@@ -165,12 +165,12 @@ class FBUtils {
 
         $event1 = $vcalendar->newVevent()
             ->setTransp( Vcalendar::OPAQUE )
-            ->setSummary( $descriptionEvent )
+            ->setSummary( $titleEvent )
             ->setDescription($descriptionEvent)
             ->setLocation( $lieuEvent)
             // set the time
-            ->setDtstart(new DateTime($start,new DateTimezone( $dtz)))
-            ->setDtend(new DateTime($end,new DateTimezone( $dtz)))
+            ->setDtstart(new DateTime($start,new DateTimezone($dtz)))
+            ->setDtend(new DateTime($end,new DateTimezone($dtz)))
             ->setOrganizer($listUserinfos[0]['mail'],
                 [ Vcalendar::CN =>  $listUserinfos[0]['displayName']]
             );
