@@ -125,13 +125,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                         <p>Durée des créneaux</p>
 
                         <select id="duree" name="duree" required=true>
-                            <option value="30">30 minutes</option>
                             <option value="60">1h</option>
-                            <option value="90">1h30</option>
                             <option value="120">2h</option>
-                            <option value="150">2h30</option>
                             <option value="180">3h</option>
-                            <option value="210">3h30</option>
                             <option value="240">4h</option>
                         </select>
                     </td>
@@ -172,7 +168,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                     <td>
                         <div id="divfromdate">
                             <p>A partir du</p>
-                            <input type="date" name="fromDate" value="<?= $fromDate; ?>" />
+                            <input type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fromDate; ?>" />
                         </div>
                     </td>
                 </tr>
