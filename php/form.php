@@ -33,6 +33,7 @@ $descriptionEvent = isset($varsHTTPGet['summarycreneau']) ? $varsHTTPGet['summar
 $lieuEvent = isset($varsHTTPGet['lieucreneau']) ? $varsHTTPGet['lieucreneau'] : null;
 $modalCreneauStart = isset($varsHTTPGet['modalCreneauStart']) ? $varsHTTPGet['modalCreneauStart'] : null;
 $modalCreneauEnd = isset($varsHTTPGet['modalCreneauEnd']) ? $varsHTTPGet['modalCreneauEnd'] : null;
+$jsonSessionInfos = isset($_SESSION['inviteEnregistrement']) ? json_encode($_SESSION['inviteEnregistrement']) : null;
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
     $js_uids = json_encode($uids);
@@ -115,6 +116,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                     }
                                 });
                             <?php endif ?>
+                            <?php if (isset($jsonSessionInfos)): ?>
+                                var jsSessionInfos=JSON.parse('<?= $jsonSessionInfos ?>');
+                            <?php endif ?>
                         </script>
                     </td>
                     <td>
@@ -195,9 +199,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             </div>
                             <div class="col-sm-5 align-content-between" id="creneauBoxInput">
                                 <label for="titrecreneau">Titre de l'évenement</label>
-                                <input id="titrecreneau" type="text" disabled placeholdr="Titre de l'évenement" name="titrecreneau" value="<?= $titleEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un titre pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
+                                <input id="titrecreneau" type="text" disabled placeholder="Titre de l'évenement" name="titrecreneau" value="<?= $titleEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un titre pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                                 <label for="summarycreneau">Description :</label>
-                                <textarea id="summarycreneau" disabled placeholdr="Description" name="summarycreneau" value="<?= $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $descriptionEvent; ?> </textarea>
+                                <textarea id="summarycreneau" disabled placeholder="Description de l'évenement" name="summarycreneau" value="<?= $descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $descriptionEvent; ?></textarea>
                                 <label for="lieucreneau">Lieu :</label>
                                 <input id="lieucreneau" type="text" disabled placeholder="Lieu de l'évenement" name="lieucreneau" value="<?= $lieuEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un lieu pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                             </div>
@@ -226,10 +230,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         <div id="reponse">
             <p>Créneaux disponibles</p>
             <ul>
-                <?php foreach ($listDate as $key => $date) : ?>
+                <?php foreach ($listDate as $date) : ?>
                     <li>
                         <time><?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
-                        <?php if (FBInvite::invitationDejaEnvoyeSurCreneau($key, $date)) : ?>
+                        <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbUsers)) != TypeInviteAction::New) : ?>
                             <div class='invitationEnvoyée'>
                                 <span class="text-success">Envoyé</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16">
@@ -237,8 +241,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                     <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z" />
                                 </svg>
                             </div>
-                        <?php else: ?>
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                        <?php endif ?>
+                        <?php if ($invitationFlag == TypeInviteAction::New): ?>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                        <?php endif ?>
+                        <?php if ($invitationFlag == TypeInviteAction::NewParticipants): ?>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                         <?php endif ?>
                     </li>
                 <?php endforeach ?>

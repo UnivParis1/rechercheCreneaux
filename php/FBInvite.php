@@ -1,24 +1,36 @@
 <?php
 use League\Period\Period as Period;
 
+enum TypeInviteAction : int {
+    case New = -1;
+    case Exist = 0;
+    case NewParticipants = 1;
+}
+
 class FBInvite {
     var $listUserInfos;
     var $icsData;
     var $listDate;
     var $modalCreneauStart;
     var $modalCreneauEnd;
+    var $titleEvent;
+    var $descriptionEvent;
+    var $lieuEvent;
     var $sujet = "Invitation évenement";
     var $headers;
     var $varsHTTPGet;
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
-
+    var $mailEffectivementEnvoyeUids;
 
     public function __construct($uids, $urlwsgroup, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet) {
         $this->listDate = $listDate;
         $this->modalCreneauStart = $modalCreneauStart;
         $this->modalCreneauEnd = $modalCreneauEnd;
         $this->varsHTTPGet = $varsHTTPGet;
+        $this->titleEvent = $titleEvent;
+        $this->descriptionEvent = $descriptionEvent;
+        $this->lieuEvent = $lieuEvent;
 
         $this->listUserInfos = FBUtils::requestUidsNames($uids, $urlwsgroup);
         $this->icsData = FBUtils::icalCreationInvitation($this->listUserInfos, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz);
@@ -32,61 +44,78 @@ class FBInvite {
         if (!isset($_SESSION['inviteEnregistrement']))
             $_SESSION['inviteEnregistrement'] = array();
 
-        foreach ($this->listUserInfos as $userinfo) {
+        foreach ($this->listUserInfos as $uid => $userinfo) {
+            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->varsHTTPGet['debugmail']) ? $this->varsHTTPGet['debugmail'] : '');
 
-            $idxListDate = FBUtils::getIdxCreneauxWithStartEnd($this->listDate, $this->modalCreneauStart, $this->modalCreneauEnd);
-
-            if (($idxListDate >= 0) === false)
-                throw new Exception("idxListDate error");
+            $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
+            $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
 
             $testInsertMail = false;
-            if (!isset($_SESSION['inviteEnregistrement'][$idxListDate])) {
-                $_SESSION['inviteEnregistrement'][$idxListDate] = array();
-                $_SESSION['inviteEnregistrement'][$idxListDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
-                $_SESSION['inviteEnregistrement'][$idxListDate]['mails'] = [$userinfo['mail'] => false];
+            if (!isset($_SESSION['inviteEnregistrement'][$idxSessionDate])) {
+                $_SESSION['inviteEnregistrement'][$idxSessionDate] = array();
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'lieuEvent' => $this->lieuEvent];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => array($userinfo['mail'], 'sended' => false) ];
             } else {
-                // test de vérification si il y'a eu envoi d'emails
-                foreach ($_SESSION['inviteEnregistrement'][$idxListDate]['mails'] as $mail => $estEnvoye)
-                    if ($mail == $userinfo['mail'] && $estEnvoye)
-                        $testInsertMail = true;
+                // test de vérification si il y'a eu envoi d'emails, envoi si le mail est ajouté
+                if (array_key_exists($uid, $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'])) {
+                    foreach ($_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] as $uid => $aMails) {
+                        $mail = $aMails[0];
+                        $estEnvoye = $aMails['sended'];
+                        if ($mail == $userinfo['mail'] && $estEnvoye) {
+                            $testInsertMail = true;
+                            break;
+                        }
+                    }
+                }
             }
-
-            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->varsHTTPGet['debugmail']) ? $this->varsHTTPGet['debugmail'] : '');
 
             if (!$testInsertMail) {
                 $envoiTest = mail($mailAddr, "Invitation à un evenement", base64_encode($this->icsData), $this->headers);
 
                 if (!$envoiTest)
                     throw new Exception("erreur envoi mail");
+
                 $this->mailEffectivementEnvoye = true;
-                $this->mailEffectivementEnvoyeKey = $idxListDate;
-                $_SESSION['inviteEnregistrement'][$idxListDate]['mails'][$userinfo['mail']] = true;
+                $this->mailEffectivementEnvoyeKey = $idxSessionDate;
+                if (!isset($this->mailEffectivementEnvoyeUids))
+                    $this->mailEffectivementEnvoyeUids = array();
+
+                $this->mailEffectivementEnvoyeUids[] = $uid;
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] = array($userinfo['mail'], 'sended' => true);
             }
         }
     }
 
-    static public function invitationDejaEnvoyeSurCreneau(int $key, Period $dateAffichéeHTML) {
+    static public function invitationDejaEnvoyeSurCreneau(Period $dateAffichéeHTML, array $fbUsers) {
         if (array_key_exists('inviteEnregistrement', $_SESSION) === false)
-            return false;
+            return TypeInviteAction::New;
 
-        $aaMEnvoyes = $_SESSION['inviteEnregistrement'];
+        $aaMEnvoyes = &$_SESSION['inviteEnregistrement'];
 
-        if (!(array_key_exists($key, $aaMEnvoyes) && array_key_exists('modalCreneau', $aaMEnvoyes[$key])))
-            return false;
+        $key = FBUtils::getIdxCreneauxWithStartEnd($aaMEnvoyes, $dateAffichéeHTML->startDate, $dateAffichéeHTML->endDate);
 
-        $aMails = $aaMEnvoyes[$key];
+        if (!($key != -1 && array_key_exists($key, $aaMEnvoyes) && array_key_exists('modalCreneau', $aaMEnvoyes[$key])))
+            return TypeInviteAction::New;
 
-        $modalCreneau = $aMails['modalCreneau'];
+        $aInfos = &$aaMEnvoyes[$key];
+
+        $modalCreneau = $aInfos['modalCreneau'];
         $modalPeriod = Period::fromDate(new DateTime($modalCreneau['modalCreneauStart']), (new DateTime($modalCreneau['modalCreneauEnd'])));
         if (($modalPeriod <=> $dateAffichéeHTML) !== 0) {
-            return false;
+            return TypeInviteAction::New;
         }
 
-        foreach ($aMails as $mail => $isSend)
-            if ($isSend)
-                return true;
+// Test si le nombre de users est différent sur la session
+        if (count($fbUsers) > count($aInfos['mails']))
+            return TypeInviteAction::NewParticipants;
 
-        return false;
+        foreach ($aInfos['mails'] as $aMails) {
+            if ($aMails['sended'])
+                return TypeInviteAction::Exist;
+        }
+
+        return TypeInviteAction::New;
     }
 
     public function getMailsEnvoyes() {
@@ -95,19 +124,23 @@ class FBInvite {
             return '';
 
         $key = $this->mailEffectivementEnvoyeKey;
+        $uids = $this->mailEffectivementEnvoyeUids;
 
         $alertMailsEnvoyes = $_SESSION['inviteEnregistrement'][$key];
 
         if (!$alertMailsEnvoyes)
             throw new Exception('erreur cle absente mails envoyés');
 
-        $aMails = array();
-        foreach($alertMailsEnvoyes['mails'] as $mail => $isSend)
-            if ($isSend)
-                $aMails[] = $mail;
+        $rMails = array();
 
-        if (sizeof($aMails) > 0) {
-            return implode(' - ', $aMails);
+        foreach ($uids as $uid) {
+            $aMails = $alertMailsEnvoyes['mails'][$uid];
+            if ($aMails['sended'])
+                $rMails[] = $aMails[0];
+        }
+
+        if (sizeof($rMails) > 0) {
+            return implode(' - ', $rMails);
         }
 
         return '';

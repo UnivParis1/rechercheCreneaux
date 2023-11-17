@@ -139,16 +139,16 @@ class FBUtils {
         return $array;
     }
 
-    public static function getIdxCreneauxWithStartEnd(array $listDate, $start, $end) : int {
-        $dtStart = new DateTime($start);
-        $dtEnd = new DateTime($end);
+    public static function getIdxCreneauxWithStartEnd(array $sessionDate, $dtStart, $dtEnd) : int {
+        foreach ($sessionDate as $key => $data) {
+            $modalCreneau = $data['modalCreneau'];
+            $startCurrent = new DateTime($modalCreneau['modalCreneauStart']);
+            $endCurrent = new DateTime($modalCreneau['modalCreneauEnd']);
 
-        for ($idx = 0; $idx < sizeof($listDate); $idx++) {
-            $date = $listDate[$idx];
-            if ($date->startDate == $dtStart && $date->endDate == $dtEnd) {
-                return $idx;
-            }
+            if ($dtStart == $startCurrent && $dtEnd == $endCurrent)
+                return $key;
         }
+
         return -1;
     }
 
@@ -163,16 +163,17 @@ class FBUtils {
             $reqArray = json_decode($response);
 
             if (sizeof($reqArray) == 1) {
-                array_push($arrayReturn, get_object_vars($reqArray[0]));
+                $arrayReturn[$uid] = get_object_vars($reqArray[0]);
             }
         }
         return $arrayReturn;
     }
 
     public static function icalCreationInvitation($listUserinfos, $start, $end, $titleEvent, $descriptionEvent, $lieuEvent, $dtz) {
+        $uidFirst = array_key_first($listUserinfos);
         $vcalendar = Vcalendar::factory()
             ->setMethod( Vcalendar::REQUEST )
-            ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[0]['displayName'] )
+            ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[$uidFirst]['displayName'] )
             ->setXprop( Vcalendar::X_PROP, "Application Recherche créneaux" )
             ->setXprop( Vcalendar::X_WR_TIMEZONE, $dtz );
 
@@ -184,8 +185,8 @@ class FBUtils {
             // set the time
             ->setDtstart(new DateTime($start,new DateTimezone($dtz)))
             ->setDtend(new DateTime($end,new DateTimezone($dtz)))
-            ->setOrganizer($listUserinfos[0]['mail'],
-                [ Vcalendar::CN =>  $listUserinfos[0]['displayName']]
+            ->setOrganizer($listUserinfos[$uidFirst]['mail'],
+                [ Vcalendar::CN =>  $listUserinfos[$uidFirst]['displayName']]
             );
 
         foreach ($listUserinfos as $userinfo) {

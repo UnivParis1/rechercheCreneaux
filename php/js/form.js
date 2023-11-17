@@ -1,6 +1,6 @@
-var divpersonselect = "#divpersonselect";
-var idperson_ul = "#person_ul";
-var listDisplayname = Array();
+let divpersonselect = "#divpersonselect";
+let idperson_ul = "#person_ul";
+let listDisplayname = new Map();
 
 function errorShow(toShow) {
     if (toShow === true) {
@@ -14,7 +14,7 @@ function errorShow(toShow) {
 }
 
 function getCurrentOptions() {
-    var getVals = new Array();
+    let getVals = new Array();
 
     $(idperson_ul + " li input").each(function (idx, option) {
         getVals[idx] = option.value;
@@ -38,19 +38,19 @@ function setOptionsUid(jsuids) {
 }
 
 function addOptionWithUid(uid, displayName) {
-    listDisplayname.push(displayName);
+    listDisplayname.set(uid, displayName);
 
     if ($(divpersonselect).is(":hidden"))
         $(divpersonselect).show();
 
-    var newLi = $('<li>');
-    var label = $('<input>');
+    let newLi = $('<li>');
+    let label = $('<input>');
     label.attr('type', 'checkbox').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none');
 
     newLi.append(label);
     newLi.append(displayName);
 
-    var button = $('<button>').text('supprimer');
+    let button = $('<button>').text('supprimer');
 
     newLi.append(button);
     $(idperson_ul).append(newLi);
@@ -58,7 +58,7 @@ function addOptionWithUid(uid, displayName) {
     button.on("click", function () {
         $(this).parent().remove();
 
-        var optnb = getCurrentOptions();
+        let optnb = getCurrentOptions();
 
         if (optnb.length === 0)
             $(divpersonselect).hide();
@@ -68,8 +68,8 @@ function addOptionWithUid(uid, displayName) {
 }
 
 function addOptionUid(uid, displayName) {
-    //var uid=this.value;
-    var vals = getCurrentOptions();
+    //let uid=this.value;
+    let vals = getCurrentOptions();
     if (vals.indexOf(uid) === -1) {
         addOptionWithUid(uid, displayName);
     }
@@ -81,8 +81,8 @@ function addOptionUid(uid, displayName) {
 
 function wsCallbackUid(event, ui) {
 
-    var uid = ui.item.uid;
-    var displayName = ui.item.displayName;
+    let uid = ui.item.uid;
+    let displayName = ui.item.displayName;
 
     addOptionUid(uid, displayName);
 
@@ -106,7 +106,7 @@ $(function() {
             $("input[name='actionFormulaireValider']").val("envoiInvitation");
         }
 
-        var vals = getCurrentOptions();
+        let vals = getCurrentOptions();
 
         if (vals.length > 1) {
             this.submit();
@@ -119,13 +119,13 @@ $(function() {
 
     $('#divpersonselect').hide();
 
-    var slider = document.getElementById('slider');
+    let slider = document.getElementById('slider');
 
-    var selectorPlagesHoraires = "input:hidden[name='plagesHoraires[]']";
-    var p1a = $(selectorPlagesHoraires)[0].value.split('-');
-    var p2a = $(selectorPlagesHoraires)[1].value.split('-');
+    let selectorPlagesHoraires = "input:hidden[name='plagesHoraires[]']";
+    let p1a = $(selectorPlagesHoraires)[0].value.split('-');
+    let p2a = $(selectorPlagesHoraires)[1].value.split('-');
 
-    var formatter = function(valueString) {
+    let formatter = function(valueString) {
                         if (valueString.search('H30') != -1) {
                             return Number(valueString.replace('H30', '.5'));
                         }
@@ -138,9 +138,9 @@ $(function() {
                         return Number(valueString);
                     };
 
-    var plagesStrings = p1a.concat(p2a);
+    let plagesStrings = p1a.concat(p2a);
 
-    var arrayStart = Array();
+    let arrayStart = Array();
     for (plage of plagesStrings) {
         arrayStart.push(formatter(plage));
     }
@@ -153,7 +153,7 @@ $(function() {
         tooltips: {
             to: function(value) {
                 if (value % 1 != 0) {
-                    var valueEntier = value - 0.5;
+                    let valueEntier = value - 0.5;
                     return valueEntier + "H30";
                 }
                 else {
@@ -195,17 +195,41 @@ $(function() {
         }
     });
 
-    $("#reponse li a").on("click", function() {
-        var ts=$(this).attr("timestart");
-        var te=$(this).attr("timeend");
+    function rechercheCreaneauGetIdx(start, end, jsSessionInfos) {
+        for (key in jsSessionInfos) {
+            let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
+            let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
+            let mstart = moment(modalCreneauStart);
+            let mend = moment(modalCreneauEnd);
+            if (start.diff(mstart) == 0 && end.diff(mend) == 0) {
+                return key;
+            }
+        }
+        return -1;
+    }
 
-        var start = moment.unix(ts);
-        var end = moment.unix(te);
+    let newParticipant=false;
+    let start=null;
+    let end=null;
+
+    $("#reponse li a").on("click", function() {
+        let ts=$(this).attr("timestart");
+        let te=$(this).attr("timeend");
+
+        start = moment.unix(ts);
+        end = moment.unix(te);
 
         $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
 
         $("#creneauBoxInput ~ input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
         $("#creneauBoxInput ~ input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
+
+        if ($(this).attr('newParticipant').valueOf() == 'true') {
+            newParticipant = true;
+        }
+        else {
+            newParticipant = false;
+        }
     });
 
     // Set FR pour le formattage des dates avec la librairie moment.js
@@ -218,13 +242,26 @@ $(function() {
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
 
+        let currentObj=null; // objets courant à partir de jsSessionInfos
+        if (newParticipant == true) {
+            let key = rechercheCreaneauGetIdx(start, end, jsSessionInfos);
+            if (key !== -1) {
+                currentObj = jsSessionInfos[key];
+                $('#titrecreneau').val(currentObj.infos.titleEvent);
+                $('#summarycreneau').val(currentObj.infos.descriptionEvent);
+                $('#lieucreneau').val(currentObj.infos.lieuEvent);
+            }
+        }
         ul = $("#creneauMailParticipant_ul");
         ul.empty();
-        for (displayName of listDisplayname) {
-            var li=$('<li>');
+        listDisplayname.forEach(function(displayName, uid) {
+            let li=$('<li>');
             li.text(displayName);
+            if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
+                li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
+            }
             ul.append(li);
-        }
+        });
     });
 
     $('#creneauMailInput').on('hidden.bs.modal', function () {
