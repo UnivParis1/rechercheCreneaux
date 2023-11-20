@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 //use FBUtils;
 use League\Period\Sequence as Sequence;

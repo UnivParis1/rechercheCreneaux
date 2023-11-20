@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use League\Period\Period;
 use League\Period\Sequence;
 use League\Period\DatePoint;

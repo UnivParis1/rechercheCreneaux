@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
@@ -338,7 +340,7 @@ class FBUser {
     /**
      * Set the value of creneauxGenerated
      *
-     * @return  self
+     * @return  League\Period\Sequence
      */
     public static function setCreneauxGenerated(&$creneauxGenerated)
     {

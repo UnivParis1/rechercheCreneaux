@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 require 'vendor/autoload.php';
 
 require_once('FBUser.php');
@@ -23,8 +25,8 @@ $varsHTTPGet = filter_var_array($_GET);
 
 $actionFormulaireValider = isset($varsHTTPGet['actionFormulaireValider']) ? $varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
 $uids = isset($varsHTTPGet['listuids']) ? $varsHTTPGet['listuids'] : null;
-$nbcreneaux = isset($varsHTTPGet['creneaux']) ? $varsHTTPGet['creneaux'] : null;
-$duree = isset($varsHTTPGet['duree']) ? $varsHTTPGet['duree'] : null;
+$nbcreneaux = isset($varsHTTPGet['creneaux']) ? (int) $varsHTTPGet['creneaux'] : null;
+$duree = isset($varsHTTPGet['duree']) ? (int) $varsHTTPGet['duree'] : null;
 $plagesHoraires = isset($varsHTTPGet['plagesHoraires']) ? $varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
 $joursDemandes = isset($varsHTTPGet['joursCreneaux']) ? $varsHTTPGet['joursCreneaux'] : array('MO', 'TU', 'WE', 'TH', 'FR');
 $fromDate = isset($varsHTTPGet['fromDate']) ? $varsHTTPGet['fromDate'] : (new DateTime())->format('Y-m-d');
