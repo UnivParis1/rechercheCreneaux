@@ -37,7 +37,7 @@ class FBUser {
     /**
      * @var string uid
      */
-    private String $uid;
+    public String $uid;
 
     /**
      * @var string dtz
@@ -66,6 +66,12 @@ class FBUser {
     private ?Sequence $sequence;
 
     private bool $isChanged;
+
+
+    // sert à déterminer si l'agenda d'une personne est bloquée
+    private bool $estFullBloquer = false;
+
+    public bool $estOptionnel = false;
 
     /**
      * __construct
@@ -109,6 +115,10 @@ class FBUser {
 
         $fbUser->_selectFreebusy();
         $sequence = $fbUser->_initSequence();
+
+        if ($fbUser->_testSiAgendaBloque($sequence))
+            $fbUser->estFullBloquer = true;
+
         $fbUser->sequence = $fbUser->_instanceCreneaux($sequence);
         return $fbUser;
     }
@@ -277,6 +287,30 @@ class FBUser {
         return $sequence;
     }
 
+    private function _testSiAgendaBloque(Sequence &$sequence) {
+
+        $testFBUserclone = clone($this);
+        $seqToTest = clone($sequence);
+        // generation de créneaux standards
+
+        $creneauxGeneratedTest = (new FBCreneauxGeneres(date('Y-m-d'), 60, array('9-12', '14-17'), $this->dateTimeZone->getName()))->getCreneauxSeq();
+
+        $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
+        $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
+        $testFBUserclone->setSequence($seq);
+
+        $fbUsersTest = array($testFBUserclone);
+        $fbCompareTest = new FBCompare($fbUsersTest, $creneauxGeneratedTest, $this->dateTimeZone->getName(), 1);
+
+        $testCompare = $fbCompareTest->getNbResultatsAffichés();
+
+        if ($testCompare == 0) {
+            $this->estFullBloquer = true;
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Get creneauMinute
      *
@@ -347,5 +381,9 @@ class FBUser {
         self::$creneauxGenerated =& $creneauxGenerated;
 
         return self::$creneauxGenerated;
+    }
+
+    public function getEstFullBloquer() {
+        return $this->estFullBloquer;
     }
 }

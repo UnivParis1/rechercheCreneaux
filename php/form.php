@@ -226,6 +226,21 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </form>
     </div>
 
+<?php
+    if (isset($fbUsers)) {
+        $fullBloqueUids=array();
+        foreach ($fbUsers as $fbUser) {
+            if ($fbUser->getEstFullBloquer()) {
+                $fullBloqueUids[] = $fbUser->uid;
+                echo "agenda bloqué detecté, uid $fbUser->uid participant mis en option" ;
+            }
+        }
+        if (count($fullBloqueUids) > 0) {
+            echo '<script>var jsBlockUids='. json_encode($fullBloqueUids) . '</script>';
+        }
+    }
+?>
+
     <?php if (isset($listDate) && sizeof($listDate) > 0) : ?>
         <?php $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
         $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>

@@ -53,6 +53,22 @@ function addOptionWithUid(uid, displayName) {
     let button = $('<button>').text('supprimer');
 
     newLi.append(button);
+
+    let optionnel = $('<input>');
+    optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'form-check-input,form-participant-optionnel');
+
+    if (typeof jsBlockUids != 'undefined') {
+        for (uidBlock of jsBlockUids) {
+            if (uidBlock == uid) {
+                optionnel.attr('checked', true);
+            }
+        }
+    }
+
+    newLi.append(optionnel);
+    // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
+    newLi.append('<label class="form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
+
     $(idperson_ul).append(newLi);
 
     button.on("click", function () {

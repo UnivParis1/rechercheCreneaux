@@ -22,7 +22,7 @@ class FBCompare {
     private int $nbResultatsAffichés;
     private array $arrayCreneauxAffiches;
 
-    public function __construct(&$arrayFBUsers, League\Period\Sequence &$creneauxGenerated, $dtz, $nbcreneaux) {
+    public function __construct(&$arrayFBUsers, League\Period\Sequence &$creneauxGenerated, String $dtz, $nbcreneaux) {
         $this->arrayFBUsers =& $arrayFBUsers;
         $this->creneauxGenerated =& $creneauxGenerated;
         $this->dateTimeZone = new DateTimeZone($dtz);
