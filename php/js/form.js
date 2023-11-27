@@ -14,13 +14,35 @@ function errorShow(toShow) {
 }
 
 function getCurrentOptions() {
-    let getVals = new Array();
+    let getVals = new Map();
 
-    $(idperson_ul + " li input").each(function (idx, option) {
-        getVals[idx] = option.value;
+    $(idperson_ul + " li input[name='listuids[]']").each(function (idx, option) {
+        getVals.set(idx, [option.value,true]);
     });
 
     return getVals;
+}
+
+function testOptions(vals) {
+    if (vals.size < 2) {
+        return false;
+    }
+
+    let panticipantsChecked = $(idperson_ul + " li input:checked[name='listUidsOptionnels[]']");
+
+    if ((vals.size - panticipantsChecked.length) < 2) {
+        return false;
+    }
+
+    return true;
+}
+
+function afficherPermutterHide(testFormInput) {
+    if (testFormInput == false) {
+        errorShow(true);
+    } else {
+        errorShow(false);
+    }
 }
 
 function setOptionsUid(jsuids) {
@@ -45,7 +67,7 @@ function addOptionWithUid(uid, displayName) {
 
     let newLi = $('<li>');
     let label = $('<input>');
-    label.attr('type', 'checkbox').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none');
+    label.attr('type', 'text').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none');
 
     newLi.append(label);
     newLi.append(displayName);
@@ -55,7 +77,7 @@ function addOptionWithUid(uid, displayName) {
     newLi.append(button);
 
     let optionnel = $('<input>');
-    optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'form-check-input,form-participant-optionnel');
+    optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'form-check-input,form-participant-optionnel').val(uid);
 
     if (typeof jsBlockUids != 'undefined') {
         for (uidBlock of jsBlockUids) {
@@ -64,6 +86,10 @@ function addOptionWithUid(uid, displayName) {
             }
         }
     }
+
+    optionnel.on('click', function() {
+        afficherPermutterHide(testOptions(getCurrentOptions()));
+    });
 
     newLi.append(optionnel);
     // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
@@ -74,23 +100,32 @@ function addOptionWithUid(uid, displayName) {
     button.on("click", function () {
         $(this).parent().remove();
 
-        let optnb = getCurrentOptions();
-
-        if (optnb.length === 0)
+        let testFormInput = testOptions(getCurrentOptions());
+        if (testFormInput == true) {
             $(divpersonselect).hide();
-        if (optnb.length < 2) 
-            errorShow(true);
+        }
+        afficherPermutterHide(testFormInput);
     });
 }
 
 function addOptionUid(uid, displayName) {
     //let uid=this.value;
     let vals = getCurrentOptions();
-    if (vals.indexOf(uid) === -1) {
+
+    let testUidVals = false;
+    for (const [key, value] of vals) {
+        if (value.at() == uid) {
+            testUidVals = true;
+        }
+    }
+
+    if (testUidVals === false) {
         addOptionWithUid(uid, displayName);
     }
     vals = getCurrentOptions();
-    if (vals.length > 1) {
+
+    // if (vals.size > 1) {
+    if (testOptions(vals) == true) {
         errorShow(false);
     }
 }
@@ -124,7 +159,8 @@ $(function() {
 
         let vals = getCurrentOptions();
 
-        if (vals.length > 1) {
+        // if (vals.size > 1) {
+        if (testOptions(vals) == true) {
             this.submit();
             return true;
         } else {

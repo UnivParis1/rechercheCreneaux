@@ -35,6 +35,7 @@ $descriptionEvent = isset($varsHTTPGet['summarycreneau']) ? $varsHTTPGet['summar
 $lieuEvent = isset($varsHTTPGet['lieucreneau']) ? $varsHTTPGet['lieucreneau'] : null;
 $modalCreneauStart = isset($varsHTTPGet['modalCreneauStart']) ? $varsHTTPGet['modalCreneauStart'] : null;
 $modalCreneauEnd = isset($varsHTTPGet['modalCreneauEnd']) ? $varsHTTPGet['modalCreneauEnd'] : null;
+$listUidsOptionnels = isset($varsHTTPGet['listUidsOptionnels']) ? $varsHTTPGet['listUidsOptionnels'] : null;
 $jsonSessionInfos = isset($_SESSION['inviteEnregistrement']) ? json_encode($_SESSION['inviteEnregistrement']) : null;
 
 if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) > 0) && $nbcreneaux && $duree) {
@@ -151,7 +152,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                         <div id="divpersonselect">
                             <br />
                             <p>Utilisateurs sélectionnés</p>
-                            <p class="alertrequire">Séléction minimum de 2 utilisateurs</p>
+                            <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
                             <ul id="person_ul">
                             </ul>
                         </div>
