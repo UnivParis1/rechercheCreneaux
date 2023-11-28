@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use League\Period\DatePoint;
@@ -11,9 +12,10 @@ use League\Period\Sequence;
  *
  * @author ebohm
  */
-class FBCompare {
+class FBCompare
+{
 
-    private Array $arrayFBUsers;
+    private array $arrayFBUsers;
     private Sequence $creneauxGenerated;
     private Sequence $mergedBusys;
     private DateTimeZone $dateTimeZone;
@@ -22,9 +24,15 @@ class FBCompare {
     private int $nbResultatsAffichés;
     private array $arrayCreneauxAffiches;
 
-    public function __construct(&$arrayFBUsers, League\Period\Sequence &$creneauxGenerated, String $dtz, $nbcreneaux) {
-        $this->arrayFBUsers =& $arrayFBUsers;
-        $this->creneauxGenerated =& $creneauxGenerated;
+    public function __construct($arrayFBUsers, League\Period\Sequence &$creneauxGenerated, String $dtz, $nbcreneaux)
+    {
+        // supprime les fbusers fullbloquer ou optionnel
+        foreach ($arrayFBUsers as $key => $fbUser)
+            if ($fbUser->getEstFullBloquer() == true || $fbUser->estOptionnel == true)
+                unset($arrayFBUsers[$key]);
+
+        $this->arrayFBUsers = $arrayFBUsers;
+        $this->creneauxGenerated = &$creneauxGenerated;
         $this->dateTimeZone = new DateTimeZone($dtz);
         $this->nbcreneaux = $nbcreneaux;
         $this->arrayCreneauxAffiches = array();
@@ -34,15 +42,18 @@ class FBCompare {
         $this->arrayCreneauxAffiches = $this->_arrayCreneauxAffiches();
     }
 
-    public function getArrayCreneauxAffiches() {
+    public function getArrayCreneauxAffiches()
+    {
         return $this->arrayCreneauxAffiches;
     }
 
-    public function getNbResultatsAffichés() {
+    public function getNbResultatsAffichés()
+    {
         return $this->nbResultatsAffichés;
     }
 
-    private function _substractBusysFromCreneaux() : Sequence {
+    private function _substractBusysFromCreneaux(): Sequence
+    {
         $busySeq = $this->mergedBusys;
         $creneauxGenerated = $this->creneauxGenerated;
 
@@ -59,7 +70,8 @@ class FBCompare {
         return $seq;
     }
 
-    private function _testPeriodOverlaps($sequence, $periodToCompare) {
+    private function _testPeriodOverlaps($sequence, $periodToCompare)
+    {
         foreach ($sequence as $period) {
             $arr = array();
 
@@ -71,7 +83,8 @@ class FBCompare {
     }
 
 
-    private function _testPeriodsDebug($sequence, $periodToCompare) {
+    private function _testPeriodsDebug($sequence, $periodToCompare)
+    {
         foreach ($sequence as $period) {
             $arr = array();
             $arr[] = $period->isDuring($periodToCompare);
@@ -84,7 +97,7 @@ class FBCompare {
 
             foreach ($arr as $a) {
                 if ($a) {
-//                    die(var_dump($arr));
+                    //                    die(var_dump($arr));
                     return true;
                 }
             }
@@ -92,13 +105,16 @@ class FBCompare {
         return false;
     }
 
-    private function _mergeSequencesToArrayPeriods() {
-        $arrayPeriodsIntersected = $this->arrayFBUsers[0]->getSequence()->jsonSerialize();
+    private function _mergeSequencesToArrayPeriods()
+    {
+        // correction bug index supprimé au début du tableau (prise en compte du fullbloqué)
+        $key_first = array_key_first($this->arrayFBUsers);
+        $arrayPeriodsIntersected = $this->arrayFBUsers[$key_first]->getSequence()->jsonSerialize();
 
         $arr_merged = array();
         foreach ($this->arrayFBUsers as $FBUser) {
             $arrayPeriods = $FBUser->getSequence()->jsonSerialize();
-            $arr_diff = array_udiff($arrayPeriods, $arr_merged, function($obj1, $obj2) {
+            $arr_diff = array_udiff($arrayPeriods, $arr_merged, function ($obj1, $obj2) {
                 return $obj1 <=> $obj2;
             });
             $arr_merged = array_merge($arr_merged, $arr_diff);
@@ -107,13 +123,15 @@ class FBCompare {
         return $arr_merged;
     }
 
-    private function _getMergedBusysSequence() : League\Period\Sequence {
+    private function _getMergedBusysSequence(): League\Period\Sequence
+    {
         $array_periods = $this->_mergeSequencesToArrayPeriods();
         $seq = FBUtils::addTimezoneToLeaguePeriods($array_periods, $this->dateTimeZone);
         return $seq;
     }
 
-    private function _calcNbResultats() {
+    private function _calcNbResultats()
+    {
         $sequence = $this->creneauxFinaux;
         $nbCreneaux = $this->nbcreneaux;
 
@@ -121,12 +139,13 @@ class FBCompare {
         return ($nbCreneaux > $sizeFinal) ? $sizeFinal : $nbCreneaux;
     }
 
-    private function _arrayCreneauxAffiches() : array {
+    private function _arrayCreneauxAffiches(): array
+    {
         $sequence = $this->creneauxFinaux;
         $now = new DateTime('now', $this->dateTimeZone);
 
         $arrayCreneauxAffiches = array();
-        foreach($sequence as $period) {
+        foreach ($sequence as $period) {
             if ($period->startDate->getTimestamp() > $now->getTimestamp()) {
                 $arrayCreneauxAffiches[] = $period;
             }
@@ -139,7 +158,7 @@ class FBCompare {
         return $arrayCreneauxAffiches;
     }
 
-/*     public function compareSequences() {
+    /*     public function compareSequences() {
         $arrayPeriodsIntersected = $this->arrayFBUsers[0]->getSequence()->jsonSerialize();
         foreach ($this->arrayFBUsers as $FBUser) {
             $arrayPeriods = $FBUser->getSequence()->jsonSerialize();
@@ -149,12 +168,11 @@ class FBCompare {
     }
  */
 
-/*     private function _intersectArrayPeriod(array $arrayPeriod1, array $arrayPeriod2) {
+    /*     private function _intersectArrayPeriod(array $arrayPeriod1, array $arrayPeriod2) {
         $intersection = array_uintersect($arrayPeriod1, $arrayPeriod2, function($obj1, $obj2) {
                 return $obj1<=>$obj2;
         });
         return $intersection;
     }
  */
-
 }
