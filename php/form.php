@@ -45,7 +45,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
     $fbUsers = array();
     foreach ($uids as $uid) {
-        $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated);
+        $estOptionnel = false;
+        if ($listUidsOptionnels && array_search($uid, $listUidsOptionnels) !== false)
+            $estOptionnel = true;
+        $fbUsers[] = FBUser::factory($uid, $dtz, $url, $duree, $creneauxGenerated, $estOptionnel);
         //    FBUtils::drawSequence($fbUser->getSequence()->jsonSerialize());
     }
     $fbCompare = new FBCompare($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux);

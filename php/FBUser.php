@@ -73,7 +73,7 @@ class FBUser {
     // sert à déterminer si l'agenda d'une personne est bloquée
     private bool $estFullBloquer = false;
 
-    public bool $estOptionnel = false;
+    public bool $estOptionnel;
 
     /**
      * __construct
@@ -82,13 +82,14 @@ class FBUser {
      *
      * @return void
      */
-    private function __construct(String $uid, String $dtz, String $url) {
+    private function __construct(String $uid, String $dtz, String $url, $estOptionnel = false) {
         $this->uid = $uid;
         $this->dtz = $dtz;
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
         $this->isChanged = false;
         $this->fullName = $this->_getFullnameWithUid($uid);
+        $this->estOptionnel = $estOptionnel;
 
         $contents = '';
 
@@ -108,13 +109,13 @@ class FBUser {
      *
      * @return FBUser
      */
-    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux) : FBUser {
+    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux, $estOptionnel = false) : FBUser {
         if (!isset(self::$duration))
             self::setDuration($dureeEnMinutes);
         if (!isset(self::$creneauxGenerated))
             self::setCreneauxGenerated($creneaux);
 
-        $fbUser = new self($uid, $dtz, $url);
+        $fbUser = new self($uid, $dtz, $url, $estOptionnel);
 
         $fbUser->_selectFreebusy();
         $sequence = $fbUser->_initSequence();

@@ -107,10 +107,6 @@ class FBCompare
 
     private function _mergeSequencesToArrayPeriods()
     {
-        // correction bug index supprimé au début du tableau (prise en compte du fullbloqué)
-        $key_first = array_key_first($this->arrayFBUsers);
-        $arrayPeriodsIntersected = $this->arrayFBUsers[$key_first]->getSequence()->jsonSerialize();
-
         $arr_merged = array();
         foreach ($this->arrayFBUsers as $FBUser) {
             $arrayPeriods = $FBUser->getSequence()->jsonSerialize();
