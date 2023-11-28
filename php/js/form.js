@@ -79,8 +79,8 @@ function addOptionWithUid(uid, displayName) {
     let optionnel = $('<input>');
     optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'form-check-input,form-participant-optionnel').val(uid);
 
-    if (typeof jsBlockUids != 'undefined') {
-        for (uidBlock of jsBlockUids) {
+    if (typeof jsListUidsOptionnels != 'undefined') {
+        for (uidBlock of jsListUidsOptionnels) {
             if (uidBlock == uid) {
                 optionnel.attr('checked', true);
             }
@@ -99,12 +99,13 @@ function addOptionWithUid(uid, displayName) {
 
     button.on("click", function () {
         $(this).parent().remove();
+        let opts = getCurrentOptions();
+        let testFormInput = testOptions(opts);
+        afficherPermutterHide(testFormInput);
 
-        let testFormInput = testOptions(getCurrentOptions());
-        if (testFormInput == true) {
+        if (testFormInput == false && opts.size == 0) {
             $(divpersonselect).hide();
         }
-        afficherPermutterHide(testFormInput);
     });
 }
 

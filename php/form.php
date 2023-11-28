@@ -228,6 +228,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     </div>
 
 <?php
+
     if (isset($fbUsers)) {
         $fullBloqueUids=array();
         foreach ($fbUsers as $fbUser) {
@@ -237,8 +238,15 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             }
         }
         if (count($fullBloqueUids) > 0) {
-            echo '<script>var jsBlockUids='. json_encode($fullBloqueUids) . '</script>';
+            if (!isset($listUidsOptionnels))
+                $listUidsOptionnels = $fullBloqueUids;
+            else
+                $listUidsOptionnels = array_unique(array_merge($listUidsOptionnels, $fullBloqueUids));
         }
+    }
+
+    if (isset($listUidsOptionnels) && sizeof($listUidsOptionnels) > 0) {
+        echo '<script>var jsListUidsOptionnels='. json_encode($listUidsOptionnels) . ';</script>';
     }
 ?>
 
