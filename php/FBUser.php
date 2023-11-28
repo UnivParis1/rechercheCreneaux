@@ -39,6 +39,8 @@ class FBUser {
      */
     public String $uid;
 
+    private String $fullName;
+
     /**
      * @var string dtz
      */
@@ -86,6 +88,7 @@ class FBUser {
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
         $this->isChanged = false;
+        $this->fullName = $this->_getFullnameWithUid($uid);
 
         $contents = '';
 
@@ -385,5 +388,34 @@ class FBUser {
 
     public function getEstFullBloquer() {
         return $this->estFullBloquer;
+    }
+
+    public function getEstOptionnel() {
+        return $this->estOptionnel;
+    }
+
+    public function getFullname() {
+        // ajout requête pour avoir le nom complet côté PHP
+        return $this->fullName;
+    }
+
+    private function _getFullnameWithUid($uid) : string {
+        $urlwsgroup = $_ENV['URLWSGROUP'];
+
+        $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName', 'r');
+        $ajaxReturn = stream_get_contents($fd);
+        fclose($fd);
+
+        $arrayReturn = json_decode($ajaxReturn);
+
+        $exMsg = "Erreur fonction getFullname";
+        if (!$ajaxReturn[0])
+            throw new Exception($exMsg);
+
+        $stdObj = $arrayReturn[0];
+        if (!$stdObj->uid)
+            throw new Exception($exMsg);
+
+        return $stdObj->displayName;
     }
 }

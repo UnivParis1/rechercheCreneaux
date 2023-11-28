@@ -231,10 +231,15 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 
     if (isset($fbUsers)) {
         $fullBloqueUids=array();
+        $arrayAlertOptionnelOuBloquer = array();
+        // Changer : affichage d'une alerte avec un message pour les agendas bloqués ou optionnels
         foreach ($fbUsers as $fbUser) {
             if ($fbUser->getEstFullBloquer()) {
                 $fullBloqueUids[] = $fbUser->uid;
-                echo "agenda bloqué detecté, uid $fbUser->uid participant mis en option" ;
+                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getFullname()} n\'a aucun créneau disponible dans son agenga";
+            }
+            if ($fbUser->getEstFullBloquer() || $fbUser->getEstOptionnel()) {
+                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getFullname()} a été mis en participant optionnel, son agenda n\'est pas pris en compte dans les résultats";
             }
         }
         if (count($fullBloqueUids) > 0) {
@@ -242,6 +247,9 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                 $listUidsOptionnels = $fullBloqueUids;
             else
                 $listUidsOptionnels = array_unique(array_merge($listUidsOptionnels, $fullBloqueUids));
+        }
+        if (count($arrayAlertOptionnelOuBloquer) > 0) {
+            echo '<script>alert("' . implode('\n', $arrayAlertOptionnelOuBloquer) . '")</script>';
         }
     }
 
