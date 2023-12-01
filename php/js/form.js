@@ -65,19 +65,17 @@ function addOptionWithUid(uid, displayName) {
     if ($(divpersonselect).is(":hidden"))
         $(divpersonselect).show();
 
-    let newLi = $('<li>');
-    let label = $('<input>');
-    label.attr('type', 'text').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none');
+    let newLi = $('<li>').attr('class', 'row align-items-center');
 
-    newLi.append(label);
-    newLi.append(displayName);
+    newLi.append($('<input>').attr('type', 'text').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none'));
 
-    let button = $('<button>').text('supprimer');
-
+    newLi.append($('<label>').attr('class', 'col col-sm-4').text(displayName));
+    
+    let button = $('<button>').text('supprimer').attr('class', 'col col-sm-2');
     newLi.append(button);
 
     let optionnel = $('<input>');
-    optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'form-check-input,form-participant-optionnel').val(uid);
+    optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'col col-sm-1 checkbox-inline').val(uid);
 
     if (typeof jsListUidsOptionnels != 'undefined') {
         for (uidBlock of jsListUidsOptionnels) {
@@ -93,7 +91,7 @@ function addOptionWithUid(uid, displayName) {
 
     newLi.append(optionnel);
     // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
-    newLi.append('<label class="form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
+    newLi.append('<label class="col col-sm-4 text-left form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
 
     $(idperson_ul).append(newLi);
 
