@@ -154,21 +154,30 @@ class FBUtils {
         return -1;
     }
 
-    public static function requestUidsNames($listUids, $url) {
-        $arrayReturn = array();
+    /**
+     * requestUidInfo
+     *
+     * @param  string $uid
+     * @param  string $urlwsgroup
+    * return stdObj->uid, stdObj->displayName, stdObj->mail
+     * @return stdClass
+     */
+    public static function requestUidInfo($uid, $urlwsgroup) {
+        $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail', 'r');
+        $ajaxReturn = stream_get_contents($fd);
+        fclose($fd);
 
-        foreach ($listUids as $uid) {
-            $fp = fopen($url . "?token=$uid&maxRows=1&attrs=uid,displayName,mail", 'r');
-            $response = fread($fp, 1024);
-            fclose($fp);
+        $arrayReturn = json_decode($ajaxReturn);
 
-            $reqArray = json_decode($response);
+        $exMsg = "Erreur fonction requestUidInfo";
+        if (!$ajaxReturn[0])
+            throw new Exception($exMsg . "uid: $uid");
 
-            if (sizeof($reqArray) == 1) {
-                $arrayReturn[$uid] = get_object_vars($reqArray[0]);
-            }
+        foreach ($arrayReturn as $stdObj) {
+            if ($stdObj->uid == $uid)
+                return $stdObj;
         }
-        return $arrayReturn;
+        throw new Exception($exMsg);
     }
 
     public static function icalCreationInvitation($listUserinfos, $start, $end, $titleEvent, $descriptionEvent, $lieuEvent, $dtz) {

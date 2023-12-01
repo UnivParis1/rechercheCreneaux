@@ -25,7 +25,7 @@ class FBInvite {
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
 
-    public function __construct($uids, $urlwsgroup, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet) {
+    public function __construct(array $fbUsers, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet) {
         $this->listDate = $listDate;
         $this->modalCreneauStart = $modalCreneauStart;
         $this->modalCreneauEnd = $modalCreneauEnd;
@@ -34,12 +34,22 @@ class FBInvite {
         $this->descriptionEvent = $descriptionEvent;
         $this->lieuEvent = $lieuEvent;
 
-        $this->listUserInfos = FBUtils::requestUidsNames($uids, $urlwsgroup);
+        // recupere les infos venant des $fbUsers et converti les stdObj en array
+        $this->listUserInfos = $this->_getUserinfos($fbUsers);
         $this->icsData = FBUtils::icalCreationInvitation($this->listUserInfos, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz);
 
         $this->headers = 'Content-Type: text/calendar; name="event.ics"; charset=utf-8' . "\r\n";
         $this->headers .= 'Content-Disposition: attachment; filename="event.ics"' . "\r\n";
         $this->headers .= 'Content-Transfer-Encoding: base64' . "\r\n";
+    }
+
+    private function _getUserinfos($fbUsers) {
+        $arrayReturn = array();
+        foreach ($fbUsers as $fbUser) {
+            $stdInfos = $fbUser->getUidInfos();
+            $arrayReturn[$stdInfos->uid] = get_object_vars($stdInfos);
+        }
+        return $arrayReturn;
     }
 
     public function sendInvite() {

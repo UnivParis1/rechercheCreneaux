@@ -63,12 +63,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     }
 
     if ($actionFormulaireValider == 'envoiInvitation' && is_null($titleEvent) == false && is_null($descriptionEvent) == false && is_null($lieuEvent) == false && is_null($modalCreneauStart) == false && is_null($modalCreneauEnd) == false) {
-        $fbInvite = new FBInvite($uids, $urlwsgroup, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet);
+        $fbInvite = new FBInvite($fbUsers, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet);
         $fbInvite->sendInvite();
         // Lors d'un premier appel, initialisation de jsonSessionInfos
         if ($jsonSessionInfos == null) {
             if (!isset($_SESSION['inviteEnregistrement']))
-                throw new Exception('Erreur session inviteEnregistrement null sr form.php');
+                throw new Exception('Erreur session inviteEnregistrement null sur form.php');
             $jsonSessionInfos = json_encode($_SESSION['inviteEnregistrement']);
         }
     }
@@ -245,10 +245,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         foreach ($fbUsers as $fbUser) {
             if ($fbUser->getEstFullBloquer()) {
                 $fullBloqueUids[] = $fbUser->uid;
-                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getFullname()} n\'a aucun créneau disponible dans son agenga";
+                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getUidInfos()->displayName} n\'a aucun créneau disponible dans son agenga";
             }
             if ($fbUser->getEstFullBloquer() || $fbUser->getEstOptionnel()) {
-                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getFullname()} a été mis en participant optionnel, son agenda n\'est pas pris en compte dans les résultats";
+                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getUidInfos()->displayName} a été mis en participant optionnel, son agenda n\'est pas pris en compte dans les résultats";
             }
         }
         if (count($fullBloqueUids) > 0) {
@@ -257,8 +257,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             else
                 $listUidsOptionnels = array_unique(array_merge($listUidsOptionnels, $fullBloqueUids));
         }
-        if (count($arrayAlertOptionnelOuBloquer) > 0) {
-            echo '<script>alert("' . implode('\n', $arrayAlertOptionnelOuBloquer) . '")</script>';
+
+        // alerte supprimée / enlever pour ne pas surcharger l'affichage
+        if (false && count($arrayAlertOptionnelOuBloquer) > 0) {
+            // echo '<script>alert("' . implode('\n', $arrayAlertOptionnelOuBloquer) . '")</script>';
         }
     }
 

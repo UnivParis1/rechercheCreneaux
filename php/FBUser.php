@@ -39,7 +39,7 @@ class FBUser {
      */
     public String $uid;
 
-    private String $fullName;
+    private stdClass $uidInfos;
 
     /**
      * @var string dtz
@@ -88,18 +88,14 @@ class FBUser {
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
         $this->isChanged = false;
-        $this->fullName = $this->_getFullnameWithUid($uid);
+        $this->uidInfos = $this->_getUidInfos($uid);
         $this->estOptionnel = $estOptionnel;
 
-        $contents = '';
-
         $fd = fopen($this::$url . $uid, "r");
-        while (!feof($fd)) {
-            $contents .= fread($fd, 8192);
-        }
+        $content = stream_get_contents($fd);
         fclose($fd);
 
-        $this->content = $contents;
+        $this->content = $content;
     }
 
     /**
@@ -395,28 +391,30 @@ class FBUser {
         return $this->estOptionnel;
     }
 
-    public function getFullname() {
-        // ajout requête pour avoir le nom complet côté PHP
-        return $this->fullName;
+    /**
+     * getUidInfos
+     *
+     * return stdObj->uid, stdObj->displayName, stdObj->mail
+     * @return stdClass
+     */
+    public function getUidInfos() {
+        // ajout requête pour avoir mail et name sur api
+        return $this->uidInfos;
     }
 
-    private function _getFullnameWithUid($uid) : string {
+    /**
+     * _getUidInfos
+     *
+     * @param  string $uid
+     * @return stdClass
+     */
+    private function _getUidInfos($uid) : stdClass {
         $urlwsgroup = $_ENV['URLWSGROUP'];
+        $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 
-        $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName', 'r');
-        $ajaxReturn = stream_get_contents($fd);
-        fclose($fd);
+        if (is_null($infos))
+            throw new Exception("_gellFullnameWithUid erreur récupération uid: $uid");
 
-        $arrayReturn = json_decode($ajaxReturn);
-
-        $exMsg = "Erreur fonction getFullname";
-        if (!$ajaxReturn[0])
-            throw new Exception($exMsg);
-
-        $stdObj = $arrayReturn[0];
-        if (!$stdObj->uid)
-            throw new Exception($exMsg);
-
-        return $stdObj->displayName;
+        return $infos;
     }
 }
