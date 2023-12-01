@@ -65,6 +65,12 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     if ($actionFormulaireValider == 'envoiInvitation' && is_null($titleEvent) == false && is_null($descriptionEvent) == false && is_null($lieuEvent) == false && is_null($modalCreneauStart) == false && is_null($modalCreneauEnd) == false) {
         $fbInvite = new FBInvite($uids, $urlwsgroup, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet);
         $fbInvite->sendInvite();
+        // Lors d'un premier appel, initialisation de jsonSessionInfos
+        if ($jsonSessionInfos == null) {
+            if (!isset($_SESSION['inviteEnregistrement']))
+                throw new Exception('Erreur session inviteEnregistrement null sr form.php');
+            $jsonSessionInfos = json_encode($_SESSION['inviteEnregistrement']);
+        }
     }
 }
 ?>
@@ -290,7 +296,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             </ul>
         </div>
     <?php elseif (isset($listDate) && sizeof($listDate) == 0) : ?>
-        <div>
+        <div id="reponse">
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
         </div>
     <?php endif ?>

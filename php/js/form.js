@@ -296,7 +296,7 @@ $(function() {
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
 
         let currentObj=null; // objets courant à partir de jsSessionInfos
-        if (newParticipant == true) {
+        if (typeof jsSessionInfos != 'undefined' && newParticipant == true) {
             let key = rechercheCreaneauGetIdx(start, end, jsSessionInfos);
             if (key !== -1) {
                 currentObj = jsSessionInfos[key];
