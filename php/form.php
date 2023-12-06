@@ -278,8 +278,8 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                 <?php foreach ($listDate as $date) : ?>
                     <li>
                         <time><?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
-                        <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbUsers)) != TypeInviteAction::New) : ?>
-                            <div class='invitationEnvoyée'>
+                        <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbUsers))->typeInvationAction != TypeInviteAction::New) : ?>
+                            <div class='invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
                                 <span class="text-success">Envoyé</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16">
                                     <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
@@ -287,10 +287,10 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                                 </svg>
                             </div>
                         <?php endif ?>
-                        <?php if ($invitationFlag == TypeInviteAction::New): ?>
+                        <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New): ?>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                         <?php endif ?>
-                        <?php if ($invitationFlag == TypeInviteAction::NewParticipants): ?>
+                        <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                         <?php endif ?>
                     </li>
@@ -303,11 +303,11 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </div>
     <?php endif ?>
 
-    <?php if ($actionFormulaireValider == 'envoiInvitation' && isset($fbInvite) && $fbInvite->getMailEffectivementEnvoye() && ($mailEnvoyesStr = $fbInvite->getMailsEnvoyes()) && (strlen($mailEnvoyesStr) > 0)) : ?>
-        <script langage='javascript'>
-            alert("Mails invitation envoyés à : <?= $mailEnvoyesStr ?>");
+    <!-- <?php //if ($actionFormulaireValider == 'envoiInvitation' && isset($fbInvite) && $fbInvite->getMailEffectivementEnvoye() && ($mailEnvoyesStr = $fbInvite->getMailsEnvoyes()) && (strlen($mailEnvoyesStr) > 0)) : ?>
+         <script langage='javascript'>
+           // alert("Mails invitation envoyés à : <?= $mailEnvoyesStr ?>")
         </script>
-    <?php endif ?>
+    <?php //endif ?> -->
 </body>
 
 </html>

@@ -142,6 +142,8 @@ function wsCallbackUid(event, ui) {
 }
 
 $(function() {
+    $('[data-toggle="tooltip"]').tooltip({'html' : true});
+
     $("#person").autocompleteUser(
             urlwsgroup, {
                 select: wsCallbackUid,

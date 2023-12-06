@@ -41,6 +41,10 @@ input[type="submit"]:hover {
     background-color: #00326e;
 }
 
+label[for="form-participant-optionnel"] {
+    margin-left: -21px;
+}
+
 li {
     display: list-item;
     margin-bottom: 7px;

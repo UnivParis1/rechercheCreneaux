@@ -11,19 +11,21 @@ enum TypeInviteAction : int {
 
 class FBInvite {
     var $listUserInfos;
-    var $icsData;
     var $listDate;
     var $modalCreneauStart;
     var $modalCreneauEnd;
     var $titleEvent;
     var $descriptionEvent;
     var $lieuEvent;
+    var $dtz;
     var $sujet = "Invitation évenement";
-    var $headers;
+
     var $varsHTTPGet;
+    var array $stdMails;
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
+    var string $from;
 
     public function __construct(array $fbUsers, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet) {
         $this->listDate = $listDate;
@@ -33,14 +35,52 @@ class FBInvite {
         $this->titleEvent = $titleEvent;
         $this->descriptionEvent = $descriptionEvent;
         $this->lieuEvent = $lieuEvent;
+        $this->dtz = $dtz;
 
         // recupere les infos venant des $fbUsers et converti les stdObj en array
         $this->listUserInfos = $this->_getUserinfos($fbUsers);
-        $this->icsData = FBUtils::icalCreationInvitation($this->listUserInfos, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz);
 
-        $this->headers = 'Content-Type: text/calendar; name="event.ics"; charset=utf-8' . "\r\n";
-        $this->headers .= 'Content-Disposition: attachment; filename="event.ics"' . "\r\n";
-        $this->headers .= 'Content-Transfer-Encoding: base64' . "\r\n";
+// considère le premier user comme l'organisateur ... TODO : prendre en compte l'utilisateur connecté à ent
+        $this->from = $fbUsers[0]->getUidInfos()->mail;
+        $this->stdMails = array();
+    }
+
+    private function _genereParametresMail($userinfo) {
+        $userinfo = (object) $userinfo;
+
+        $icsData = FBUtils::icalCreationInvitation($this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
+
+        $boundary = uniqid('boundary');
+
+        $from = "From: {$this->from}";
+        $to = "To: {$userinfo->mail}";
+
+        $header = "$from".PHP_EOL."$to".PHP_EOL;
+        $header = "MIME-Version: 1.0".PHP_EOL;
+        $header .= "Content-Type: multipart/alternative; boundary=\"$boundary\"".PHP_EOL;
+
+        $message = "--$boundary".PHP_EOL;
+        $message .= "Content-Type: text/plain; charset=utf-8".PHP_EOL;
+        $message .= "Content-Transfer-Encoding: 7bit".PHP_EOL.PHP_EOL;
+        $message .= "Merci de participer à la réunion importante.".PHP_EOL.PHP_EOL;
+        $message .= "--$boundary".PHP_EOL;
+        $message .= "Content-Type: text/calendar; charset=utf-8; method=REQUEST".PHP_EOL;
+        $message .= "Content-Transfer-Encoding: base64".PHP_EOL.PHP_EOL;
+        $message .= chunk_split(base64_encode($icsData));
+        $message .= "--$boundary--".PHP_EOL;
+
+        // pas pris en compte, si c'est ça qui empêche l'apparition de la bare dans thunderbird ... ben mince alors.
+        $httpHeader = 'Content-type: multipart/alternative; boundary="' . $boundary . '"';
+        $httpHeader .= 'Content-Disposition: inline; filename=invitation.ics';
+
+        $stdObj = new stdClass();
+        $stdObj->icsData = $icsData;
+        $stdObj->boundary = $boundary;
+        $stdObj->header = $header;
+        $stdObj->httpHeader = $httpHeader;
+        $stdObj->message = $message;
+
+        return $stdObj;
     }
 
     private function _getUserinfos($fbUsers) {
@@ -67,7 +107,7 @@ class FBInvite {
                 $_SESSION['inviteEnregistrement'][$idxSessionDate] = array();
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'lieuEvent' => $this->lieuEvent];
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => array($userinfo['mail'], 'sended' => false) ];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => array($userinfo['mail'], 'sended' => false, $userinfo) ];
             } else {
                 // test de vérification si il y'a eu envoi d'emails, envoi si le mail est ajouté
                 if (array_key_exists($uid, $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'])) {
@@ -83,10 +123,13 @@ class FBInvite {
             }
 
             if (!$testInsertMail) {
-                $envoiTest = mail($mailAddr, "Invitation à un evenement", base64_encode($this->icsData), $this->headers);
+                $stdMailInfo = $this->_genereParametresMail($userinfo);
+                $mailSent = mail($mailAddr, "Invitation à un événement", $stdMailInfo->message, $stdMailInfo->header);
 
-                if (!$envoiTest)
+                if (!$mailSent)
                     throw new Exception("erreur envoi mail");
+
+                $this->stdMails[] = $stdMailInfo;
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
@@ -94,40 +137,61 @@ class FBInvite {
                     $this->mailEffectivementEnvoyeUids = array();
 
                 $this->mailEffectivementEnvoyeUids[] = $uid;
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] = array($userinfo['mail'], 'sended' => true);
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] = array($userinfo['mail'], 'sended' => true, $userinfo);
             }
         }
     }
 
+    /**
+     * invitationDejaEnvoyeSurCreneau
+     *
+     * @param  mixed $dateAffichéeHTML
+     * @param  array $fbUsers
+     * @return stdClass
+     */
     static public function invitationDejaEnvoyeSurCreneau(Period $dateAffichéeHTML, array $fbUsers) {
-        if (array_key_exists('inviteEnregistrement', $_SESSION) === false)
-            return TypeInviteAction::New;
+        $returnStd = new stdClass();
+
+        if (array_key_exists('inviteEnregistrement', $_SESSION) === false) {
+            $returnStd->typeInvationAction = TypeInviteAction::New;
+            return $returnStd;
+        }
 
         $aaMEnvoyes = &$_SESSION['inviteEnregistrement'];
 
         $key = FBUtils::getIdxCreneauxWithStartEnd($aaMEnvoyes, $dateAffichéeHTML->startDate, $dateAffichéeHTML->endDate);
 
-        if (!($key != -1 && array_key_exists($key, $aaMEnvoyes) && array_key_exists('modalCreneau', $aaMEnvoyes[$key])))
-            return TypeInviteAction::New;
+        if (!($key != -1 && array_key_exists($key, $aaMEnvoyes) && array_key_exists('modalCreneau', $aaMEnvoyes[$key]))) {
+            $returnStd->typeInvationAction = TypeInviteAction::New;
+            return $returnStd;
+        }
 
         $aInfos = &$aaMEnvoyes[$key];
 
         $modalCreneau = $aInfos['modalCreneau'];
         $modalPeriod = Period::fromDate(new DateTime($modalCreneau['modalCreneauStart']), (new DateTime($modalCreneau['modalCreneauEnd'])));
         if (($modalPeriod <=> $dateAffichéeHTML) !== 0) {
-            return TypeInviteAction::New;
+            $returnStd->typeInvationAction = TypeInviteAction::New;
+            return $returnStd;
         }
 
 // Test si le nombre de users est différent sur la session
-        if (count($fbUsers) > count($aInfos['mails']))
-            return TypeInviteAction::NewParticipants;
-
-        foreach ($aInfos['mails'] as $aMails) {
-            if ($aMails['sended'])
-                return TypeInviteAction::Exist;
+        if (count($fbUsers) > count($aInfos['mails'])) {
+            $returnStd->mails = FBUtils::getMailsSended($aInfos['mails']);
+            $returnStd->typeInvationAction = TypeInviteAction::NewParticipants;
+            return $returnStd;
         }
 
-        return TypeInviteAction::New;
+        foreach ($aInfos['mails'] as $aMails) {
+            if ($aMails['sended']) {
+                $returnStd->mails = $aInfos['mails'];
+                $returnStd->typeInvationAction = TypeInviteAction::Exist;
+                return $returnStd;
+            }
+        }
+
+        $returnStd->typeInvationAction = TypeInviteAction::New;
+        return $returnStd;
     }
 
     public function getMailsEnvoyes() {
@@ -143,6 +207,17 @@ class FBInvite {
         if (!$alertMailsEnvoyes)
             throw new Exception('erreur cle absente mails envoyés');
 
+        $rMails = $this->__rMailSended($uids, $alertMailsEnvoyes);
+
+        if (sizeof($rMails) > 0) {
+            return implode(' - ', $rMails);
+        }
+
+        return '';
+    }
+
+    // fonction retournant les mails envoyé avec un test si effectivement bien envoyé
+    private function __rMailSended($uids, $alertMailsEnvoyes) {
         $rMails = array();
 
         foreach ($uids as $uid) {
@@ -150,12 +225,7 @@ class FBInvite {
             if ($aMails['sended'])
                 $rMails[] = $aMails[0];
         }
-
-        if (sizeof($rMails) > 0) {
-            return implode(' - ', $rMails);
-        }
-
-        return '';
+        return $rMails;
     }
 
     public function getMailEffectivementEnvoye() {

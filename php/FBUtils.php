@@ -214,4 +214,24 @@ class FBUtils {
 
         return $vcalendar->vtimezonePopulate()->createCalendar();
     }
+
+    public static function getMailsSended(array $aMails) {
+        $a = array();
+        foreach ($aMails as $aMail) {
+            if ($aMail['sended']) {
+                $a[] = $aMail;
+            }
+        }
+        return $a;
+    }
+
+    public static function formTooltipEnvoyéHTML(array $aMails) {
+        $html = "<span>Mails envoyés à : </span><br />";
+        $idx=0;
+        foreach ($aMails as $aMail) {
+            $html .= (($idx == 0) ? "":", ") . $aMail[1]['displayName'];
+            $idx++;
+        }
+        return $html;
+    }
 }
