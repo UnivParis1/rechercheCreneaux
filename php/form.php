@@ -18,6 +18,7 @@ $env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 $url = $_ENV['URL_FREEBUSY'];
 $dtz = $_ENV['TIMEZONE'];
 $urlwsgroup = $_ENV['URLWSGROUP'];
+$urlwsphoto = $_ENV['URLWSPHOTO'];
 setlocale(LC_TIME, $_ENV['LOCALE']);
 date_default_timezone_set($dtz);
 
@@ -103,13 +104,14 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
             <table>
                 <tr>
-                    <td>
+                    <td class="col-5">
                         <p>Séléction des utilisateurs</p>
                         <input id="person" name="person" placeholder="Nom et/ou prenom" />
 
                         <script>
                             var jsduree = <?= (is_null($duree) ? 30 : $duree); ?>;
                             var urlwsgroup = '<?= $urlwsgroup; ?>';
+                            var urlwsphoto = '<?= $urlwsphoto; ?>';
 
                             <?php if (isset($duree) && !is_null($duree)) : ?>
                                 $(function() {
@@ -151,7 +153,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <option value="240">4h</option>
                         </select>
                     </td>
-                    <td>
+                    <td class="col-2">
                         <p>Envoyer requête</p>
                         <input type="submit" name="submitRequete" value="Recherche de disponibilité" />
                     </td>
@@ -162,7 +164,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <br />
                             <p>Utilisateurs sélectionnés</p>
                             <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
-                            <ul id="person_ul">
+                            <ul id="person_ul" class="px-0">
                             </ul>
                         </div>
                     </td>
@@ -202,14 +204,14 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             <p>Envoi invitation aux participants</p>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6" id="creneauBoxDesc">
+                            <div class="col-6" id="creneauBoxDesc">
                                 <p>Créneau</p>
                                 <span id="creneauInfo" class="text-nowrap text-break"></span>
                                 <hr>
                                 <p>Participants</p>
                                 <ul id="creneauMailParticipant_ul" />
                             </div>
-                            <div class="col-sm-5 align-content-between" id="creneauBoxInput">
+                            <div class="col-5 align-content-between" id="creneauBoxInput">
                                 <label for="titrecreneau">Titre de l'évenement</label>
                                 <input id="titrecreneau" type="text" disabled placeholder="Titre de l'évenement" name="titrecreneau" value="<?= $titleEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un titre pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                                 <label for="summarycreneau">Description :</label>
@@ -270,28 +272,29 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
 ?>
 
     <?php if (isset($listDate) && sizeof($listDate) > 0) : ?>
-        <?php $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
+        <?php
+        $formatter_day =  IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE");
+        $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
         $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
         <div id="reponse">
             <p>Créneaux disponibles</p>
-            <ul>
+            <ul class="col-11">
                 <?php foreach ($listDate as $date) : ?>
-                    <li>
-                        <time><?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
+                    <li class="row">
+                        <time class="col-5"><span class="d-inline-block col-2"><?= $formatter_day->format($date->startDate->getTimestamp()) ?></span> <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
                         <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbUsers))->typeInvationAction != TypeInviteAction::New) : ?>
-                            <div class='invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
+                            <div class='col-3 invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
                                 <span class="text-success">Envoyé</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16">
+                                <svg class="bi bi-check2-circle d-inline-block" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" viewBox="0 0 16 16">
                                     <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
                                     <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z" />
                                 </svg>
                             </div>
                         <?php endif ?>
                         <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New): ?>
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
-                        <?php endif ?>
-                        <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                            <a href="#" class="col" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                        <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
+                            <a href="#" class="col" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                         <?php endif ?>
                     </li>
                 <?php endforeach ?>
