@@ -71,9 +71,9 @@ function addOptionWithUid(uid, displayName) {
 
     newLi.append('<img class="col-1 rounded-circle" alt="' + uid + '" src="' + urlwsphoto + '?uid='+ uid + '" />');
 
-    newLi.append($('<label>').attr('class', 'col-3').text(displayName));
+    newLi.append($('<label>').attr('class', 'col-3 px-0').text(displayName));
 
-    let button = $('<button>').text('supprimer').attr('class', 'col-2');
+    let button = $('<button>').text('supprimer').attr('class', 'col-2 px-0');
     newLi.append(button);
 
     let optionnel = $('<input>');

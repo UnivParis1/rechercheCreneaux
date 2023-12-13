@@ -95,7 +95,7 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     <script src="./js/min/moment-with-locales.js"></script>
 </head>
 
-<body>
+<body >
     <div id="titre">
         <h1>Recherche de disponibilités</h1>
     </div>
@@ -238,52 +238,38 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
         </form>
     </div>
 
-<?php
-
+    <?php
     if (isset($fbUsers)) {
         $fullBloqueUids=array();
-        $arrayAlertOptionnelOuBloquer = array();
-        // Changer : affichage d'une alerte avec un message pour les agendas bloqués ou optionnels
         foreach ($fbUsers as $fbUser) {
             if ($fbUser->getEstFullBloquer()) {
                 $fullBloqueUids[] = $fbUser->uid;
-                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getUidInfos()->displayName} n\'a aucun créneau disponible dans son agenga";
+                $aAgendaFullBloquerStr[] = "le participant {$fbUser->getUidInfos()->displayName} n'a aucun créneaux disponibles, les résultats ne prennent pas en compte son agenda";
             }
-            if ($fbUser->getEstFullBloquer() || $fbUser->getEstOptionnel()) {
-                $arrayAlertOptionnelOuBloquer[] = "le participant {$fbUser->getUidInfos()->displayName} a été mis en participant optionnel, son agenda n\'est pas pris en compte dans les résultats";
-            }
-        }
-        if (count($fullBloqueUids) > 0) {
-            if (!isset($listUidsOptionnels))
-                $listUidsOptionnels = $fullBloqueUids;
-            else
-                $listUidsOptionnels = array_unique(array_merge($listUidsOptionnels, $fullBloqueUids));
-        }
-
-        // alerte supprimée / enlever pour ne pas surcharger l'affichage
-        if (false && count($arrayAlertOptionnelOuBloquer) > 0) {
-            // echo '<script>alert("' . implode('\n', $arrayAlertOptionnelOuBloquer) . '")</script>';
         }
     }
-
     if (isset($listUidsOptionnels) && sizeof($listUidsOptionnels) > 0) {
         echo '<script>var jsListUidsOptionnels='. json_encode($listUidsOptionnels) . ';</script>';
     }
-?>
-
-    <?php if (isset($listDate) && sizeof($listDate) > 0) : ?>
+    ?>
+    <div id="reponse">
+    <?php if (isset($aAgendaFullBloquerStr) && count($aAgendaFullBloquerStr) > 0): ?>
+            <p class='shadow p-3 mb-5 bg-body rounded text-center lead'><?= implode("<br />", $aAgendaFullBloquerStr); ?></p>
+    <?php endif ?>
+    <?php if (isset($listDate) && sizeof($listDate) == 0) : ?>
+            <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
+    <?php elseif (isset($listDate) && sizeof($listDate) > 0) : ?>
         <?php
         $formatter_day =  IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE");
         $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
         $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
-        <div id="reponse">
             <p>Créneaux disponibles</p>
             <ul class="col-11">
                 <?php foreach ($listDate as $date) : ?>
                     <li class="row">
                         <time class="col-5"><span class="d-inline-block col-2"><?= $formatter_day->format($date->startDate->getTimestamp()) ?></span> <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
                         <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbUsers))->typeInvationAction != TypeInviteAction::New) : ?>
-                            <div class='col-3 invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
+                            <div class='col-1 px-0 invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
                                 <span class="text-success">Envoyé</span>
                                 <svg class="bi bi-check2-circle d-inline-block" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" viewBox="0 0 16 16">
                                     <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
@@ -292,25 +278,15 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
                             </div>
                         <?php endif ?>
                         <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New): ?>
-                            <a href="#" class="col" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                            <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                         <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                            <a href="#" class="col" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                            <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                         <?php endif ?>
                     </li>
                 <?php endforeach ?>
             </ul>
-        </div>
-    <?php elseif (isset($listDate) && sizeof($listDate) == 0) : ?>
-        <div id="reponse">
-            <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
-        </div>
-    <?php endif ?>
-
-    <!-- <?php //if ($actionFormulaireValider == 'envoiInvitation' && isset($fbInvite) && $fbInvite->getMailEffectivementEnvoye() && ($mailEnvoyesStr = $fbInvite->getMailsEnvoyes()) && (strlen($mailEnvoyesStr) > 0)) : ?>
-         <script langage='javascript'>
-           // alert("Mails invitation envoyés à : <?= $mailEnvoyesStr ?>")
-        </script>
-    <?php //endif ?> -->
+        <?php endif ?>
+    </div>
 </body>
 
 </html>
