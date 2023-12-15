@@ -35,17 +35,22 @@ class FBUtils {
 
         return $sequence;
     }
-    
+
+    public static function sortFBUsersByBusyCount(FBUser ... $fbUsers) : Array {
+        $fbUserSort = $fbUsers;
+        usort($fbUserSort, function(FBUser $fbusr1, FBUser $fbusr2)  {
+            $cmp = $fbusr1->getSequence()->count() <=> $fbusr2->getSequence()->count();
+            return $cmp;
+        });
+        return $fbUserSort;
+    }
+
     public static function createSequenceFromArrayFbusy(array $fbusys, $dtz) {
         
         $sequence = new Sequence();
         
         foreach ($fbusys as $fbusy) {
-            
             $fbusdate = $fbusy[0];
-
-            $t1DateTime = $fbusdate[0];
-            $t2DateTime = $fbusdate[1];
 
             $dstart = DateTimeImmutable::createFromMutable($fbusdate[0]);
             $dstart = $dstart->setTimezone($dtz);
@@ -108,13 +113,10 @@ class FBUtils {
 
     public static function _cmpSeqContainPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : int {
         foreach ($sequence as $period) {
-
-            $test1 = $period->contains($periodToCompare);
-            $test2 = $periodToCompare->contains($period);
             // creneau > busy
-            if ($test1) {
+            if ($period->contains($periodToCompare)) {
                 return -1;
-            }elseif ($test2) {// creneau < busy
+            }elseif ($periodToCompare->contains($period)) {// creneau < busy
                 return 1;
             }
         }

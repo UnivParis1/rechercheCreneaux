@@ -15,7 +15,7 @@ use League\Period\Sequence;
 class FBCompare
 {
 
-    private array $arrayFBUsers;
+    public array $arrayFBUsers;
     private Sequence $creneauxGenerated;
     private Sequence $mergedBusys;
     private DateTimeZone $dateTimeZone;
@@ -60,7 +60,7 @@ class FBCompare
         $arr_creneaux = array();
 
         foreach ($creneauxGenerated as $creneau) {
-            if ($this->_testPeriodsDebug($busySeq, $creneau) == false) {
+            if ($this->_testPeriodsDebug($busySeq, $creneau) === false) {
                 $arr_creneaux[] = $creneau;
             }
         }
@@ -70,37 +70,16 @@ class FBCompare
         return $seq;
     }
 
-    private function _testPeriodOverlaps($sequence, $periodToCompare)
-    {
-        foreach ($sequence as $period) {
-            $arr = array();
-
-            if ($period->overlaps($periodToCompare) || $periodToCompare->overlaps($period)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     private function _testPeriodsDebug($sequence, $periodToCompare)
     {
         foreach ($sequence as $period) {
-            $arr = array();
-            $arr[] = $period->isDuring($periodToCompare);
-            $arr[] = $period->overlaps($periodToCompare);
-            $arr[] = $period->contains($periodToCompare);
-
-            $arr[] = $periodToCompare->isDuring($period);
-            $arr[] = $periodToCompare->overlaps($period);
-            $arr[] = $periodToCompare->contains($period);
-
-            foreach ($arr as $a) {
-                if ($a) {
-                    //                    die(var_dump($arr));
-                    return true;
-                }
-            }
+            // optimisation performance
+            if ( ! ($period->isDuring($periodToCompare) === false &&
+                    $period->overlaps($periodToCompare) === false &&
+                    $period->contains($periodToCompare) === false &&
+                    $periodToCompare->isDuring($period) === false &&
+                    $periodToCompare->overlaps($period) === false &&
+                    $periodToCompare->contains($period) === false)) return true;
         }
         return false;
     }
@@ -154,6 +133,25 @@ class FBCompare
         return $arrayCreneauxAffiches;
     }
 
+    public static function algo_search_results($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux) {
+        $returnStd = new stdClass();
+        $returnStd->fbUsersUnsetted = array();
+        $fbUsersCP = $fbUsers;
+
+        for ($i = 0; $i < count($fbUsers); $i++) {
+
+            $returnStd->fbUsersUnsetted[] = $fbUsers[$i];
+            unset($fbUsersCP[$i]);
+
+            $fbCompare = new FBCompare($fbUsersCP, $creneauxGenerated, $dtz, $nbcreneaux);
+
+            if ($fbCompare->getNbResultatsAffichés() > 0) {
+                $returnStd->fbCompare = $fbCompare;
+                return $returnStd;
+            }
+        }
+        return null;
+    }
     /*     public function compareSequences() {
         $arrayPeriodsIntersected = $this->arrayFBUsers[0]->getSequence()->jsonSerialize();
         foreach ($this->arrayFBUsers as $FBUser) {

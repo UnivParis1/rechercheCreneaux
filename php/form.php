@@ -54,6 +54,17 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     }
     $fbCompare = new FBCompare($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux);
     $nbResultatsAffichés = $fbCompare->getNbResultatsAffichés();
+
+    if ($nbResultatsAffichés == 0 && sizeof($fbUsers) > 2) {
+        $fbUserSortNbs = array_reverse(FBUtils::sortFBUsersByBusyCount(... $fbUsers));
+
+        if (!is_null($stdNewFBCompare = FBCompare::algo_search_results($fbUserSortNbs, $creneauxGenerated, $dtz, $nbcreneaux))) {
+            $fbCompare = $stdNewFBCompare->fbCompare;
+            $fbUsersUnsetted = $stdNewFBCompare->fbUsersUnsetted;
+            $nbResultatsAffichés = $fbCompare->getNbResultatsAffichés();
+        }
+    }
+
     $creneauxFinauxArray = $fbCompare->getArrayCreneauxAffiches();
 
     $listDate = array();
@@ -248,6 +259,14 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
             }
         }
     }
+
+    if (isset($fbUsersUnsetted) && count($fbUsersUnsetted) > 0) {
+        $aUserUnsetStr[] = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat";
+        foreach ($fbUsersUnsetted as $fbUserUnset) {
+            $aUserUnsetStr[] = "Les résultats ne prennent pas en compte le participant {$fbUserUnset->getUidInfos()->displayName}";
+        }
+    }
+
     if (isset($listUidsOptionnels) && sizeof($listUidsOptionnels) > 0) {
         echo '<script>var jsListUidsOptionnels='. json_encode($listUidsOptionnels) . ';</script>';
     }
@@ -256,6 +275,11 @@ if (($uids && sizeof($uids) > 1) && ($plagesHoraires && sizeof($plagesHoraires) 
     <?php if (isset($aAgendaFullBloquerStr) && count($aAgendaFullBloquerStr) > 0): ?>
             <p class='shadow p-3 mb-5 bg-body rounded text-center lead'><?= implode("<br />", $aAgendaFullBloquerStr); ?></p>
     <?php endif ?>
+
+    <?php if (isset($aUserUnsetStr) && count($aUserUnsetStr) > 1): ?>
+            <p class='shadow p-3 mb-5 bg-body rounded text-left lead'><?= implode("<br />", $aUserUnsetStr); ?></p>
+    <?php endif ?>
+
     <?php if (isset($listDate) && sizeof($listDate) == 0) : ?>
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
     <?php elseif (isset($listDate) && sizeof($listDate) > 0) : ?>

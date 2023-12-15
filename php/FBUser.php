@@ -8,9 +8,6 @@ declare(strict_types=1);
  */
 
 use Kigkonsult\Icalcreator\Vcalendar;
-use Kigkonsult\Icalcreator\VcalendarParser;
-use Kigkonsult\Icalcreator\Vfreebusy;
-use League\Period\DatePoint;
 use League\Period\Period;
 use League\Period\Duration;
 use League\Period\Sequence;
@@ -73,6 +70,11 @@ class FBUser {
     // sert à déterminer si l'agenda d'une personne est bloquée
     private bool $estFullBloquer = false;
 
+    // si son agenda n'est pas pris en compte dans les résultats
+    // dans le cas où la recherche donne 0 résultats, on élimine les agendas les
+    // plus chargés
+    public bool $estDisqualifier = false;
+
     public bool $estOptionnel;
 
     /**
@@ -116,6 +118,7 @@ class FBUser {
         $fbUser->_selectFreebusy();
         $sequence = $fbUser->_initSequence();
 
+// commenté temporairement, pour tester algo suppression d'une personne
         if ($fbUser->_testSiAgendaBloque($sequence))
             $fbUser->estFullBloquer = true;
 
@@ -149,7 +152,6 @@ class FBUser {
     }
 
     private function _instanceCreneaux(&$sequence) : Sequence {
-        $duration = self::getDuration();
         $creneaugenSeq = $this->getCreneauxGenerated();
 
         foreach ($sequence as $busyPeriod) {
@@ -242,7 +244,6 @@ class FBUser {
     }
 
     private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit, &$sequence) : Sequence {
-        $creneauxGenerated = $this->getCreneauxGenerated();
         $offset = $sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
 
@@ -257,14 +258,8 @@ class FBUser {
 
         $indexNew = $offset;
         foreach ($arrayNewPeriods as $newPeriod) {
-            // vérifie si les busys normalisés sont bien dans les creneaux au cas ou la periode > plusieurs jours
-            $testInCreneau = FBUtils::_cmpSeqContainPeriod($creneauxGenerated, $newPeriod);
-            $testOverlap = FBUtils::_cmpSeqOverlapPeriod($creneauxGenerated, $newPeriod);
-
-//            if ($testInCreneau !== 0) { // || $testOverlap === false) {
-                $sequence->insert($indexNew, $newPeriod);
-                $indexNew++;
-//            }
+            $sequence->insert($indexNew, $newPeriod);
+            $indexNew++;
         }
         $this->isChanged = true;
         return $sequence;
@@ -291,6 +286,7 @@ class FBUser {
 
         $testFBUserclone = clone($this);
         $seqToTest = clone($sequence);
+
         // generation de créneaux standards
 
         $creneauxGeneratedTest = (new FBCreneauxGeneres(date('Y-m-d'), 60, array('9-12', '14-17'), $this->dateTimeZone->getName()))->getCreneauxSeq();
