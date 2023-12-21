@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
- */
 
 use Kigkonsult\Icalcreator\Vcalendar;
 use League\Period\Period;
@@ -108,10 +104,12 @@ class FBUser {
      * @return FBUser
      */
     public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux, $estOptionnel = false) : FBUser {
-        if (!isset(self::$duration))
+        if (!isset(self::$duration)) {
             self::setDuration($dureeEnMinutes);
-        if (!isset(self::$creneauxGenerated))
+        }
+        if (!isset(self::$creneauxGenerated)) {
             self::setCreneauxGenerated($creneaux);
+        }
 
         $fbUser = new self($uid, $dtz, $url, $estOptionnel);
 
@@ -119,8 +117,9 @@ class FBUser {
         $sequence = $fbUser->_initSequence();
 
 // commenté temporairement, pour tester algo suppression d'une personne
-        if ($fbUser->_testSiAgendaBloque($sequence))
+        if ($fbUser->_testSiAgendaBloque($sequence)) {
             $fbUser->estFullBloquer = true;
+        }
 
         $fbUser->sequence = $fbUser->_instanceCreneaux($sequence);
         return $fbUser;
@@ -144,8 +143,8 @@ class FBUser {
     private function _initSequence() : Sequence {
         $duration = self::$duration;
 
+        // crée la séquence puis trie par date de début
         $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
-        // trie par date de début
         $sequence = FBUtils::sortSequence($sequence);
 
         return $sequence;
@@ -158,10 +157,12 @@ class FBUser {
 
             $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $sequence);
 
-            if ($sequence->indexOf($busyPeriod) !== false)
+            if ($sequence->indexOf($busyPeriod) !== false) {
                 $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $sequence);
-            else
+            }
+            else {
                 $busyOverlap = false;
+            }
 
             // Suppression des busys lorsqu'ils sont hors des periodes générées
             if ($busyInclus === false && $busyOverlap === false) {
@@ -288,8 +289,13 @@ class FBUser {
         $seqToTest = clone($sequence);
 
         // generation de créneaux standards
+        $stdParamClone = new stdClass();
+        $stdParamClone->fromDate = date('Y-m-d');
+        $stdParamClone->duree = 60;
+        $stdParamClone->plagesHoraires = array('9-12', '14-17');
+        $stdParamClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
 
-        $creneauxGeneratedTest = (new FBCreneauxGeneres(date('Y-m-d'), 60, array('9-12', '14-17'), $this->dateTimeZone->getName()))->getCreneauxSeq();
+        $creneauxGeneratedTest = (new FBCreneauxGeneres($stdParamClone, $this->dateTimeZone->getName()))->getCreneauxSeq();
 
         $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
         $seq = $testFBUserclone->_instanceCreneaux($seqToTest);

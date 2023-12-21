@@ -10,6 +10,8 @@ enum TypeInviteAction : int {
 }
 
 class FBInvite {
+    var FBForm $fbForm;
+    var array $fbUsers;
     var $listUserInfos;
     var $listDate;
     var $modalCreneauStart;
@@ -20,29 +22,39 @@ class FBInvite {
     var $dtz;
     var $sujet = "Invitation évenement";
 
-    var $varsHTTPGet;
+    var $stdEnv;
     var array $stdMails;
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
     var string $from;
 
-    public function __construct(array $fbUsers, $modalCreneauStart, $modalCreneauEnd, $titleEvent, $descriptionEvent, $lieuEvent, $dtz, $listDate, $varsHTTPGet) {
+    public function __construct($fbForm, $stdParams, $stdEnv, $listDate) {
+        $this->fbForm = $fbForm;
+        $this->fbUsers = $fbForm->getFbUsers();
+
         $this->listDate = $listDate;
-        $this->modalCreneauStart = $modalCreneauStart;
-        $this->modalCreneauEnd = $modalCreneauEnd;
-        $this->varsHTTPGet = $varsHTTPGet;
-        $this->titleEvent = $titleEvent;
-        $this->descriptionEvent = $descriptionEvent;
-        $this->lieuEvent = $lieuEvent;
-        $this->dtz = $dtz;
+        $this->modalCreneauStart = $stdParams->modalCreneauStart;
+        $this->modalCreneauEnd = $stdParams->modalCreneauEnd;
+        $this->stdEnv = $stdEnv;
+        $this->dtz = $stdEnv->dtz;
+        $this->titleEvent = $stdParams->titleEvent;
+        $this->descriptionEvent = $stdParams->descriptionEvent;
+        $this->lieuEvent = $stdParams->lieuEvent;
 
         // recupere les infos venant des $fbUsers et converti les stdObj en array
-        $this->listUserInfos = $this->_getUserinfos($fbUsers);
+        $this->listUserInfos = $this->_getUserinfos($this->fbUsers);
 
 // considère le premier user comme l'organisateur ... TODO : prendre en compte l'utilisateur connecté à ent
-        $this->from = $fbUsers[0]->getUidInfos()->mail;
+        $this->from = $this->fbUsers[0]->getUidInfos()->mail;
         $this->stdMails = array();
+    }
+
+    public static function verifSiInvitation($stdParams) {
+        if ($stdParams->actionFormulaireValider == 'envoiInvitation' && is_null($stdParams->titleEvent) == false && is_null($stdParams->descriptionEvent) == false) {
+            return true;
+        }
+        return false;
     }
 
     private function _genereParametresMail($userinfo) {
@@ -97,7 +109,7 @@ class FBInvite {
             $_SESSION['inviteEnregistrement'] = array();
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
-            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->varsHTTPGet['debugmail']) ? $this->varsHTTPGet['debugmail'] : '');
+            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : '');
 
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);

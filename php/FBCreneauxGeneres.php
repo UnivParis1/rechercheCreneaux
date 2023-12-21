@@ -23,22 +23,22 @@ class FBCreneauxGeneres {
     private static Duration $duration;
     private League\Period\Sequence $creneauxSeq;
 
-    public function __construct(String $startDate, int $dureeMinutes, array $plagesHoraires, string $dtz, array $days = ['MO', 'TU', 'WE', 'TH', 'FR']) {
-        $this->startDate = $startDate;
-        $this->dureeMinutes = $dureeMinutes;
-        $this->setDuration($dureeMinutes);
-        $this->plagesHoraires = $plagesHoraires;
+    public function __construct(stdClass $stdParams, $dtz) {
+        $this->startDate = $stdParams->fromDate;
+        $this->dureeMinutes = $stdParams->duree;
+        $this->setDuration($stdParams->duree);
+        $this->plagesHoraires = $stdParams->plagesHoraires;
+        $this->days = $stdParams->joursDemandes;
         $this->dtz = $dtz;
-        $this->days = $days;
 
-        $arrPlage = $this->parsePlagesHoraires($plagesHoraires);
+        $arrPlage = $this->parsePlagesHoraires($stdParams->plagesHoraires);
 
-        $firstCreneau = $this->getDefaultsCreneaux($startDate, $dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $days);
-        $secondCreneau = $this->getDefaultsCreneaux($startDate, $dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $days);
+        $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days);
+        $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days);
 
         $this->creneauxSeq = new Sequence();
-        $this->generateSequence($firstCreneau, $dureeMinutes, $arrPlage[0], $arrPlage[1]);
-        $this->generateSequence($secondCreneau, $dureeMinutes, $arrPlage[2], $arrPlage[3]);
+        $this->generateSequence($firstCreneau, $this->dureeMinutes, $arrPlage[0], $arrPlage[1]);
+        $this->generateSequence($secondCreneau, $this->dureeMinutes, $arrPlage[2], $arrPlage[3]);
 
         $this->creneauxSeq = FBUtils::sortSequence($this->creneauxSeq);
     }
