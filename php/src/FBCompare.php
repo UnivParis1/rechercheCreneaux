@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-use League\Period\DatePoint;
-use League\Period\Period;
-use League\Period\Duration;
+namespace RechercheCreneaux;
+
+use DateTime;
+use stdClass;
+use DateTimeZone;
 use League\Period\Sequence;
 
 /**
@@ -24,7 +26,7 @@ class FBCompare
     private int $nbResultatsAffichés;
     private array $arrayCreneauxAffiches;
 
-    public function __construct($arrayFBUsers, League\Period\Sequence &$creneauxGenerated, String $dtz, $nbcreneaux)
+    public function __construct($arrayFBUsers, Sequence &$creneauxGenerated, String $dtz, $nbcreneaux)
     {
         // supprime les fbusers fullbloquer ou optionnel
         foreach ($arrayFBUsers as $key => $fbUser)
@@ -98,7 +100,7 @@ class FBCompare
         return $arr_merged;
     }
 
-    private function _getMergedBusysSequence(): League\Period\Sequence
+    private function _getMergedBusysSequence(): Sequence
     {
         $array_periods = $this->_mergeSequencesToArrayPeriods();
         $seq = FBUtils::addTimezoneToLeaguePeriods($array_periods, $this->dateTimeZone);

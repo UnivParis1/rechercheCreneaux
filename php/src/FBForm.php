@@ -1,8 +1,28 @@
 <?php
 
-class FBForm {
+namespace RechercheCreneaux;
 
-    var $uids;
+
+use stdClass;
+use RechercheCreneaux\FBUser;
+use RechercheCreneaux\FBCompare;
+use RechercheCreneaux\FBCreneauxGeneres;
+
+/**
+ * FBForm
+ */
+class FBForm {
+    /**
+     * uids
+     *
+     * @var mixed
+     */
+    var $uids; 
+    /**
+     * fbUsers
+     *
+     * @var mixed
+     */
     var $fbUsers;
     var $creneauxGenerated;
 
@@ -27,8 +47,12 @@ class FBForm {
     }
 
     public static function validParams(stdClass $stdParams) {
-        if (($stdParams->uids && sizeof($stdParams->uids) > 1) && ($stdParams->plagesHoraires && sizeof($stdParams->plagesHoraires) > 0) && $stdParams->nbcreneaux && $stdParams->duree)
-            return true;
+        if (($stdParams->uids && sizeof($stdParams->uids) > 1) 
+                && ($stdParams->plagesHoraires && sizeof($stdParams->plagesHoraires) > 0) 
+                && $stdParams->nbcreneaux && $stdParams->duree) 
+                {
+                    return true;
+                }
 
         return false;
     }
@@ -36,7 +60,12 @@ class FBForm {
     public function getCreneauxGenerated() {
         return $this->creneauxGenerated;
     }
-
+    
+    /**
+     * getFbCompare
+     *
+     * @return FBCompare
+     */
     public function getFbCompare() {
         return $this->fbCompare;
     }

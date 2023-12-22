@@ -1,12 +1,19 @@
 <?php
 declare(strict_types=1);
 
+namespace RechercheCreneaux;
+
 //use FBUtils;
-use League\Period\Sequence as Sequence;
+use DateTime;
+use stdClass;
+use DatePeriod;
+use RRule\RRule;
+use DateInterval;
+use DateTimeImmutable;
+use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
 use League\Period\Duration as Duration;
-use League\Period\Bounds as Bounds;
-use RRule\RRule;
+use League\Period\Sequence as Sequence;
 
 /**
  * Description of FBCreneauxGeneres
@@ -21,7 +28,7 @@ class FBCreneauxGeneres {
     private array $days;
     private int $dureeMinutes;
     private static Duration $duration;
-    private League\Period\Sequence $creneauxSeq;
+    private Sequence $creneauxSeq;
 
     public function __construct(stdClass $stdParams, $dtz) {
         $this->startDate = $stdParams->fromDate;

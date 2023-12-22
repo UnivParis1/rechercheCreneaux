@@ -2,11 +2,16 @@
 
 declare(strict_types=1);
 
+namespace RechercheCreneaux;
 
-use Kigkonsult\Icalcreator\Vcalendar;
+use stdClass;
+use Exception;
+use DateInterval;
+use DateTimeZone;
 use League\Period\Period;
 use League\Period\Duration;
 use League\Period\Sequence;
+use Kigkonsult\Icalcreator\Vcalendar;
 
 /**
  * Description of FBUser
@@ -25,7 +30,7 @@ class FBUser {
      */
     private static Duration $duration;
 
-    private static League\Period\Sequence $creneauxGenerated;
+    private static Sequence $creneauxGenerated;
 
     /**
      * @var string uid
@@ -116,7 +121,6 @@ class FBUser {
         $fbUser->_selectFreebusy();
         $sequence = $fbUser->_initSequence();
 
-// commenté temporairement, pour tester algo suppression d'une personne
         if ($fbUser->_testSiAgendaBloque($sequence)) {
             $fbUser->estFullBloquer = true;
         }
@@ -185,7 +189,7 @@ class FBUser {
      * @param  mixed $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysOverlap(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod, &$sequence) : bool {
+    private function _instanceCreneauxBusysOverlap(Sequence $creneaugenSeq, Period $busyPeriod, &$sequence) : bool {
         $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
 
         if ($cmpOverlapCreneau) {
@@ -221,7 +225,7 @@ class FBUser {
      * @param  mixed $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysInclus(League\Period\Sequence $creneaugenSeq, League\Period\Period $busyPeriod, &$sequence) : bool {
+    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod, &$sequence) : bool {
         $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
 
         if ($cmpBusyCreneau === 0) {
@@ -244,7 +248,7 @@ class FBUser {
         return true;
     }
 
-    private function _normCreneauxInferieurDuree(League\Period\Period $periodToSplit, &$sequence) : Sequence {
+    private function _normCreneauxInferieurDuree(Period $periodToSplit, &$sequence) : Sequence {
         $offset = $sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
 
@@ -266,7 +270,7 @@ class FBUser {
         return $sequence;
     }
 
-    private function _normCreneauxSuperieurDuree(League\Period\Period $period, &$sequence) : Sequence {
+    private function _normCreneauxSuperieurDuree(Period $period, &$sequence) : Sequence {
         $idx = $sequence->indexOf($period);
         $duration = $this->getDuration();
         $sequence->remove($idx);
@@ -276,7 +280,7 @@ class FBUser {
         return $sequence;
     }
 
-    private function _removePeriod(League\Period\Period $period, &$sequence) : Sequence {
+    private function _removePeriod(Period $period, &$sequence) : Sequence {
         $idx = $sequence->indexOf($period);
         $sequence->remove($idx);
         $this->isChanged = true;
@@ -365,7 +369,7 @@ class FBUser {
     /**
      * Get the value of creneauxGenerated
      */
-    public function getCreneauxGenerated() : League\Period\Sequence
+    public function getCreneauxGenerated() : Sequence
     {
         if (isset(self::$creneauxGenerated))
             return self::$creneauxGenerated;
@@ -410,7 +414,7 @@ class FBUser {
      * @param  string $uid
      * @return stdClass
      */
-    private function _getUidInfos($uid) : stdClass {
+    private function _getUidInfos($uid)  {
         $urlwsgroup = $_ENV['URLWSGROUP'];
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 

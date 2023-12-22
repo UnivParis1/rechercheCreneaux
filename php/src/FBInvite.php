@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace RechercheCreneaux;
+
+use DateTime;
+use stdClass;
+use Exception;
+use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
 
 enum TypeInviteAction : int {

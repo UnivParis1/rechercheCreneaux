@@ -2,10 +2,17 @@
 
 declare(strict_types=1);
 
+namespace RechercheCreneaux;
+
+use DateTime;
+use Exception;
+use DateInterval;
+use DateTimeZone;
+use DateTimeImmutable;
+use League\Period\Chart;
 use League\Period\Period;
 use League\Period\Sequence;
-use League\Period\DatePoint;
-use League\Period\Chart;
+use RechercheCreneaux\FBUser;
 use Kigkonsult\Icalcreator\Vcalendar;
 
 
@@ -68,8 +75,8 @@ class FBUtils {
     /**
      * createSequenceFromArrayPeriods
      *
-     * @param  array{League\Period\Period} $periods
-     * @return League\Period\Sequence $sequence
+     * @param  array{Period} $periods
+     * @return Sequence $sequence
      */
     public static function createSequenceFromArrayPeriods($periods) {
         $sequence = new Sequence();
@@ -83,12 +90,12 @@ class FBUtils {
     
     public static function createSequenceFromDT(array $creneaux, $duree) {
 
-        $seqgen = new \League\Period\Sequence();
+        $seqgen = new Sequence();
 
         foreach ($creneaux as $creneau) {
             $dateend = DateTimeImmutable::createFromMutable($creneau);
             $end = $dateend->add(new DateInterval('PT'. $duree . 'M'));
-            $period = \League\Period\Period::fromDate($creneau, $end);
+            $period = Period::fromDate($creneau, $end);
 
             $seqgen->push($period);
         }
@@ -97,7 +104,7 @@ class FBUtils {
     }
 
     public static function addTimezoneToLeaguePeriods($periods, DateTimeZone $dateTimeZone) {
-        $seq = new \League\Period\Sequence();
+        $seq = new Sequence();
 
         foreach ($periods as $period) {
             $dstart = DateTime::createFromImmutable($period->startDate);
@@ -105,13 +112,13 @@ class FBUtils {
             $dend = DateTime::createFromImmutable($period->endDate);
             $dend->setTimezone($dateTimeZone);
 
-            $newPeriod = \League\Period\Period::fromDate($dstart, $dend);
+            $newPeriod = Period::fromDate($dstart, $dend);
             $seq->push($newPeriod);
         }
         return $seq;
     }
 
-    public static function _cmpSeqContainPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : int {
+    public static function _cmpSeqContainPeriod(Sequence $sequence, Period $periodToCompare ) : int {
         foreach ($sequence as $period) {
             // creneau > busy
             if ($period->contains($periodToCompare)) {
@@ -123,7 +130,7 @@ class FBUtils {
         return 0;
     }
 
-    public static function _cmpSeqOverlapPeriod(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : bool {
+    public static function _cmpSeqOverlapPeriod(Sequence $sequence, Period $periodToCompare ) : bool {
         foreach ($sequence as $period) {
             if ($period->overlaps($periodToCompare)) {
                 return true;
@@ -132,7 +139,7 @@ class FBUtils {
         return false;
     }
 
-    public static function _cmpGetIdxOverlapCreneauBusy(League\Period\Sequence $sequence, League\Period\Period $periodToCompare ) : array {
+    public static function _cmpGetIdxOverlapCreneauBusy(Sequence $sequence, Period $periodToCompare ) : array {
         $array = array();
         foreach ($sequence as $period) {
             $testDebut = $period->overlaps($periodToCompare);
