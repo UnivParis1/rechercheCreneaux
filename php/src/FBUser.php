@@ -20,6 +20,8 @@ use Kigkonsult\Icalcreator\Vcalendar;
  */
 class FBUser {
 
+    var $fbParams;
+
     /**
      * @var string url
      */
@@ -67,7 +69,6 @@ class FBUser {
 
     private bool $isChanged;
 
-
     // sert à déterminer si l'agenda d'une personne est bloquée
     private bool $estFullBloquer = false;
 
@@ -85,7 +86,8 @@ class FBUser {
      *
      * @return void
      */
-    private function __construct(String $uid, String $dtz, String $url, $estOptionnel = false) {
+    private function __construct(String $uid, String $dtz, String $url, $estOptionnel, $fbParams) {
+        $this->fbParams = $fbParams;
         $this->uid = $uid;
         $this->dtz = $dtz;
         $this->setDateTimeZone($dtz);
@@ -108,7 +110,7 @@ class FBUser {
      *
      * @return FBUser
      */
-    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux, $estOptionnel = false) : FBUser {
+    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux, $estOptionnel, FBParams $fbParams) : FBUser {
         if (!isset(self::$duration)) {
             self::setDuration($dureeEnMinutes);
         }
@@ -116,11 +118,12 @@ class FBUser {
             self::setCreneauxGenerated($creneaux);
         }
 
-        $fbUser = new self($uid, $dtz, $url, $estOptionnel);
+        $fbUser = new self($uid, $dtz, $url, $estOptionnel, $fbParams);
 
         $fbUser->_selectFreebusy();
         $sequence = $fbUser->_initSequence();
 
+        // if (false)
         if ($fbUser->_testSiAgendaBloque($sequence)) {
             $fbUser->estFullBloquer = true;
         }
@@ -293,13 +296,13 @@ class FBUser {
         $seqToTest = clone($sequence);
 
         // generation de créneaux standards
-        $stdParamClone = new stdClass();
-        $stdParamClone->fromDate = date('Y-m-d');
-        $stdParamClone->duree = 60;
-        $stdParamClone->plagesHoraires = array('9-12', '14-17');
-        $stdParamClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
+        $fbParamsClone = clone($this->fbParams);
+        $fbParamsClone->fromDate = date('Y-m-d');
+        $fbParamsClone->duree = 60;
+        $fbParamsClone->plagesHoraires = array('9-12', '14-17');
+        $fbParamsClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
 
-        $creneauxGeneratedTest = (new FBCreneauxGeneres($stdParamClone, $this->dateTimeZone->getName()))->getCreneauxSeq();
+        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone, $this->dateTimeZone->getName()))->getCreneauxSeq();
 
         $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
         $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
@@ -380,7 +383,7 @@ class FBUser {
     /**
      * Set the value of creneauxGenerated
      *
-     * @return  League\Period\Sequence
+     * @return  \League\Period\Sequence
      */
     public static function setCreneauxGenerated(&$creneauxGenerated)
     {

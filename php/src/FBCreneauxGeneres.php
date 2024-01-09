@@ -11,6 +11,7 @@ use RRule\RRule;
 use DateInterval;
 use DateTimeImmutable;
 use RechercheCreneaux\FBUtils;
+use RechercheCreneaux\FBParams;
 use League\Period\Period as Period;
 use League\Period\Duration as Duration;
 use League\Period\Sequence as Sequence;
@@ -30,15 +31,15 @@ class FBCreneauxGeneres {
     private static Duration $duration;
     private Sequence $creneauxSeq;
 
-    public function __construct(stdClass $stdParams, $dtz) {
-        $this->startDate = $stdParams->fromDate;
-        $this->dureeMinutes = $stdParams->duree;
-        $this->setDuration($stdParams->duree);
-        $this->plagesHoraires = $stdParams->plagesHoraires;
-        $this->days = $stdParams->joursDemandes;
+    public function __construct(FBParams $fbParams, $dtz) {
+        $this->startDate = $fbParams->fromDate;
+        $this->dureeMinutes = $fbParams->duree;
+        $this->setDuration($fbParams->duree);
+        $this->plagesHoraires = $fbParams->plagesHoraires;
+        $this->days = $fbParams->joursDemandes;
         $this->dtz = $dtz;
 
-        $arrPlage = $this->parsePlagesHoraires($stdParams->plagesHoraires);
+        $arrPlage = $this->parsePlagesHoraires($fbParams->plagesHoraires);
 
         $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days);
         $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days);

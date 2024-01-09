@@ -5,6 +5,7 @@ namespace RechercheCreneaux;
 
 use stdClass;
 use RechercheCreneaux\FBUser;
+use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
 
@@ -30,26 +31,26 @@ class FBForm {
 
     var $listDate;
 
-    public function __construct(stdClass $stdParams, stdClass $stdEnv) {
-        $this->creneauxGenerated = (new FBCreneauxGeneres($stdParams, $stdEnv->dtz))->getCreneauxSeq();
+    public function __construct(FBParams $fbParams, stdClass $stdEnv) {
+        $this->creneauxGenerated = (new FBCreneauxGeneres($fbParams, $stdEnv->dtz))->getCreneauxSeq();
 
         $fbUsers = array();
-        foreach ($stdParams->uids as $uid) {
+        foreach ($fbParams->uids as $uid) {
             $estOptionnel = false;
-            if ($stdParams->listUidsOptionnels && array_search($uid, $stdParams->listUidsOptionnels) !== false) {
+            if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
                 $estOptionnel = true;
             }
 
-            $fbUsers[] = FBUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $stdParams->duree, $this->creneauxGenerated, $estOptionnel);
+            $fbUsers[] = FBUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $this->creneauxGenerated, $estOptionnel, $fbParams);
         }
         $this->fbUsers = $fbUsers;
-        $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->dtz, $stdParams->nbcreneaux);
+        $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
     }
 
-    public static function validParams(stdClass $stdParams) {
-        if (($stdParams->uids && sizeof($stdParams->uids) > 1) 
-                && ($stdParams->plagesHoraires && sizeof($stdParams->plagesHoraires) > 0) 
-                && $stdParams->nbcreneaux && $stdParams->duree) 
+    public static function validParams(FBParams $fbParams) {
+        if (($fbParams->uids && sizeof($fbParams->uids) > 1)
+                && ($fbParams->plagesHoraires && sizeof($fbParams->plagesHoraires) > 0)
+                && $fbParams->nbcreneaux && $fbParams->duree)
                 {
                     return true;
                 }

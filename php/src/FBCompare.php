@@ -147,7 +147,7 @@ class FBCompare
 
             $fbCompare = new FBCompare($fbUsersCP, $creneauxGenerated, $dtz, $nbcreneaux);
 
-            if ($fbCompare->getNbResultatsAffichés() > 0) {
+            if ($fbCompare->getNbResultatsAffichés() > 0 && count($fbUsersCP) > 0) {
                 $returnStd->fbCompare = $fbCompare;
                 return $returnStd;
             }

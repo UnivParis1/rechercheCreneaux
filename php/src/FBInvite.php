@@ -7,6 +7,7 @@ use DateTime;
 use stdClass;
 use Exception;
 use RechercheCreneaux\FBUtils;
+use RechercheCreneaux\FBParams;
 use League\Period\Period as Period;
 
 enum TypeInviteAction : int {
@@ -35,18 +36,18 @@ class FBInvite {
     var $mailEffectivementEnvoyeUids;
     var string $from;
 
-    public function __construct($fbForm, $stdParams, $stdEnv, $listDate) {
+    public function __construct($fbForm, $fbParams, $stdEnv, $listDate) {
         $this->fbForm = $fbForm;
         $this->fbUsers = $fbForm->getFbUsers();
 
         $this->listDate = $listDate;
-        $this->modalCreneauStart = $stdParams->modalCreneauStart;
-        $this->modalCreneauEnd = $stdParams->modalCreneauEnd;
+        $this->modalCreneauStart = $fbParams->modalCreneauStart;
+        $this->modalCreneauEnd = $fbParams->modalCreneauEnd;
         $this->stdEnv = $stdEnv;
         $this->dtz = $stdEnv->dtz;
-        $this->titleEvent = $stdParams->titleEvent;
-        $this->descriptionEvent = $stdParams->descriptionEvent;
-        $this->lieuEvent = $stdParams->lieuEvent;
+        $this->titleEvent = $fbParams->titleEvent;
+        $this->descriptionEvent = $fbParams->descriptionEvent;
+        $this->lieuEvent = $fbParams->lieuEvent;
 
         // recupere les infos venant des $fbUsers et converti les stdObj en array
         $this->listUserInfos = $this->_getUserinfos($this->fbUsers);
@@ -56,8 +57,8 @@ class FBInvite {
         $this->stdMails = array();
     }
 
-    public static function verifSiInvitation($stdParams) {
-        if ($stdParams->actionFormulaireValider == 'envoiInvitation' && is_null($stdParams->titleEvent) == false && is_null($stdParams->descriptionEvent) == false) {
+    public static function verifSiInvitation($fbParams) {
+        if ($fbParams->actionFormulaireValider == 'envoiInvitation' && is_null($fbParams->titleEvent) == false && is_null($fbParams->descriptionEvent) == false) {
             return true;
         }
         return false;
