@@ -142,8 +142,13 @@ class FBCompare
 
         for ($i = 0; $i < count($fbUsers); $i++) {
 
-            $returnStd->fbUsersUnsetted[] = $fbUsers[$i];
             unset($fbUsersCP[$i]);
+
+            if ($fbUsers[$i]->getEstOptionnel() || $fbUsers[$i]->getEstFullBloquer()) {
+                continue;
+            }
+
+            $returnStd->fbUsersUnsetted[] = $fbUsers[$i];
 
             $fbCompare = new FBCompare($fbUsersCP, $creneauxGenerated, $dtz, $nbcreneaux);
 
