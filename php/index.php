@@ -66,16 +66,8 @@ if (FBForm::validParams($fbParams)) {
         $listDate[] = $creneauxFinauxArray[$i];
     }
 
-    if (FBInvite::verifSiInvitation($fbParams)) {
-        $fbInvite = new FBInvite($fbForm, $fbParams, $stdEnv, $listDate);
-        $fbInvite->sendInvite();
-        // Lors d'un premier appel, initialisation de jsonSessionInfos
-        if ($fbParams->jsonSessionInfos == null) {
-            if (!isset($_SESSION['inviteEnregistrement'])) {
-                throw new Exception('Erreur session inviteEnregistrement null sur form.php');
-            }
-            $fbParams->jsonSessionInfos = json_encode($_SESSION['inviteEnregistrement']);
-        }
+    if ($fbForm->invitationProcess($listDate)) {
+        $jsonSessionInfos = $fbForm->fbParams->jsonSessionInfos;
     }
 }
 ?>
@@ -99,105 +91,105 @@ if (FBForm::validParams($fbParams)) {
     <script src="./js/min/moment-with-locales.js"></script>
 </head>
 
-<body >
+<body>
     <div id="titre">
         <h1>Recherche de disponibilités</h1>
     </div>
-    <div id="formulaire">
+    <div id="formulaire" class="table-responsive">
         <form id="form" action="">
             <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
-            <table>
-                <tr>
-                    <td class="col-5">
-                        <p>Séléction des utilisateurs</p>
-                        <input id="person" name="person" placeholder="Nom et/ou prenom" />
+            <table class="table-lg">
+                    <tr>
+                        <td class="col-5">
+                            <p>Séléction des utilisateurs</p>
+                            <input id="person" name="person" placeholder="Nom et/ou prenom" />
 
-                        <script>
-                            var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
-                            var urlwsgroup = '<?= $stdEnv->urlwsgroup; ?>';
-                            var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
+                            <script>
+                                var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
+                                var urlwsgroup = '<?= $stdEnv->urlwsgroup; ?>';
+                                var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
 
-                            <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)) : ?>
-                                $(function() {
-                                    $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
-                                });
-                            <?php endif ?>
+                                <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)) : ?>
+                                    $(function() {
+                                        $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
+                                    });
+                                <?php endif ?>
 
-                            <?php if ($fbParams->uids && isset($js_uids)) : ?>
-                                var jsuids = <?= "$js_uids" ?>;
+                                <?php if ($fbParams->uids && isset($js_uids)) : ?>
+                                    var jsuids = <?= "$js_uids" ?>;
 
-                                $(function() {
-                                    setOptionsUid(jsuids);
+                                    $(function() {
+                                        setOptionsUid(jsuids);
 
-                                    if (jsuids.length < 2) {
-                                        errorShow(true);
-                                    }
-                                });
-                            <?php endif ?>
-                            <?php if (isset($fbParams->jsonSessionInfos)): ?>
-                                var jsSessionInfos=JSON.parse('<?= $fbParams->jsonSessionInfos ?>');
-                            <?php endif ?>
-                        </script>
-                    </td>
-                    <td>
-                        <p>Nombre de créneaux</p>
-                        <input id="creneaux" name="creneaux" type="number" value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
-                    </td>
-                    <td>
-                        <p>Durée des créneaux</p>
+                                        if (jsuids.length < 2) {
+                                            errorShow(true);
+                                        }
+                                    });
+                                <?php endif ?>
+                                <?php if (isset($jsonSessionInfos)): ?>
+                                    var jsSessionInfos=JSON.parse('<?= $jsonSessionInfos ?>');
+                                <?php endif ?>
+                            </script>
+                        </td>
+                        <td>
+                            <p>Nombre de créneaux</p>
+                            <input id="creneaux" name="creneaux" type="number" value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
+                        </td>
+                        <td>
+                            <p>Durée des créneaux</p>
 
-                        <select id="duree" name="duree" required=true>
-                            <option value="30"<?= ($fbParams->duree == 30) ? ' selected':'' ?>>30 minutes</option>
-                            <option value="60"<?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected':'' ?>>1h</option>
-                            <option value="90"<?= ($fbParams->duree == 90) ? ' selected':'' ?>>1h30</option>
-                            <option value="120"<?= ($fbParams->duree == 120) ? ' selected':'' ?>>2h</option>
-                            <option value="150"<?= ($fbParams->duree == 150) ? ' selected':'' ?>>2h30</option>
-                            <option value="180"<?= ($fbParams->duree == 180) ? ' selected':'' ?>>3h</option>
-                            <option value="210"<?= ($fbParams->duree == 210) ? ' selected':'' ?>>3h30</option>
-                            <option value="240"<?= ($fbParams->duree == 240) ? ' selected':'' ?>>4h</option>
-                        </select>
-                    </td>
-                    <td class="col-2">
-                        <p>Envoyer requête</p>
-                        <input type="submit" name="submitRequete" value="Recherche de disponibilité" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div id="divpersonselect">
-                            <br />
-                            <p>Utilisateurs sélectionnés</p>
-                            <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
-                            <ul id="person_ul" class="px-0">
-                            </ul>
-                        </div>
-                    </td>
-                    <td colspan="2">
-                        <div id="divjours">
-                            <p>Jours séléctionnés</p>
-                            <fieldset>
-                                <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if (in_array('MO', $fbParams->joursDemandes)) echo 'checked' ?>>Lundi</input>
-                                <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if (in_array('TU', $fbParams->joursDemandes)) echo 'checked' ?>>Mardi</input>
-                                <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if (in_array('WE', $fbParams->joursDemandes)) echo 'checked' ?>>Mercredi</input>
-                                <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if (in_array('TH', $fbParams->joursDemandes)) echo 'checked' ?>>Jeudi</input>
-                                <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes)) echo 'checked' ?>>Vendredi</input>
-                            </fieldset>
-                            <br />
-                        </div>
-                        <div id="divplagehoraire">
-                            <p>Plage horaire</p>
-                            <div id="slider"></div>
-                            <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
-                            <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
-                        </div>
-                    </td>
-                    <td>
-                        <div id="divfromdate">
-                            <p>A partir du</p>
-                            <input required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fbParams->fromDate; ?>" />
-                        </div>
-                    </td>
-                </tr>
+                            <select id="duree" name="duree" required=true>
+                                <option value="30"<?= ($fbParams->duree == 30) ? ' selected':'' ?>>30 minutes</option>
+                                <option value="60"<?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected':'' ?>>1h</option>
+                                <option value="90"<?= ($fbParams->duree == 90) ? ' selected':'' ?>>1h30</option>
+                                <option value="120"<?= ($fbParams->duree == 120) ? ' selected':'' ?>>2h</option>
+                                <option value="150"<?= ($fbParams->duree == 150) ? ' selected':'' ?>>2h30</option>
+                                <option value="180"<?= ($fbParams->duree == 180) ? ' selected':'' ?>>3h</option>
+                                <option value="210"<?= ($fbParams->duree == 210) ? ' selected':'' ?>>3h30</option>
+                                <option value="240"<?= ($fbParams->duree == 240) ? ' selected':'' ?>>4h</option>
+                            </select>
+                        </td>
+                        <td class="col-2">
+                            <p>Envoyer requête</p>
+                            <input type="submit" name="submitRequete" value="Recherche de disponibilité" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divpersonselect">
+                                <br />
+                                <p>Utilisateurs sélectionnés</p>
+                                <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
+                                <ul id="person_ul" class="px-0">
+                                </ul>
+                            </div>
+                        </td>
+                        <td colspan="2">
+                            <div id="divjours">
+                                <p>Jours séléctionnés</p>
+                                <fieldset>
+                                    <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if (in_array('MO', $fbParams->joursDemandes)) echo 'checked' ?>>Lundi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if (in_array('TU', $fbParams->joursDemandes)) echo 'checked' ?>>Mardi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if (in_array('WE', $fbParams->joursDemandes)) echo 'checked' ?>>Mercredi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if (in_array('TH', $fbParams->joursDemandes)) echo 'checked' ?>>Jeudi</input>
+                                    <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes)) echo 'checked' ?>>Vendredi</input>
+                                </fieldset>
+                                <br />
+                            </div>
+                            <div id="divplagehoraire">
+                                <p>Plage horaire</p>
+                                <div id="slider"></div>
+                                <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
+                                <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                            </div>
+                        </td>
+                        <td>
+                            <div id="divfromdate">
+                                <p>A partir du</p>
+                                <input required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fbParams->fromDate; ?>" />
+                            </div>
+                        </td>
+                    </tr>
             </table>
 
             <!-- Modal -->

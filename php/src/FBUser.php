@@ -14,13 +14,30 @@ use League\Period\Sequence;
 use Kigkonsult\Icalcreator\Vcalendar;
 
 /**
- * Description of FBUser
- *
- * @author ebohm
+ * Classe regroupant la gestion des users, fait l'appel au webservice agenda et normalise les créneaux busy
+ * La normalisation vise à faire correspondre les créneaux busy avec les créneaux générés dans le but de faciliter les opérations de comparaisons
+ * Ex: si un créneau busy est à cheval sur 2 créneaux, remplacer le busy par ces 2 créneaux et les considéré comme busy
  */
 class FBUser {
 
-    var $fbParams;
+    /** @var bool $estDisqualifier
+     * si son agenda n'est pas pris en compte dans les résultats
+     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
+     * plus chargés
+     *
+    */
+    public bool $estDisqualifier = false;
+
+    public bool $estOptionnel;
+
+    /**
+     * @var string uid
+     */
+    public string $uid;
+
+    public FBParams $fbParams;
+
+    protected Sequence $creneauxGenerated;
 
     /**
      * @var string url
@@ -32,19 +49,7 @@ class FBUser {
      */
     private static Duration $duration;
 
-    private static Sequence $creneauxGenerated;
-
-    /**
-     * @var string uid
-     */
-    public String $uid;
-
     private stdClass $uidInfos;
-
-    /**
-     * @var string dtz
-     */
-    private String $dtz;
 
     private DateTimeZone $dateTimeZone;
 
@@ -54,30 +59,22 @@ class FBUser {
     private String $content;
 
     /**
-     * @var Vcalendar vcal
-     */
-    private Vcalendar $vcal;
-    /**
      * @var array fbusys
      */
-    private Array $fbusys;
+    public Array $fbusys;
     
     /**
-     * @var Sequence sequence
+     * @var Sequence|null
      */
     private ?Sequence $sequence;
 
     private bool $isChanged;
 
-    // sert à déterminer si l'agenda d'une personne est bloquée
+    /** @var bool $estFullBloquer
+     * sert à déterminer si l'agenda d'une personne est bloquée
+    */
     private bool $estFullBloquer = false;
 
-    // si son agenda n'est pas pris en compte dans les résultats
-    // dans le cas où la recherche donne 0 résultats, on élimine les agendas les
-    // plus chargés
-    public bool $estDisqualifier = false;
-
-    public bool $estOptionnel;
 
     /**
      * __construct
@@ -86,10 +83,9 @@ class FBUser {
      *
      * @return void
      */
-    private function __construct(String $uid, String $dtz, String $url, $estOptionnel, $fbParams) {
+    private function __construct(String $uid, String $dtz, String $url, bool $estOptionnel, FBParams $fbParams) {
         $this->fbParams = $fbParams;
         $this->uid = $uid;
-        $this->dtz = $dtz;
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
         $this->isChanged = false;
@@ -103,32 +99,24 @@ class FBUser {
         $this->content = $content;
     }
 
-    /**
-     * factory
-     *
-     * @param string uid
-     *
-     * @return FBUser
-     */
-    public static function factory(String $uid, String $dtz, String $url, $dureeEnMinutes, &$creneaux, $estOptionnel, FBParams $fbParams) : FBUser {
+    public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, bool $estOptionnel, FBParams $fbParams) : FBUser {
         if (!isset(self::$duration)) {
             self::setDuration($dureeEnMinutes);
         }
-        if (!isset(self::$creneauxGenerated)) {
-            self::setCreneauxGenerated($creneaux);
-        }
 
         $fbUser = new self($uid, $dtz, $url, $estOptionnel, $fbParams);
+        $fbUser->creneauxGenerated = $creneaux;
 
         $fbUser->_selectFreebusy();
-        $sequence = $fbUser->_initSequence();
+        $busySeq = $fbUser->_initSequence();
 
         // if (false)
-        if ($fbUser->_testSiAgendaBloque($sequence)) {
+        if ($fbUser->_testSiAgendaBloque($busySeq)) {
             $fbUser->estFullBloquer = true;
         }
-
-        $fbUser->sequence = $fbUser->_instanceCreneaux($sequence);
+//        file_put_contents($uid.'_busyseq.txt', var_export($busySeq, true));
+        $fbUser->sequence = $fbUser->_instanceCreneaux($busySeq);
+//        file_put_contents($uid.'_busynormseq.txt', var_export($fbUser->sequence, true));
         return $fbUser;
     }
 
@@ -144,12 +132,9 @@ class FBUser {
         $fbusys = $component->getAllFreebusy();
 
         $this->fbusys = $fbusys;
-        $this->vcal = $vcal;
     }
 
     private function _initSequence() : Sequence {
-        $duration = self::$duration;
-
         // crée la séquence puis trie par date de début
         $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
         $sequence = FBUtils::sortSequence($sequence);
@@ -157,15 +142,15 @@ class FBUser {
         return $sequence;
     }
 
-    private function _instanceCreneaux(&$sequence) : Sequence {
+    private function _instanceCreneaux(Sequence &$busySeq) : Sequence {
         $creneaugenSeq = $this->getCreneauxGenerated();
 
-        foreach ($sequence as $busyPeriod) {
+        foreach ($busySeq as $busyPeriod) {
 
-            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $sequence);
+            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $busySeq);
 
-            if ($sequence->indexOf($busyPeriod) !== false) {
-                $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $sequence);
+            if ($busySeq->indexOf($busyPeriod) !== false) {
+                $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $busySeq);
             }
             else {
                 $busyOverlap = false;
@@ -173,14 +158,14 @@ class FBUser {
 
             // Suppression des busys lorsqu'ils sont hors des periodes générées
             if ($busyInclus === false && $busyOverlap === false) {
-                $sequence = $this->_removePeriod($busyPeriod, $sequence);
+                $busySeq = $this->_removePeriod($busyPeriod, $busySeq);
                 continue;
             }
         }
         if ($this->isChanged) {
-            $sequence = FBUtils::sortSequence($sequence);
+            $busySeq = FBUtils::sortSequence($busySeq);
         }
-        return $sequence;
+        return $busySeq;
     }
 
     /**
@@ -188,35 +173,36 @@ class FBUser {
      *
      * Méthode servant à tester les cas où un des créneaux généré enchevêtre une période d'un busy et réciproquement
      *
-     * @param  mixed $creneaugenSeq
-     * @param  mixed $busyPeriod
+     * @param  Sequence $creneaugenSeq
+     * @param  Period $busyPeriod
+     * @param  Sequence $busySeq
      * @return bool
      */
-    private function _instanceCreneauxBusysOverlap(Sequence $creneaugenSeq, Period $busyPeriod, &$sequence) : bool {
+    private function _instanceCreneauxBusysOverlap(Sequence $creneaugenSeq, Period $busyPeriod, Sequence &$busySeq) : bool {
         $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
 
         if ($cmpOverlapCreneau) {
             $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
-            $sequence = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, $sequence);
+            $busySeq = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, $busySeq);
             return true;
         }
         return false;
     }
 
-    private function _replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, &$sequence) : Sequence {
+    private function _replaceWithArrayCreneauxGeneratedIdx(Period $busyPeriod, array $arrayIdxGen, Sequence &$busySeq) : Sequence {
         $creneauxGenerated = $this->getCreneauxGenerated();
 
-        $offset = $sequence->indexOf($busyPeriod);
-        $sequence->remove($offset);
+        $offset = $busySeq->indexOf($busyPeriod);
+        $busySeq->remove($offset);
 
         $indexNew = $offset;
         foreach ($arrayIdxGen as $idxCreneauxGen) {
             $newPeriod = clone ($creneauxGenerated->get($idxCreneauxGen));
-            $sequence->insert($indexNew, $newPeriod);
+            $busySeq->insert($indexNew, $newPeriod);
             $indexNew++;
         }
 
-        return $sequence;
+        return $busySeq;
     }
 
     /**
@@ -224,25 +210,25 @@ class FBUser {
      *
      * Méthode servant à tester les cas où un des créneaux généré inclus une période d'un busy et réciproquement
      *
-     * @param  mixed $creneaugenSeq
-     * @param  mixed $busyPeriod
+     * @param  Sequence $creneaugenSeq
+     * @param  Period $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod, &$sequence) : bool {
+    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod, Sequence &$busySeq) : bool {
         $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
 
-        if ($cmpBusyCreneau === 0) {
+        if ($cmpBusyCreneau == 0) {
             return false;
         }
 
         switch ($cmpBusyCreneau) {
             case 1:
                 // creneau < busy
-                $sequence = $this->_normCreneauxInferieurDuree($busyPeriod, $sequence);
+                $busySeq = $this->_normCreneauxInferieurDuree($busyPeriod, $busySeq);
                 break;
             case -1:
                 // creneau > busy
-                $sequence = $this->_normCreneauxSuperieurDuree($busyPeriod, $sequence);
+                $busySeq = $this->_normCreneauxSuperieurDuree($busyPeriod, $busySeq);
                 break;
             default:
                 throw new Exception("Erreur comparaison creneau _normCreneaux");
@@ -250,7 +236,6 @@ class FBUser {
 
         return true;
     }
-
     private function _normCreneauxInferieurDuree(Period $periodToSplit, &$sequence) : Sequence {
         $offset = $sequence->indexOf($periodToSplit);
         $duration = self::getDuration();
@@ -273,27 +258,27 @@ class FBUser {
         return $sequence;
     }
 
-    private function _normCreneauxSuperieurDuree(Period $period, &$sequence) : Sequence {
-        $idx = $sequence->indexOf($period);
+    private function _normCreneauxSuperieurDuree(Period $period, Sequence &$busySeq) : Sequence {
+        $idx = $busySeq->indexOf($period);
         $duration = $this->getDuration();
-        $sequence->remove($idx);
+        $busySeq->remove($idx);
         $newPeriod = $period->withDurationAfterStart($duration);
-        $sequence->insert($idx, $newPeriod);
+        $busySeq->insert($idx, $newPeriod);
         $this->isChanged = true;
-        return $sequence;
+        return $busySeq;
     }
 
-    private function _removePeriod(Period $period, &$sequence) : Sequence {
-        $idx = $sequence->indexOf($period);
-        $sequence->remove($idx);
+    private function _removePeriod(Period $period, Sequence &$busySeq) : Sequence {
+        $idx = $busySeq->indexOf($period);
+        $busySeq->remove($idx);
         $this->isChanged = true;
-        return $sequence;
+        return $busySeq;
     }
 
-    private function _testSiAgendaBloque(Sequence &$sequence) {
+    private function _testSiAgendaBloque(Sequence &$busySeq) : bool {
 
         $testFBUserclone = clone($this);
-        $seqToTest = clone($sequence);
+        $seqToTest = clone($busySeq);
 
         // generation de créneaux standards
         $fbParamsClone = clone($this->fbParams);
@@ -302,7 +287,7 @@ class FBUser {
         $fbParamsClone->plagesHoraires = array('9-12', '14-17');
         $fbParamsClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
 
-        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone, $this->dateTimeZone->getName()))->getCreneauxSeq();
+        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone))->getCreneauxSeq();
 
         $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
         $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
@@ -350,13 +335,13 @@ class FBUser {
      *
      * @return  Sequence
      */ 
-    public function getSequence()
+    public function getSequence() : Sequence
     {
         return $this->sequence;
     }
 
-    protected function setSequence(&$sequence) {
-        $this->sequence = $sequence;
+    protected function setSequence(Sequence &$busySeq) {
+        $this->sequence = $busySeq;
     }
 
     public function getDateTimeZone()
@@ -374,10 +359,7 @@ class FBUser {
      */
     public function getCreneauxGenerated() : Sequence
     {
-        if (isset(self::$creneauxGenerated))
-            return self::$creneauxGenerated;
-        else
-            return false;
+        return $this->creneauxGenerated;
     }
 
     /**
@@ -385,11 +367,11 @@ class FBUser {
      *
      * @return  \League\Period\Sequence
      */
-    public static function setCreneauxGenerated(&$creneauxGenerated)
+    public function setCreneauxGenerated(&$creneauxGenerated)
     {
-        self::$creneauxGenerated =& $creneauxGenerated;
+        $this->creneauxGenerated =& $creneauxGenerated;
 
-        return self::$creneauxGenerated;
+        return $creneauxGenerated;
     }
 
     public function getEstFullBloquer() {
@@ -401,12 +383,19 @@ class FBUser {
     }
 
     /**
-     * getUidInfos
+     * récupère les informations détaillée relatives à l'utilisateur
+     *
+     * Return stdClass object has following structure
+     * <code>
+     * $uid - uid de l'utilisateur
+     * $displayName - nom affiché de l'utilisateur
+     * $mail - mail de l'utilisateur
+     * </code>
      *
      * return stdObj->uid, stdObj->displayName, stdObj->mail
      * @return stdClass
      */
-    public function getUidInfos() {
+    public function getUidInfos() : stdClass {
         // ajout requête pour avoir mail et name sur api
         return $this->uidInfos;
     }
@@ -417,7 +406,7 @@ class FBUser {
      * @param  string $uid
      * @return stdClass
      */
-    private function _getUidInfos($uid)  {
+    private function _getUidInfos(string $uid)  {
         $urlwsgroup = $_ENV['URLWSGROUP'];
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 

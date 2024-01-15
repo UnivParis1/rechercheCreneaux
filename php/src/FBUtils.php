@@ -9,30 +9,19 @@ use Exception;
 use DateInterval;
 use DateTimeZone;
 use DateTimeImmutable;
-use League\Period\Chart;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
 use Kigkonsult\Icalcreator\Vcalendar;
-
+use stdClass;
 
 /**
- * Description of FBUtils
- *
- * @author ebohm
+ * Classe regroupant les fonctions utils pouvant être utilisés dans plusieurs classes
+ * Principalement les callbacks de tri sur les sequences
  */
 class FBUtils {
 
-    public static function drawSequence(array $periods) {
-        
-        $sequence = FBUtils::createSequenceFromArrayPeriods($periods);
-        $sequence = FBUtils::sortSequence($sequence);
-
-        $dataset = new Chart\Dataset([['period', $sequence->length()], ['sequence', $sequence]]);
-        (new Chart\GanttChart())->stroke($dataset);
-    }
-    
-    public static function sortSequence(Sequence &$sequence) {
+    public static function sortSequence(Sequence &$sequence) : Sequence {
         $sequence->sort(function (Period $period1, Period $period2) : int {
             if ($period1->startDate == $period2->startDate && $period1->endDate == $period2->endDate) {
                 return 0;
@@ -43,16 +32,35 @@ class FBUtils {
         return $sequence;
     }
 
-    public static function sortFBUsersByBusyCount(FBUser ... $fbUsers) : Array {
+    /**
+     * Fonction qui trie les FBUsers selon le nombre de busys brut renvoyés par le webservice
+     *
+     * Le trie s'effectue sur le nombre de créneau busy qui sont renvoyés par le webservice
+     * Ceci ne prend pas en compte les busy générés par l'application elle même mais uniquement les busys
+     * qui sont renvoyés par l'appel à l'api
+     *
+     * @param  array[FBUser]
+     *
+     * @return array[FBUser]
+     */
+    public static function sortFBUsersByBusyCount(FBUser ... $fbUsers) : array {
         $fbUserSort = $fbUsers;
         usort($fbUserSort, function(FBUser $fbusr1, FBUser $fbusr2)  {
-            $cmp = $fbusr1->getSequence()->count() <=> $fbusr2->getSequence()->count();
-            return $cmp;
+            $nbBusys1 = count($fbusr1->fbusys);
+            $nbBusys2 = count($fbusr2->fbusys);
+
+            return $nbBusys1 <=> $nbBusys2;
         });
         return $fbUserSort;
     }
 
-    public static function createSequenceFromArrayFbusy(array $fbusys, $dtz) {
+    /**
+     * @param array{array{DateTime[]}} $fbusys
+     * @param DateTimeZone $dtz
+     *
+     * @return Sequence
+     */
+    public static function createSequenceFromArrayFbusy(array $fbusys, DateTimeZone $dtz) : Sequence {
         
         $sequence = new Sequence();
         
@@ -71,14 +79,14 @@ class FBUtils {
 
         return $sequence;
     }
-        
+
     /**
      * createSequenceFromArrayPeriods
      *
      * @param  array{Period} $periods
      * @return Sequence $sequence
      */
-    public static function createSequenceFromArrayPeriods($periods) {
+    public static function createSequenceFromArrayPeriods(array $periods) : Sequence {
         $sequence = new Sequence();
 
         foreach ($periods as $period) {
@@ -88,7 +96,13 @@ class FBUtils {
         return $sequence;
     }
     
-    public static function createSequenceFromDT(array $creneaux, $duree) {
+    /**
+     * @param array{DateTime} $creneaux
+     * @param int $duree
+     *
+     * @return Sequence
+     */
+    public static function createSequenceFromDT(array $creneaux, int $duree) : Sequence {
 
         $seqgen = new Sequence();
 
@@ -103,7 +117,13 @@ class FBUtils {
         return $seqgen;
     }
 
-    public static function addTimezoneToLeaguePeriods($periods, DateTimeZone $dateTimeZone) {
+    /**
+     * @param array{Period} $periods
+     * @param DateTimeZone $dateTimeZone
+     * 
+     * @return Sequence
+     */
+    public static function addTimezoneToLeaguePeriods(array $periods, DateTimeZone $dateTimeZone) : Sequence {
         $seq = new Sequence();
 
         foreach ($periods as $period) {
@@ -118,8 +138,8 @@ class FBUtils {
         return $seq;
     }
 
-    public static function _cmpSeqContainPeriod(Sequence $sequence, Period $periodToCompare ) : int {
-        foreach ($sequence as $period) {
+    public static function _cmpSeqContainPeriod(Sequence $creneaugenSeq, Period $periodToCompare ) : int {
+        foreach ($creneaugenSeq as $period) {
             // creneau > busy
             if ($period->contains($periodToCompare)) {
                 return -1;
@@ -130,8 +150,8 @@ class FBUtils {
         return 0;
     }
 
-    public static function _cmpSeqOverlapPeriod(Sequence $sequence, Period $periodToCompare ) : bool {
-        foreach ($sequence as $period) {
+    public static function _cmpSeqOverlapPeriod(Sequence $creneaugenSeq, Period $periodToCompare ) : bool {
+        foreach ($creneaugenSeq as $period) {
             if ($period->overlaps($periodToCompare)) {
                 return true;
             }
@@ -139,12 +159,12 @@ class FBUtils {
         return false;
     }
 
-    public static function _cmpGetIdxOverlapCreneauBusy(Sequence $sequence, Period $periodToCompare ) : array {
+    public static function _cmpGetIdxOverlapCreneauBusy(Sequence $creneaugenSeq, Period $periodToCompare ) : array {
         $array = array();
-        foreach ($sequence as $period) {
+        foreach ($creneaugenSeq as $period) {
             $testDebut = $period->overlaps($periodToCompare);
             if ($testDebut) {
-                $array[] = $sequence->indexOf($period);
+                $array[] = $creneaugenSeq->indexOf($period);
             }
         }
         return $array;
@@ -164,14 +184,20 @@ class FBUtils {
     }
 
     /**
-     * requestUidInfo
+     * Appel au webservice pour obtenir des informations supplémentaires sur un utilisateur
+     *
+     * Return stdClass object has following structure
+     * <code>
+     * $uid - uid de l'utilisateur
+     * $displayName - nom affiché de l'utilisateur
+     * $mail - mail de l'utilisateur
+     * </code>
      *
      * @param  string $uid
      * @param  string $urlwsgroup
-    * return stdObj->uid, stdObj->displayName, stdObj->mail
      * @return stdClass
      */
-    public static function requestUidInfo($uid, $urlwsgroup) {
+    public static function requestUidInfo(string $uid, string $urlwsgroup) : stdClass {
         $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail', 'r');
         $ajaxReturn = stream_get_contents($fd);
         fclose($fd);
@@ -189,7 +215,18 @@ class FBUtils {
         throw new Exception($exMsg);
     }
 
-    public static function icalCreationInvitation($listUserinfos, $start, $end, $titleEvent, $descriptionEvent, $lieuEvent, $dtz) {
+    /**
+     * @param array $listUserinfos
+     * @param string $start
+     * @param string $end
+     * @param string $titleEvent
+     * @param string $descriptionEvent
+     * @param string $lieuEvent
+     * @param string $dtz
+     *
+     * @return string
+     */
+    public static function icalCreationInvitation(array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz) : string {
         $uidFirst = array_key_first($listUserinfos);
         $vcalendar = Vcalendar::factory()
             ->setMethod( Vcalendar::REQUEST )
@@ -224,7 +261,7 @@ class FBUtils {
         return $vcalendar->vtimezonePopulate()->createCalendar();
     }
 
-    public static function getMailsSended(array $aMails) {
+    public static function getMailsSended(array $aMails) : array {
         $a = array();
         foreach ($aMails as $aMail) {
             if ($aMail['sended']) {
@@ -234,7 +271,7 @@ class FBUtils {
         return $a;
     }
 
-    public static function formTooltipEnvoyéHTML(array $aMails) {
+    public static function formTooltipEnvoyéHTML(array $aMails) : string {
         $html = "<span>Mails envoyés à : </span><br />";
         $idx=0;
         foreach ($aMails as $aMail) {

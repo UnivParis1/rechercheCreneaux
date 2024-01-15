@@ -7,37 +7,41 @@ namespace RechercheCreneaux;
 use DateTime;
 use stdClass;
 
+/**
+ * Classe regroupant les paramètres globaux
+ * Issu d'une stdclass, a été formalisée comme classe pour plus de clarté
+ */
 class FBParams {
 
-    var $varsHTTPGet;
+    var array $varsHTTPGet;
 
     var $actionFormulaireValider;
 
-    var $uids;
+    var ?array $uids;
 
-    var $nbcreneaux;
+    var ?int $nbcreneaux;
 
-    var $duree;
+    var ?int $duree;
 
-    var $plagesHoraires;
+    var array $plagesHoraires;
 
-    var $joursDemandes;
+    var array $joursDemandes;
 
-    var $fromDate;
+    var string $fromDate;
 
-    var $titleEvent;
+    var ?string $titleEvent;
 
-    var $descriptionEvent;
+    var ?string $descriptionEvent;
 
-    var $lieuEvent;
+    var ?string $lieuEvent;
 
-    var $modalCreneauStart;
+    var ?string $modalCreneauStart;
 
-    var $modalCreneauEnd;
+    var ?string $modalCreneauEnd;
 
-    var $listUidsOptionnels;
+    var ?array $listUidsOptionnels;
 
-    var $jsonSessionInfos;
+    var ?string $jsonSessionInfos;
 
     public function __construct(stdClass $stdEnv) {
 

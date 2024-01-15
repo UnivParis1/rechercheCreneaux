@@ -10,13 +10,14 @@ use DateTimeZone;
 use League\Period\Sequence;
 
 /**
- * Description of FBCompare
- *
- * @author ebohm
+ * Classe de comparaison des différents agenda
  */
 class FBCompare
 {
 
+    /**
+     * @var array{FBUser}
+     */
     public array $arrayFBUsers;
     private Sequence $creneauxGenerated;
     private Sequence $mergedBusys;
@@ -26,7 +27,13 @@ class FBCompare
     private int $nbResultatsAffichés;
     private array $arrayCreneauxAffiches;
 
-    public function __construct($arrayFBUsers, Sequence &$creneauxGenerated, String $dtz, $nbcreneaux)
+    /**
+     * @param array $arrayFBUsers
+     * @param Sequence $creneauxGenerated
+     * @param string $dtz
+     * @param int $nbcreneaux
+     */
+    public function __construct(array $arrayFBUsers, Sequence &$creneauxGenerated, string $dtz, int $nbcreneaux)
     {
         // supprime les fbusers fullbloquer ou optionnel
         foreach ($arrayFBUsers as $key => $fbUser)
@@ -135,7 +142,20 @@ class FBCompare
         return $arrayCreneauxAffiches;
     }
 
-    public static function algo_search_results($fbUsers, $creneauxGenerated, $dtz, $nbcreneaux) {
+    /**
+     * Fonction de recherche de créneaux lorsqu'il n'y a aucun résultat
+     *
+     * Cette fonction enlève un à un les utilisateurs et vérifie s'il y a un résultat.
+     * Si aucuns résultat n'est trouvé, renvoi null
+     *
+     * @param array $fbUsers
+     * @param Sequence $creneauxGenerated
+     * @param string $dtz
+     * @param int $nbcreneaux
+     *
+     * @return stdClass|null
+     */
+    public static function algo_search_results(array $fbUsers, Sequence $creneauxGenerated, string $dtz, int $nbcreneaux) : ?stdClass {
         $returnStd = new stdClass();
         $returnStd->fbUsersUnsetted = array();
         $fbUsersCP = $fbUsers;
@@ -159,21 +179,4 @@ class FBCompare
         }
         return null;
     }
-    /*     public function compareSequences() {
-        $arrayPeriodsIntersected = $this->arrayFBUsers[0]->getSequence()->jsonSerialize();
-        foreach ($this->arrayFBUsers as $FBUser) {
-            $arrayPeriods = $FBUser->getSequence()->jsonSerialize();
-            $arrayPeriodsIntersected = $this->_intersectArrayPeriod($arrayPeriodsIntersected, $arrayPeriods);
-        }
-        return $arrayPeriodsIntersected;
-    }
- */
-
-    /*     private function _intersectArrayPeriod(array $arrayPeriod1, array $arrayPeriod2) {
-        $intersection = array_uintersect($arrayPeriod1, $arrayPeriod2, function($obj1, $obj2) {
-                return $obj1<=>$obj2;
-        });
-        return $intersection;
-    }
- */
 }

@@ -7,7 +7,6 @@ use DateTime;
 use stdClass;
 use Exception;
 use RechercheCreneaux\FBUtils;
-use RechercheCreneaux\FBParams;
 use League\Period\Period as Period;
 
 enum TypeInviteAction : int {
@@ -16,6 +15,9 @@ enum TypeInviteAction : int {
     case NewParticipants = 1;
 }
 
+/**
+ * Gère les invitations agenda ICS envoyés aux participants
+ */
 class FBInvite {
     var FBForm $fbForm;
     var array $fbUsers;
@@ -164,11 +166,11 @@ class FBInvite {
     /**
      * invitationDejaEnvoyeSurCreneau
      *
-     * @param  mixed $dateAffichéeHTML
+     * @param  Period $dateAffichéeHTML
      * @param  array $fbUsers
      * @return stdClass
      */
-    static public function invitationDejaEnvoyeSurCreneau(Period $dateAffichéeHTML, array $fbUsers) {
+    static public function invitationDejaEnvoyeSurCreneau(Period $dateAffichéeHTML, array $fbUsers) : stdClass {
         $returnStd = new stdClass();
 
         if (array_key_exists('inviteEnregistrement', $_SESSION) === false) {

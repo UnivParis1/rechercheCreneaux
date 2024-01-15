@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
-//use FBUtils;
 use DateTime;
-use stdClass;
 use DatePeriod;
 use RRule\RRule;
 use DateInterval;
@@ -16,33 +14,28 @@ use League\Period\Period as Period;
 use League\Period\Duration as Duration;
 use League\Period\Sequence as Sequence;
 
+
 /**
- * Description of FBCreneauxGeneres
- *
- * @author ebohm
+ * Classe servant à générer les créneaux d'après les paramètres demandés (plage horaire, jours, date de fin...)
  */
 class FBCreneauxGeneres {
 
     private String $startDate;
-    private String $dtz;
-    private array $plagesHoraires;
     private array $days;
     private int $dureeMinutes;
     private static Duration $duration;
     private Sequence $creneauxSeq;
 
-    public function __construct(FBParams $fbParams, $dtz) {
+    public function __construct(FBParams $fbParams) {
         $this->startDate = $fbParams->fromDate;
         $this->dureeMinutes = $fbParams->duree;
         $this->setDuration($fbParams->duree);
-        $this->plagesHoraires = $fbParams->plagesHoraires;
         $this->days = $fbParams->joursDemandes;
-        $this->dtz = $dtz;
 
         $arrPlage = $this->parsePlagesHoraires($fbParams->plagesHoraires);
 
-        $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days);
-        $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $this->dureeMinutes, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days);
+        $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days);
+        $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days);
 
         $this->creneauxSeq = new Sequence();
         $this->generateSequence($firstCreneau, $this->dureeMinutes, $arrPlage[0], $arrPlage[1]);
@@ -60,7 +53,7 @@ class FBCreneauxGeneres {
         return $this->creneauxSeq;
     }
 
-    public function getDefaultsCreneaux($startDate, $dureeEnMinutes, int $hours, int $minutely, array $days, int $addXmonth = 1) {
+    public function getDefaultsCreneaux(string $startDate, int $hours, int $minutely, array $days, int $addXmonth = 1) {
         $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $startDate)
                 ->add(new DateInterval('P'. $addXmonth .'M'))
                 ->format('Y-m-d');
