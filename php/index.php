@@ -229,34 +229,21 @@ if (FBForm::validParams($fbParams)) {
     </div>
 
     <?php
-    if (isset($fbForm)) {
-        $fullBloqueUids=array();
-        foreach ($fbForm->getFbUsers() as $fbUser) {
-            if ($fbUser->getEstFullBloquer()) {
-                $fullBloqueUids[] = $fbUser->uid;
-                $aAgendaFullBloquerStr[] = "le participant {$fbUser->getUidInfos()->displayName} n'a aucun créneaux disponibles, les résultats ne prennent pas en compte son agenda";
-            }
-        }
-    }
-
-    if (isset($fbUsersUnsetted) && count($fbUsersUnsetted) > 0) {
-        $aUserUnsetStr[] = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat";
-        foreach ($fbUsersUnsetted as $fbUserUnset) {
-            $aUserUnsetStr[] = "Les résultats ne prennent pas en compte le participant {$fbUserUnset->getUidInfos()->displayName}";
-        }
-    }
-
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {
         echo '<script>var jsListUidsOptionnels='. json_encode($fbParams->listUidsOptionnels) . ';</script>';
     }
     ?>
     <div id="reponse">
-    <?php if (isset($aAgendaFullBloquerStr) && count($aAgendaFullBloquerStr) > 0): ?>
-            <p class='shadow p-3 mb-5 bg-body rounded text-center lead'><?= implode("<br />", $aAgendaFullBloquerStr); ?></p>
-    <?php endif ?>
-
-    <?php if (isset($aUserUnsetStr) && count($aUserUnsetStr) > 1): ?>
-            <p class='shadow p-3 mb-5 bg-body rounded text-left lead'><?= implode("<br />", $aUserUnsetStr); ?></p>
+    <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
+        <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
+        <div class='shadow p-3 mb-5 bg-body rounded lead'>
+            <p><?= $txtFailParticipants ?></p>
+            <ul>
+                <?php foreach ($fbUsersUnsetted as $fbUser): ?>
+                    <li><?= $fbUser->getUidInfos()->displayName ?></li>
+                <?php endforeach ?>
+            </ul>
+        </div>
     <?php endif ?>
 
     <?php if (isset($listDate) && sizeof($listDate) == 0) : ?>

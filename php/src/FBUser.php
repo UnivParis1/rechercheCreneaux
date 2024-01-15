@@ -20,22 +20,26 @@ use Kigkonsult\Icalcreator\Vcalendar;
  */
 class FBUser {
 
-    /** @var bool $estDisqualifier
-     * si son agenda n'est pas pris en compte dans les résultats
-     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
-     * plus chargés
-     *
-    */
-    public bool $estDisqualifier = false;
-
-    public bool $estOptionnel;
-
     /**
      * @var string uid
      */
     public string $uid;
 
     public FBParams $fbParams;
+
+    /** @var bool $estDisqualifier
+     * si son agenda n'est pas pris en compte dans les résultats
+     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
+     * plus chargés
+    */
+    public bool $estDisqualifier = false;
+
+    /** @var bool $estFullBloquer
+     * sert à déterminer si l'agenda d'une personne est bloquée
+    */
+    public bool $estFullBloquer = false;
+
+    public bool $estOptionnel;
 
     protected Sequence $creneauxGenerated;
 
@@ -69,11 +73,6 @@ class FBUser {
     private ?Sequence $sequence;
 
     private bool $isChanged;
-
-    /** @var bool $estFullBloquer
-     * sert à déterminer si l'agenda d'une personne est bloquée
-    */
-    private bool $estFullBloquer = false;
 
 
     /**

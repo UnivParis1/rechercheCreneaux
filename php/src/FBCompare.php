@@ -170,6 +170,8 @@ class FBCompare
 
             $returnStd->fbUsersUnsetted[] = $fbUsers[$i];
 
+            $fbUsers[$i]->estDisqualifier = true;
+
             $fbCompare = new FBCompare($fbUsersCP, $creneauxGenerated, $dtz, $nbcreneaux);
 
             if ($fbCompare->getNbResultatsAffichés() > 0 && count($fbUsersCP) > 0) {

@@ -81,6 +81,23 @@ class FBForm {
         return false;
     }
 
+    public function getFBUsersDisqualifierOrBloquer() : ?array {
+
+        $fbUsers = array();
+        foreach ($this->fbUsers as $fbUser) {
+            if ($fbUser->estDisqualifier || $fbUser->estFullBloquer) {
+                $fbUsers[] = $fbUser;
+            }
+        }
+
+        if (count($fbUsers) > 0) {
+            return $fbUsers;
+        }
+        else {
+            return null;
+        }
+    }
+
     public function getCreneauxGenerated() : Sequence {
         return $this->creneauxGenerated;
     }
