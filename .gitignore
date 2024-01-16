@@ -1,0 +1,8 @@
+/php/nbproject/
+/php/vendor/
+/php/.vscode/
+/php/.idea/
+/php/.env
+/php/composer.lock
+/tests/
+
