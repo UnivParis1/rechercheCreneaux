@@ -31,6 +31,8 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->urlwsgroup = $_ENV['URLWSGROUP'];
 $stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
+$stdEnv->prolongationEntJs = (isset($_ENV['PROLONGATION_ENT_JS'])) ? $_ENV['PROLONGATION_ENT_JS'] : null;
+$stdEnv->prolongationEntArgsCurrent = (isset($_ENV['PROLONGATION_ENT_ARGS_CURRENT'])) ? $_ENV['PROLONGATION_ENT_ARGS_CURRENT'] : null;
 
 $stdEnv->maildebuginvite = ($stdEnv->env == 'dev' && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
 
@@ -75,6 +77,11 @@ if (FBForm::validParams($fbParams)) {
 <!DOCTYPE html>
 
 <head>
+    <?php if (is_null($stdEnv->prolongationEntJs) == false && is_null($stdEnv->prolongationEntArgsCurrent) == false): ?>
+        <script>window.prolongation_ENT_args={current:'<?= $stdEnv->prolongationEntArgsCurrent ?>', delegateAuth: true};</script>
+        <script src="<?= $stdEnv->prolongationEntJs ?>"></script>
+    <?php endif ?>
+
     <link href="./css/bootstrap.min.css" rel="stylesheet" />
     <script src="./js/bootstrap.bundle.min.js"></script>
 
@@ -92,9 +99,6 @@ if (FBForm::validParams($fbParams)) {
 </head>
 
 <body>
-    <div id="titre">
-        <h1>Recherche de disponibilités</h1>
-    </div>
     <div id="formulaire" class="table-responsive">
         <form id="form" action="">
             <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
@@ -234,16 +238,18 @@ if (FBForm::validParams($fbParams)) {
     }
     ?>
     <div id="reponse">
-    <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
-        <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
-        <div class='shadow p-3 mb-5 bg-body rounded lead'>
-            <p><?= $txtFailParticipants ?></p>
-            <ul>
-                <?php foreach ($fbUsersUnsetted as $fbUser): ?>
-                    <li><?= $fbUser->getUidInfos()->displayName ?></li>
-                <?php endforeach ?>
-            </ul>
-        </div>
+    <?php if (isset($fbForm)) : ?>
+        <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
+            <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
+            <div class='shadow p-3 mb-5 bg-body rounded lead'>
+                <p><?= $txtFailParticipants ?></p>
+                <ul>
+                    <?php foreach ($fbUsersUnsetted as $fbUser): ?>
+                        <li><?= $fbUser->getUidInfos()->displayName ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+        <?php endif ?>
     <?php endif ?>
 
     <?php if (isset($listDate) && sizeof($listDate) == 0) : ?>
