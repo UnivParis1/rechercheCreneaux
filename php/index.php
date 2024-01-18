@@ -94,7 +94,7 @@ if (FBForm::validParams($fbParams)) {
     <link href="./css/nouislider.min.css" rel="stylesheet" />
     <script src="./js/nouislider.min.js"></script>
 
-    <script src="./js/min/moment.js"></script>
+    <script src="./js/min/moment.min.js"></script>
     <script src="./js/min/moment-with-locales.js"></script>
 </head>
 
