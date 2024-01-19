@@ -29,7 +29,10 @@ $stdEnv = new stdClass();
 $stdEnv->env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
-$stdEnv->urlwsgroup = $_ENV['URLWSGROUP'];
+$stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
+$stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
+$stdEnv->urlwsgroupUsersInGroup = $_ENV['URLWSGROUP_USERS_IN_GROUP'];
+
 $stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
 $stdEnv->prolongationEntJs = (isset($_ENV['PROLONGATION_ENT_JS'])) ? $_ENV['PROLONGATION_ENT_JS'] : null;
 $stdEnv->prolongationEntArgsCurrent = (isset($_ENV['PROLONGATION_ENT_ARGS_CURRENT'])) ? $_ENV['PROLONGATION_ENT_ARGS_CURRENT'] : null;
@@ -77,8 +80,13 @@ if (FBForm::validParams($fbParams)) {
 <!DOCTYPE html>
 
 <head>
-    <?php if (is_null($stdEnv->prolongationEntJs) == false && is_null($stdEnv->prolongationEntArgsCurrent) == false): ?>
-        <script>window.prolongation_ENT_args={current:'<?= $stdEnv->prolongationEntArgsCurrent ?>', delegateAuth: true};</script>
+    <?php if (is_null($stdEnv->prolongationEntJs) === false && is_null($stdEnv->prolongationEntArgsCurrent) === false && ($_SERVER['HTTP_HOST'] === 'localhost') === false) : ?>
+        <script>
+            window.prolongation_ENT_args = {
+                current: '<?= $stdEnv->prolongationEntArgsCurrent ?>',
+                delegateAuth: true
+            };
+        </script>
         <script src="<?= $stdEnv->prolongationEntJs ?>"></script>
     <?php endif ?>
 
@@ -110,7 +118,9 @@ if (FBForm::validParams($fbParams)) {
 
                             <script>
                                 var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
-                                var urlwsgroup = '<?= $stdEnv->urlwsgroup; ?>';
+                                var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
+                                var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
+                                var urlwsgroupUsersInGroup = '<?= $stdEnv->urlwsgroupUsersInGroup; ?>';
                                 var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
 
                                 <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)) : ?>

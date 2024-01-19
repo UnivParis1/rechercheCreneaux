@@ -406,7 +406,7 @@ class FBUser {
      * @return stdClass
      */
     private function _getUidInfos(string $uid)  {
-        $urlwsgroup = $_ENV['URLWSGROUP'];
+        $urlwsgroup = $_ENV['URLWSGROUP_USER_INFOS'];
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 
         if (is_null($infos))

@@ -48,12 +48,12 @@ function afficherPermutterHide(testFormInput) {
 function setOptionsUid(jsuids) {
     for (uid of jsuids) {
         $.ajax({
-            url: urlwsgroup,
-            jsonp : "callback",
-            data: {'token' : uid, 'maxRows' : 1, 'attrs' : "uid,displayName"},
+            url: urlwsgroupUserInfos,
+            jsonp: "callback",
+            data: { 'token': uid, 'maxRows': 1, 'attrs': "uid,displayName" },
             dataType: 'jsonp',
             success: function (response) {
-                addOptionWithUid(response[0].uid, response[0].displayName);
+                addOptionUid(response[0].uid, response[0].displayName);
             }
         });
     }
@@ -133,25 +133,47 @@ function addOptionUid(uid, displayName) {
 
 function wsCallbackUid(event, ui) {
 
-    let uid = ui.item.uid;
-    let displayName = ui.item.displayName;
+    if (ui.item.category == 'users') {
 
-    addOptionUid(uid, displayName);
+        let uid = ui.item.uid;
+        let displayName = ui.item.displayName;
+
+        addOptionUid(uid, displayName);
+    }
+    else if (ui.item.category == 'structures') {
+        $.ajax({
+            url: urlwsgroupUsersInGroup,
+            jsonp: "callback",
+            data: { key: ui.item.key},
+            dataType: 'jsonp',
+            success: function (response) {
+                let arrayUids = new Array();
+                for (obj of response) {
+                    arrayUids.push(obj.uid);
+                }
+                setOptionsUid(arrayUids);
+            }
+        });
+    }
 
     $(event.target).val('');
 
     return false;
 }
 
-$(function() {
-    $('[data-toggle="tooltip"]').tooltip({'html' : true});
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
 
-    $("#person").autocompleteUser(
-            urlwsgroup, {
-                select: wsCallbackUid,
-                wantedAttr: "uid"
-            }
-    );
+    $("#person").autocompleteUserAndGroup(
+        urlwsgroupUsersAndGroups, {
+        select: wsCallbackUid,
+        wantedAttr: "uid",
+        wsParams: {
+            filter_category: "structures",
+            group_attrs: "businessCategory",
+            filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
+        }
+    });
 
     $("#form").on("submit", function (event) {
         event.preventDefault();
