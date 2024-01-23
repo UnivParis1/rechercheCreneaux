@@ -9,6 +9,7 @@ use stdClass;
 use Exception;
 use DateInterval;
 use Dotenv\Dotenv;
+use phpCAS;
 use IntlDateFormatter;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBForm;
@@ -22,20 +23,46 @@ require 'vendor/autoload.php';
 session_start();
 
 // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
-Dotenv::createImmutable(__DIR__)->safeLoad();
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
+
+// valeures requises dans le fichier .env exception levée si ce n'est pas le cas
+$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE' ,'LOCALE', 'URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
 setlocale(LC_TIME, $_ENV['LOCALE']);
 
 $stdEnv = new stdClass();
 $stdEnv->env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
+
 $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
 $stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
 $stdEnv->urlwsgroupUsersInGroup = $_ENV['URLWSGROUP_USERS_IN_GROUP'];
 
-$stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
-$stdEnv->prolongationEntJs = (isset($_ENV['PROLONGATION_ENT_JS'])) ? $_ENV['PROLONGATION_ENT_JS'] : null;
-$stdEnv->prolongationEntArgsCurrent = (isset($_ENV['PROLONGATION_ENT_ARGS_CURRENT'])) ? $_ENV['PROLONGATION_ENT_ARGS_CURRENT'] : null;
+if (isset($_ENV['PHOTO_SHOW']) && $_ENV['PHOTO_SHOW'] == true) {
+    $dotenv->required('URLWSPHOTO');
+    $stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
+}
+if (isset($_ENV['PROLONGATION_BANDEAU']) && $_ENV['PROLONGATION_BANDEAU'] == true) {
+    $dotenv->required(['PROLONGATION_ENT_JS', 'PROLONGATION_ENT_ARGS_CURRENT']);
+
+    $stdEnv->prolongationEntJs = $_ENV['PROLONGATION_ENT_JS'];
+    $stdEnv->prolongationEntArgsCurrent = $_ENV['PROLONGATION_ENT_ARGS_CURRENT'];
+}
+
+if (isset($_ENV['CAS']) && $_ENV['CAS'] == true) {
+    $dotenv->required(['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL']);
+
+    phpCAS::client("2.0", $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'] , $_ENV['APP_URL']);
+    phpCAS::setNoCasServerValidation();
+
+    phpCAS::forceAuthentication();
+
+    if (!phpCAS::isAuthenticated()) {
+        throw new Exception("Recherche_de_creneaux CAS Error authentificated");
+    }
+    $stdEnv->uidCasUser = phpCAS::getUser();
+}
 
 $stdEnv->maildebuginvite = ($stdEnv->env == 'dev' && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
 

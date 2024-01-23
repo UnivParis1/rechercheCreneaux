@@ -109,13 +109,12 @@ class FBUser {
         $fbUser->_selectFreebusy();
         $busySeq = $fbUser->_initSequence();
 
-        // if (false)
         if ($fbUser->_testSiAgendaBloque($busySeq)) {
             $fbUser->estFullBloquer = true;
         }
-//        file_put_contents($uid.'_busyseq.txt', var_export($busySeq, true));
+
         $fbUser->sequence = $fbUser->_instanceCreneaux($busySeq);
-//        file_put_contents($uid.'_busynormseq.txt', var_export($fbUser->sequence, true));
+
         return $fbUser;
     }
 

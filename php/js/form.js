@@ -140,11 +140,11 @@ function wsCallbackUid(event, ui) {
 
         addOptionUid(uid, displayName);
     }
-    else if (ui.item.category == 'structures') {
+    else if (ui.item.category == 'structures' || ui.item.category == 'local') {
         $.ajax({
-            url: urlwsgroupUsersInGroup,
+            url: urlwsgroupUserInfos,
             jsonp: "callback",
-            data: { key: ui.item.key},
+            data: { key: ui.item.key, CAS: "true", filter_member_of_group: ui.item.key, filter_mail: "*", maxRows: 30, attrs: "uid,displayName"},
             dataType: 'jsonp',
             success: function (response) {
                 let arrayUids = new Array();
@@ -169,8 +169,8 @@ $(function () {
         select: wsCallbackUid,
         wantedAttr: "uid",
         wsParams: {
-            filter_category: "structures",
-            group_attrs: "businessCategory",
+            filter_category: ["structures"],
+            group_attrs: ["businessCategory", "collab"],
             filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
         }
     });
@@ -184,7 +184,6 @@ $(function () {
 
         let vals = getCurrentOptions();
 
-        // if (vals.size > 1) {
         if (testOptions(vals) == true) {
             this.submit();
             return true;

@@ -54,8 +54,11 @@ class FBInvite {
         // recupere les infos venant des $fbUsers et converti les stdObj en array
         $this->listUserInfos = $this->_getUserinfos($this->fbUsers);
 
-// considère le premier user comme l'organisateur ... TODO : prendre en compte l'utilisateur connecté à ent
-        $this->from = $this->fbUsers[0]->getUidInfos()->mail;
+        if (isset($stdEnv->uidCasUser)) {
+            $this->from = (FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos))->mail;
+        } else {
+            $this->from = $this->fbUsers[0]->getUidInfos()->mail;
+        }
         $this->stdMails = array();
     }
 
@@ -118,7 +121,7 @@ class FBInvite {
             $_SESSION['inviteEnregistrement'] = array();
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
-            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : '');
+            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : false);
 
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
