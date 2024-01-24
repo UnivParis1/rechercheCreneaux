@@ -50,7 +50,7 @@ function setOptionsUid(jsuids) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
-            data: { 'token': uid, 'maxRows': 1, 'attrs': "uid,displayName" },
+            data: { token: uid, CAS: true, maxRows: 1, attrs: "uid,displayName" },
             dataType: 'jsonp',
             success: function (response) {
                 addOptionUid(response[0].uid, response[0].displayName);
@@ -144,7 +144,7 @@ function wsCallbackUid(event, ui) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
-            data: { key: ui.item.key, CAS: "true", filter_member_of_group: ui.item.key, filter_mail: "*", maxRows: 30, attrs: "uid,displayName"},
+            data: { key: ui.item.key, CAS: true, filter_member_of_group: ui.item.key, filter_mail: "*", maxRows: 30, attrs: "uid,displayName"},
             dataType: 'jsonp',
             success: function (response) {
                 let arrayUids = new Array();

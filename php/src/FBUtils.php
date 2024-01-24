@@ -226,11 +226,11 @@ class FBUtils {
      *
      * @return string
      */
-    public static function icalCreationInvitation(array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz) : string {
-        $uidFirst = array_key_first($listUserinfos);
+    public static function icalCreationInvitation(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
+    {
         $vcalendar = Vcalendar::factory()
             ->setMethod( Vcalendar::REQUEST )
-            ->setXprop( Vcalendar::X_WR_CALNAME, $listUserinfos[$uidFirst]['displayName'] )
+            ->setXprop( Vcalendar::X_WR_CALNAME, $organisateur->displayName )
             ->setXprop( Vcalendar::X_PROP, "Application Recherche créneaux" )
             ->setXprop( Vcalendar::X_WR_TIMEZONE, $dtz );
 
@@ -242,15 +242,15 @@ class FBUtils {
             // set the time
             ->setDtstart(new DateTime($start,new DateTimezone($dtz)))
             ->setDtend(new DateTime($end,new DateTimezone($dtz)))
-            ->setOrganizer($listUserinfos[$uidFirst]['mail'],
-                [ Vcalendar::CN =>  $listUserinfos[$uidFirst]['displayName']]
+            ->setOrganizer($organisateur->mail,
+                [ Vcalendar::CN =>  $organisateur->displayName]
             );
 
         foreach ($listUserinfos as $userinfo) {
             $event1->setAttendee($userinfo['mail'],
                 [Vcalendar::ROLE     => Vcalendar::REQ_PARTICIPANT,
-                Vcalendar::PARTSTAT => Vcalendar::NEEDS_ACTION,
-                Vcalendar::RSVP     => Vcalendar::TRUE]);
+                    Vcalendar::PARTSTAT => Vcalendar::NEEDS_ACTION,
+                    Vcalendar::RSVP     => Vcalendar::TRUE]);
         }
 
         $event1->setStatus(Vcalendar::CONFIRMED);

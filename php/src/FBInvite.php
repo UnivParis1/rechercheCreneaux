@@ -37,6 +37,7 @@ class FBInvite {
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
     var string $from;
+    private stdClass $organisateur;
 
     public function __construct($fbForm, $fbParams, $stdEnv, $listDate) {
         $this->fbForm = $fbForm;
@@ -55,9 +56,11 @@ class FBInvite {
         $this->listUserInfos = $this->_getUserinfos($this->fbUsers);
 
         if (isset($stdEnv->uidCasUser)) {
-            $this->from = (FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos))->mail;
+            $this->organisateur = FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos);
+            $this->from = $this->organisateur->mail;
         } else {
-            $this->from = $this->fbUsers[0]->getUidInfos()->mail;
+            $this->organisateur = $this->fbUsers[0]->getUidInfos();
+            $this->from = $this->organisateur->mail;
         }
         $this->stdMails = array();
     }
@@ -72,7 +75,7 @@ class FBInvite {
     private function _genereParametresMail($userinfo) {
         $userinfo = (object) $userinfo;
 
-        $icsData = FBUtils::icalCreationInvitation($this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
+        $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
 
         $boundary = uniqid('boundary');
 

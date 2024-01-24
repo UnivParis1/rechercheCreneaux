@@ -37,7 +37,6 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
 $stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
-$stdEnv->urlwsgroupUsersInGroup = $_ENV['URLWSGROUP_USERS_IN_GROUP'];
 
 if (isset($_ENV['PHOTO_SHOW']) && $_ENV['PHOTO_SHOW'] == true) {
     $dotenv->required('URLWSPHOTO');
@@ -53,7 +52,7 @@ if (isset($_ENV['PROLONGATION_BANDEAU']) && $_ENV['PROLONGATION_BANDEAU'] == tru
 if (isset($_ENV['CAS']) && $_ENV['CAS'] == true) {
     $dotenv->required(['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL']);
 
-    phpCAS::client("2.0", $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'] , $_ENV['APP_URL']);
+    phpCAS::client(CAS_VERSION_2_0, $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'] , $_ENV['APP_URL']);
     phpCAS::setNoCasServerValidation();
 
     phpCAS::forceAuthentication();
@@ -64,7 +63,7 @@ if (isset($_ENV['CAS']) && $_ENV['CAS'] == true) {
     $stdEnv->uidCasUser = phpCAS::getUser();
 }
 
-$stdEnv->maildebuginvite = ($stdEnv->env == 'dev' && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
+$stdEnv->maildebuginvite = (($stdEnv->env == 'dev' || $stdEnv->env == 'local') && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
 
 date_default_timezone_set($stdEnv->dtz);
 
@@ -147,7 +146,6 @@ if (FBForm::validParams($fbParams)) {
                                 var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
                                 var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
                                 var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
-                                var urlwsgroupUsersInGroup = '<?= $stdEnv->urlwsgroupUsersInGroup; ?>';
                                 var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
 
                                 <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)) : ?>
