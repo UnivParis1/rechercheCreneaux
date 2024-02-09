@@ -27,7 +27,7 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
-$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE' ,'LOCALE', 'URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
+$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE' ,'LOCALE', 'URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS', 'RECHERCHE_SUR_X_JOURS']);
 setlocale(LC_TIME, $_ENV['LOCALE']);
 
 $stdEnv = new stdClass();
@@ -37,6 +37,7 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
 $stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
+$stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
 if (isset($_ENV['PHOTO_SHOW']) && $_ENV['PHOTO_SHOW'] == true) {
     $dotenv->required('URLWSPHOTO');

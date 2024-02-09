@@ -23,6 +23,7 @@ class FBCreneauxGeneres {
     private String $startDate;
     private array $days;
     private int $dureeMinutes;
+    private int $rechercheSurXJours;
     private static Duration $duration;
     private Sequence $creneauxSeq;
 
@@ -31,11 +32,12 @@ class FBCreneauxGeneres {
         $this->dureeMinutes = $fbParams->duree;
         $this->setDuration($fbParams->duree);
         $this->days = $fbParams->joursDemandes;
+        $this->rechercheSurXJours = $fbParams->rechercheSurXJours;
 
         $arrPlage = $this->parsePlagesHoraires($fbParams->plagesHoraires);
 
-        $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days);
-        $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days);
+        $firstCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[0]['h'], $arrPlage[0]['i'], $this->days, $this->rechercheSurXJours);
+        $secondCreneau = $this->getDefaultsCreneaux($this->startDate, $arrPlage[2]['h'], $arrPlage[2]['i'], $this->days, $this->rechercheSurXJours);
 
         $this->creneauxSeq = new Sequence();
         $this->generateSequence($firstCreneau, $this->dureeMinutes, $arrPlage[0], $arrPlage[1]);
@@ -53,9 +55,9 @@ class FBCreneauxGeneres {
         return $this->creneauxSeq;
     }
 
-    public function getDefaultsCreneaux(string $startDate, int $hours, int $minutely, array $days, int $addXmonth = 1) {
+    public function getDefaultsCreneaux(string $startDate, int $hours, int $minutely, array $days, int $rechercheSurXJours) {
         $dateEndCreneau = DateTime::createFromFormat('Y-m-d', $startDate)
-                ->add(new DateInterval('P'. $addXmonth .'M'))
+                ->add(new DateInterval('P'. $rechercheSurXJours .'D'))
                 ->format('Y-m-d');
 
         return self::generateCreneaux($startDate, $dateEndCreneau, array($hours), $days, array($minutely));
