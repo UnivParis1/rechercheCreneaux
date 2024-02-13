@@ -169,8 +169,7 @@ $(function () {
         select: wsCallbackUid,
         wantedAttr: "uid",
         wsParams: {
-            filter_category: ["structures"],
-            group_attrs: ["businessCategory", "collab"],
+            filter_category: "structures|collab",
             filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
         }
     });
