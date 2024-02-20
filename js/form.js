@@ -50,10 +50,12 @@ function setOptionsUid(jsuids) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
-            data: { token: uid, CAS: true, maxRows: 1, attrs: "uid,displayName" },
+            data: { token: uid, CAS: true, maxRows: 1, attrs: "uid,displayName,mail" },
             dataType: 'jsonp',
             success: function (response) {
-                addOptionUid(response[0].uid, response[0].displayName);
+                if (typeof response[0].mail != "undefined") {
+                    addOptionUid(response[0].uid, response[0].displayName);
+                }
             }
         });
     }
@@ -138,7 +140,11 @@ function wsCallbackUid(event, ui) {
         let uid = ui.item.uid;
         let displayName = ui.item.displayName;
 
-        addOptionUid(uid, displayName);
+        if (typeof ui.item.mail == "undefined") {
+            alert("Le courriel de l'utilisateur " + ui.item.displayName + " étant absent, son entrée n'est pas ajoutée à la liste");
+        } else {
+            addOptionUid(uid, displayName);
+        }
     }
     else if (ui.item.category == 'structures' || ui.item.category == 'local') {
         $.ajax({
@@ -156,7 +162,7 @@ function wsCallbackUid(event, ui) {
         });
     }
 
-    $(event.target).val('');
+    $('input#person').val('');
 
     return false;
 }
