@@ -134,12 +134,10 @@ if (FBForm::validParams($fbParams)) {
 </head>
 
 <body>
-    <div id="formulaire" class="table-responsive">
-        <form id="form" action="">
+        <form id="form" class="container" action="">
             <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
-            <table class="table-lg">
-                    <tr>
-                        <td class="col-5">
+                    <div class="row">
+                        <div class="col">
                             <p>Séléction des utilisateurs</p>
                             <input id="person" name="person" placeholder="Nom et/ou prenom" />
 
@@ -170,12 +168,12 @@ if (FBForm::validParams($fbParams)) {
                                     var jsSessionInfos=JSON.parse('<?= $jsonSessionInfos ?>');
                                 <?php endif ?>
                             </script>
-                        </td>
-                        <td>
+                        </div>
+                        <div class="col">
                             <p>Nombre de créneaux</p>
                             <input id="creneaux" name="creneaux" type="number" value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
-                        </td>
-                        <td>
+                        </div>
+                        <div class="col">
                             <p>Durée des créneaux</p>
 
                             <select id="duree" name="duree" required=true>
@@ -188,14 +186,14 @@ if (FBForm::validParams($fbParams)) {
                                 <option value="210"<?= ($fbParams->duree == 210) ? ' selected':'' ?>>3h30</option>
                                 <option value="240"<?= ($fbParams->duree == 240) ? ' selected':'' ?>>4h</option>
                             </select>
-                        </td>
-                        <td class="col-2">
+                        </div>
+                        <div class="col-2">
                             <p>Envoyer requête</p>
-                            <input type="submit" name="submitRequete" value="Recherche de disponibilité" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
+                            <input class="btn btn-sm btn-primary rounded" type="submit" name="submitRequete" value="Recherche de disponibilité" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
                             <div id="divpersonselect">
                                 <br />
                                 <p>Utilisateurs sélectionnés</p>
@@ -203,8 +201,8 @@ if (FBForm::validParams($fbParams)) {
                                 <ul id="person_ul" class="px-0">
                                 </ul>
                             </div>
-                        </td>
-                        <td colspan="2">
+                        </div>
+                        <div class="col-6">
                             <div id="divjours">
                                 <p>Jours séléctionnés</p>
                                 <fieldset>
@@ -222,15 +220,12 @@ if (FBForm::validParams($fbParams)) {
                                 <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
                                 <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                             </div>
-                        </td>
-                        <td>
-                            <div id="divfromdate">
+                        </div>
+                        <div class="col-2 d-inline-flex flex-column justify-content-center">
                                 <p>A partir du</p>
-                                <input required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fbParams->fromDate; ?>" />
-                            </div>
-                        </td>
-                    </tr>
-            </table>
+                                <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fbParams->fromDate; ?>" />
+                        </div>
+                    </div>
 
             <!-- Modal -->
             <div class="modal fade" id="creneauMailInput" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
@@ -266,14 +261,13 @@ if (FBForm::validParams($fbParams)) {
                 </div>
             </div>
         </form>
-    </div>
 
     <?php
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {
         echo '<script>var jsListUidsOptionnels='. json_encode($fbParams->listUidsOptionnels) . ';</script>';
     }
     ?>
-    <div id="reponse">
+    <div id="reponse" class="container my-4">
     <?php if (isset($fbForm)) : ?>
         <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
             <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
