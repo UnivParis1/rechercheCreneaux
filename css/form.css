@@ -13,19 +13,23 @@ p {
     color: #707070;  
 }
 
+#form.container {
+    border-right: 1px #707070 dotted;
+}
+
 #form.container > .row { 
     background: #eeeff0; 
 }
 
 #form.container > .row:nth-child(even) 
 {
-    border-top: 1px solid #707070;    
+    border-top: 1px #707070 dotted;
 }
 
 #form.container > .row:nth-child(odd) 
 {
     border-top: 1px #707070 dotted;
-    border-bottom: 1px solid #707070;
+    border-bottom: 1px #707070 dotted;
 }
 
 #form.container > .row p {
