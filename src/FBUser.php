@@ -405,7 +405,8 @@ class FBUser {
      * @return stdClass
      */
     private function _getUidInfos(string $uid)  {
-        $urlwsgroup = $_ENV['URLWSGROUP_USER_INFOS'];
+        $urlwsgroup = $_ENV['URLWSGROUP_USER_INFOS'] . ((strtolower($_ENV['ENV']) === 'prod') ? 'Trusted':'');
+
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 
         if (is_null($infos))
