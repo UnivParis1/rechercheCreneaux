@@ -405,7 +405,9 @@ class FBUser {
      * @return stdClass
      */
     private function _getUidInfos(string $uid)  {
-        $urlwsgroup = $_ENV['URLWSGROUP_USER_INFOS'] . ((strtolower($_ENV['ENV']) === 'prod') ? 'Trusted':'');
+        $urlwsgroupUserInfos = $this->fbParams->stdEnv->urlwsgroupUserInfos;
+        $env = $this->fbParams->stdEnv->env;
+        $urlwsgroup = $urlwsgroupUserInfos . ((strtolower($env) === 'prod') ? 'Trusted':'');
 
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
 

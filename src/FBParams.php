@@ -45,8 +45,11 @@ class FBParams {
 
     var ?string $jsonSessionInfos;
 
+    public stdClass $stdEnv;
+
     public function __construct(stdClass $stdEnv) {
 
+        $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
         $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? $stdEnv->varsHTTPGet['listuids'] : null;
         $this->nbcreneaux = isset($stdEnv->varsHTTPGet['creneaux']) ? (int) $stdEnv->varsHTTPGet['creneaux'] : null;
