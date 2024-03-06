@@ -7,7 +7,9 @@ namespace RechercheCreneaux;
 use DateTime;
 use stdClass;
 use DateTimeZone;
+use League\Period\Period;
 use League\Period\Sequence;
+
 
 /**
  * Classe de comparaison des différents agenda
@@ -79,16 +81,68 @@ class FBCompare
         return $seq;
     }
 
-    private function _testPeriodsDebug($sequence, $periodToCompare)
+    /**
+     * Méthode de comparaison entre les créneaux générés et les créneaux busys
+     *
+     * Cette méthode renvoie Vrai si sur les créneaux générés, certains chevauchent 
+     * ou correspondent à des créneaux renvoyés busy par l'api de l'utilisateur
+     *
+     * @param Sequence $sequence
+     * @param Period $periodToCompare
+     * @return boolean
+     */
+    private function _testPeriodsDebug(Sequence $sequence, Period $periodToCompare) : bool
     {
         foreach ($sequence as $period) {
-            // optimisation performance
-            if ( ! ($period->isDuring($periodToCompare) === false &&
-                    $period->overlaps($periodToCompare) === false &&
-                    $period->contains($periodToCompare) === false &&
-                    $periodToCompare->isDuring($period) === false &&
-                    $periodToCompare->overlaps($period) === false &&
-                    $periodToCompare->contains($period) === false)) return true;
+            $isDuring = $period->isDuring($periodToCompare);
+            if ($isDuring) {
+                echo '_testPeriodsDebug : isDuring';
+                continue;
+            }
+
+            if (!$isDuring)
+                $overlaps = $period->overlaps($periodToCompare);
+                if ($overlaps) {
+                    echo '_testPeriodsDebug : overlaps';
+                    continue;
+                }
+
+            if (!($isDuring && $overlaps))
+                $contains = $period->contains($periodToCompare);
+                if ($contains) {
+                    echo '_testPeriodsDebug : contains';
+                    continue;
+                }
+
+            if (!($isDuring && $overlaps && $contains))
+                $pIsDuring = $periodToCompare->isDuring($period);
+                if ($pIsDuring) {
+                    echo '_testPeriodsDebug : p_isDuring';
+                    continue;
+                }
+
+            if (!($isDuring && $overlaps && $contains && $pIsDuring))
+                $pOverlaps = $periodToCompare->overlaps($period);
+                if ($pOverlaps) {
+                    echo '_testPeriodsDebug : p_overlaps';
+                    continue;
+                }
+
+            if (!($isDuring && $overlaps && $contains && $pIsDuring && $pOverlaps))
+                $pContains = $periodToCompare->contains($period);
+                if ($pContains) {
+                    echo '_testPeriodsDebug : p_contains';
+                    continue;
+                }
+
+            if (($isDuring === false &&
+                 $overlaps === false &&
+                 $contains === false &&
+                 $pIsDuring === false &&
+                 $pOverlaps === false &&
+                 $pContains === false) == false) {
+                     return true;
+                 }
         }
         return false;
     }
