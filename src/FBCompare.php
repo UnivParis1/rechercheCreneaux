@@ -95,54 +95,22 @@ class FBCompare
     {
         foreach ($sequence as $period) {
             $isDuring = $period->isDuring($periodToCompare);
-            if ($isDuring) {
-                echo '_testPeriodsDebug : isDuring';
-                continue;
-            }
+            if ($isDuring) return true;
 
-            if (!$isDuring)
-                $overlaps = $period->overlaps($periodToCompare);
-                if ($overlaps) {
-                    echo '_testPeriodsDebug : overlaps';
-                    continue;
-                }
+            $overlaps = $period->overlaps($periodToCompare);
+            if ($overlaps) return true;
 
-            if (!($isDuring && $overlaps))
-                $contains = $period->contains($periodToCompare);
-                if ($contains) {
-                    echo '_testPeriodsDebug : contains';
-                    continue;
-                }
+            $contains = $period->contains($periodToCompare);
+            if ($contains) return true;
 
-            if (!($isDuring && $overlaps && $contains))
-                $pIsDuring = $periodToCompare->isDuring($period);
-                if ($pIsDuring) {
-                    echo '_testPeriodsDebug : p_isDuring';
-                    continue;
-                }
+            $pIsDuring = $periodToCompare->isDuring($period);
+            if ($pIsDuring) return true;
 
-            if (!($isDuring && $overlaps && $contains && $pIsDuring))
-                $pOverlaps = $periodToCompare->overlaps($period);
-                if ($pOverlaps) {
-                    echo '_testPeriodsDebug : p_overlaps';
-                    continue;
-                }
+            $pOverlaps = $periodToCompare->overlaps($period);
+            if ($pOverlaps) return true;
 
-            if (!($isDuring && $overlaps && $contains && $pIsDuring && $pOverlaps))
-                $pContains = $periodToCompare->contains($period);
-                if ($pContains) {
-                    echo '_testPeriodsDebug : p_contains';
-                    continue;
-                }
-
-            if (($isDuring === false &&
-                 $overlaps === false &&
-                 $contains === false &&
-                 $pIsDuring === false &&
-                 $pOverlaps === false &&
-                 $pContains === false) == false) {
-                     return true;
-                 }
+            $pContains = $periodToCompare->contains($period);
+            if ($pContains) return true;
         }
         return false;
     }
