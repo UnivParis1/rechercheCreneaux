@@ -124,7 +124,8 @@ class FBInvite {
             $_SESSION['inviteEnregistrement'] = array();
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
-            $mailAddr = ($_ENV['ENV'] == 'PROD') ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : false);
+            $mailAddr = ($_ENV['ENV'] == strtolower('PROD')) ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : false);
+            if (! $mailAddr) throw new Exception("mailAddr false, erreur environnement, MAIL_DEV_SEND_DEBUG non renseigné dans .env ?");
 
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
