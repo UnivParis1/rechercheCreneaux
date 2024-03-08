@@ -11,9 +11,12 @@ use RechercheCreneaux\FBUtils;
 class FBCompareTest extends TestCase
 {
     public function testgetNbResultatsAffichés() {
-        $stdEnv = unserialize(file_get_contents('tests/stdenv.json'));
-        $fbParams = unserialize(file_get_contents('tests/fbparams.json'));
-        $fbForm = unserialize(file_get_contents('tests/fbform.json'));
+        $testId = getenv("FBCompareTestId");
+        $path = "tests/FBCompareTest-$testId";
+
+        $stdEnv = unserialize(file_get_contents("$path/stdenv.json"));
+        $fbParams = unserialize(file_get_contents("$path/fbparams.json"));
+        $fbForm = unserialize(file_get_contents("$path/fbform.json"));
 
         $reFbForm = new \ReflectionObject($fbForm);
 
