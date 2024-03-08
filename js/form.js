@@ -150,7 +150,7 @@ function wsCallbackUid(event, ui) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
-            data: { key: ui.item.key, CAS: true, filter_member_of_group: ui.item.key, filter_mail: "*", maxRows: 30, attrs: "uid,displayName"},
+            data: { key: ui.item.key, CAS: true, filter_member_of_group: ui.item.key, filter_mail: "*", maxRows: 100, attrs: "uid,displayName"},
             dataType: 'jsonp',
             success: function (response) {
                 let arrayUids = new Array();
