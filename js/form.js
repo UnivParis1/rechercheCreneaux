@@ -175,6 +175,7 @@ $(function () {
         select: wsCallbackUid,
         wantedAttr: "uid",
         wsParams: {
+            CAS: 1,
             filter_category: "groups",
             filter_group_cn: "collab.*|employees.*",
             filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
