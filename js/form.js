@@ -71,7 +71,7 @@ function addOptionWithUid(uid, displayName) {
 
     newLi.append($('<input>').attr('type', 'text').attr('name', 'listuids[]').attr('multiple', true).attr('checked', true).val(uid).css('display', 'none'));
 
-    newLi.append('<img class="col-1 rounded-circle" alt="' + uid + '" src="' + urlwsphoto + '?uid='+ uid + '" />');
+    newLi.append('<img class="col-2 rounded-circle" alt="' + uid + '" src="' + urlwsphoto + '?uid='+ uid + '" />');
 
     newLi.append($('<label>').attr('class', 'col-3 px-0').text(displayName));
 
