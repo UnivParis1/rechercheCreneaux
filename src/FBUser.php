@@ -143,7 +143,14 @@ class FBUser {
         $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
         $sequence = FBUtils::sortSequence($sequence);
 
-        return $sequence;
+        $periodBefore = Period::after(new \DateTime(), "{$this->fbParams->rechercheSurXJours} DAYS");
+
+        return $sequence->filter(function (Period $interval) use ($periodBefore)  {
+            if ($interval->endDate->getTimestamp() <= $periodBefore->endDate->getTimestamp()) {
+                return true;
+            }
+            return false;
+        });
     }
 
     private function _instanceCreneaux(Sequence &$busySeq) : Sequence {
