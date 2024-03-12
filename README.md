@@ -7,6 +7,10 @@ Ce projet vise à développer un outil pour la recherche de créneaux dans un pl
 
 Le but est de fournir une interface simple et intuitive pour rechercher des créneaux disponibles en fonction de différents critères, tels que les agendas par utilisateur, la date, l'heure, la durée
 
+## Principe de fonctionnement
+
+Le projet se base sur la récupération des évenements FREE/BUSY depuis l'api d'un calendrier (kronoligh/google/...).
+
 
 # Fonctionnalités
 
@@ -28,11 +32,18 @@ qui renvoie les identifiants des utilisateurs de type "uid"
 Dans le cadre du développement du projet, l'appel se fait sur un agenda kronolith
 avec le paramètre du fichier .env : URL_FREEBUSY
 
-# Configuration
 
-+ Fichier .env : regroupe les configurations
+# Quickstart
 
 La configuration se fait en créant un fichier .env sur la base du fichier .env.example
+
+# Configuration
+
+## Fichier .env
+
++ Fichier .env : mis à la racine du projet, variable de configurations
+
+### Variables indispensables
 
 + URL_FREEBUSY : url api récupération du calendrier.
 

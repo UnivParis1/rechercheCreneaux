@@ -24,10 +24,12 @@ session_start();
 
 // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
 $dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->safeLoad();
+$dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
-$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE' ,'LOCALE', 'URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS', 'RECHERCHE_SUR_X_JOURS']);
+$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
+$dotenv->required('RECHERCHE_SUR_X_JOURS')->isInteger();
+
 setlocale(LC_TIME, $_ENV['LOCALE']);
 
 $stdEnv = new stdClass();
@@ -35,25 +37,37 @@ $stdEnv->env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 
 $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
-$stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
-$stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
 $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
-if (isset($_ENV['PHOTO_SHOW']) && $_ENV['PHOTO_SHOW'] == true) {
+$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS'])->isBoolean();
+
+$stdEnv->wsgroup = (boolean) json_decode(strtolower($_ENV['WSGROUP']));
+$stdEnv->photoShow = (boolean) json_decode(strtolower($_ENV['PHOTO_SHOW']));
+$stdEnv->prolongationBandeau = (boolean) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
+$stdEnv->cas = (boolean) json_decode(strtolower($_ENV['CAS']));
+
+if ($stdEnv->wsgroup === true) {
+    $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
+    $stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
+    $stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
+}
+
+if ($stdEnv->photoShow === true) {
     $dotenv->required('URLWSPHOTO');
     $stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
 }
-if (isset($_ENV['PROLONGATION_BANDEAU']) && $_ENV['PROLONGATION_BANDEAU'] == true) {
+
+if ($stdEnv->prolongationBandeau === true) {
     $dotenv->required(['PROLONGATION_ENT_JS', 'PROLONGATION_ENT_ARGS_CURRENT']);
 
     $stdEnv->prolongationEntJs = $_ENV['PROLONGATION_ENT_JS'];
     $stdEnv->prolongationEntArgsCurrent = $_ENV['PROLONGATION_ENT_ARGS_CURRENT'];
 }
 
-if (isset($_ENV['CAS']) && $_ENV['CAS'] == true) {
+if ($stdEnv->cas === true) {
     $dotenv->required(['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL']);
 
-    phpCAS::client(CAS_VERSION_2_0, $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'] , $_ENV['APP_URL']);
+    phpCAS::client(CAS_VERSION_2_0, $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'], $_ENV['APP_URL']);
     phpCAS::setNoCasServerValidation();
 
     phpCAS::forceAuthentication();
@@ -80,7 +94,7 @@ if (FBForm::validParams($fbParams)) {
     $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
 
     if ($nbResultatsAffichés == 0 && sizeof($fbForm->getFbUsers()) > 2) {
-        $fbUserSortNbs = array_reverse(FBUtils::sortFBUsersByBusyCount(... $fbForm->getFbUsers()));
+        $fbUserSortNbs = array_reverse(FBUtils::sortFBUsersByBusyCount(...$fbForm->getFbUsers()));
 
         if (!is_null($stdNewFBCompare = FBCompare::algo_search_results($fbUserSortNbs, $fbForm->getCreneauxGenerated(), $stdEnv->dtz, $fbParams->nbcreneaux))) {
             $fbForm->setFbCompare($stdNewFBCompare->fbCompare);
@@ -98,16 +112,17 @@ if (FBForm::validParams($fbParams)) {
         $listDate[] = $creneauxFinauxArray[$i];
     }
 
-    if ($fbForm->invitationProcess($listDate)) {
-        $jsonSessionInfos = $fbForm->fbParams->jsonSessionInfos;
+    if ($stdEnv->wsgroup) {
+        if ($fbForm->invitationProcess($listDate)) {
+            $jsonSessionInfos = $fbForm->fbParams->jsonSessionInfos;
+        }
     }
 }
 ?>
 
 <!DOCTYPE html>
-
 <head>
-    <?php if (is_null($stdEnv->prolongationEntJs) === false && is_null($stdEnv->prolongationEntArgsCurrent) === false && ($_SERVER['HTTP_HOST'] === 'localhost') === false) : ?>
+    <?php if ($stdEnv->prolongationBandeau === true): ?>
         <script>
             window.prolongation_ENT_args = {
                 current: '<?= $stdEnv->prolongationEntArgsCurrent ?>',
@@ -118,195 +133,210 @@ if (FBForm::validParams($fbParams)) {
     <?php endif ?>
 
     <link href="./css/bootstrap.min.css" rel="stylesheet" />
-    <script src="./js/bootstrap.bundle.min.js"></script>
-
-    <script src="./js/jquery.min.js"></script>
-    <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
-
     <link href="./css/form.css" rel="stylesheet" />
-    <script type='text/javascript' src='./js/form.js'></script>
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/jquery.min.js"></script>
+
+    <?php if ($stdEnv->wsgroup): ?>
+        <script type='text/javascript'
+            src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+        <script type='text/javascript' src='./js/form.js'></script>
+    <?php else: ?>
+        <script type='text/javascript' src='./js/noform.js'></script>
+    <?php endif ?>
 
     <link href="./css/nouislider.min.css" rel="stylesheet" />
     <script src="./js/nouislider.min.js"></script>
+    <script src="./js/slider.js"></script>
 
     <script src="./js/min/moment.min.js"></script>
     <script src="./js/min/moment-with-locales.js"></script>
 </head>
 
 <body>
-        <form id="form" class="container" action="">
-            <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
-                    <div class="row">
-                        <div class="col">
-                            <p>Séléction des utilisateurs</p>
-                            <input id="person" name="person" placeholder="Nom et/ou prenom" />
+    <form id="form" class="container" action="">
+        <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
+        <div class="row">
+            <div class="col">
+                <p>Séléction des utilisateurs</p>
+                <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
 
-                            <script>
-                                var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
-                                var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
-                                var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
-                                var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
+                <script>
+                    var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
+                    let slider = document.getElementById('slider');
+                    <?php if ($stdEnv->wsgroup): ?>
+                        var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
+                        var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
-                                <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)) : ?>
-                                    $(function() {
-                                        $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
-                                    });
-                                <?php endif ?>
+                        <?php if ($fbParams->uids && isset($js_uids)): ?>
+                            var jsuids = <?= "$js_uids" ?>;
 
-                                <?php if ($fbParams->uids && isset($js_uids)) : ?>
-                                    var jsuids = <?= "$js_uids" ?>;
+                            $(function () {
+                                setOptionsUid(jsuids);
 
-                                    $(function() {
-                                        setOptionsUid(jsuids);
+                                if (jsuids.length < 2) {
+                                    errorShow(true);
+                                }
+                            });
+                        <?php endif ?>
+                        <?php if (isset($jsonSessionInfos)): ?>
+                            var jsSessionInfos = JSON.parse('<?= $jsonSessionInfos ?>');
+                        <?php endif ?>
+                    <?php else: // sans wsgroup?>
+                        <?php if ($fbParams->uids && isset($js_uids)): ?>
+                            var jsuids = <?= "$js_uids" ?>;
 
-                                        if (jsuids.length < 2) {
-                                            errorShow(true);
-                                        }
-                                    });
-                                <?php endif ?>
-                                <?php if (isset($jsonSessionInfos)): ?>
-                                    var jsSessionInfos=JSON.parse('<?= $jsonSessionInfos ?>');
-                                <?php endif ?>
-                            </script>
-                        </div>
-                        <div class="col">
-                            <p>Nombre de créneaux</p>
-                            <input id="creneaux" name="creneaux" type="number" value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
-                        </div>
-                        <div class="col">
-                            <p>Durée des créneaux</p>
+                            $(function () {
+                                setOptionsUid(jsuids);
+                            });
+                        <?php endif ?>
+                    <?php endif ?>
 
-                            <select id="duree" name="duree" required=true>
-                                <option value="30"<?= ($fbParams->duree == 30) ? ' selected':'' ?>>30 minutes</option>
-                                <option value="60"<?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected':'' ?>>1h</option>
-                                <option value="90"<?= ($fbParams->duree == 90) ? ' selected':'' ?>>1h30</option>
-                                <option value="120"<?= ($fbParams->duree == 120) ? ' selected':'' ?>>2h</option>
-                                <option value="150"<?= ($fbParams->duree == 150) ? ' selected':'' ?>>2h30</option>
-                                <option value="180"<?= ($fbParams->duree == 180) ? ' selected':'' ?>>3h</option>
-                                <option value="210"<?= ($fbParams->duree == 210) ? ' selected':'' ?>>3h30</option>
-                                <option value="240"<?= ($fbParams->duree == 240) ? ' selected':'' ?>>4h</option>
-                            </select>
-                        </div>
-                        <div class="col-2">
-                            <p>Envoyer requête</p>
-                            <input class="btn btn-sm btn-primary rounded" type="submit" name="submitRequete" value="Recherche de disponibilité" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div id="divpersonselect">
-                                <br />
-                                <p>Utilisateurs sélectionnés</p>
-                                <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
-                                <ul id="person_ul" class="px-0">
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div id="divjours">
-                                <p>Jours séléctionnés</p>
-                                <fieldset>
-                                    <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if (in_array('MO', $fbParams->joursDemandes)) echo 'checked' ?>>Lundi</input>
-                                    <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if (in_array('TU', $fbParams->joursDemandes)) echo 'checked' ?>>Mardi</input>
-                                    <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if (in_array('WE', $fbParams->joursDemandes)) echo 'checked' ?>>Mercredi</input>
-                                    <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if (in_array('TH', $fbParams->joursDemandes)) echo 'checked' ?>>Jeudi</input>
-                                    <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes)) echo 'checked' ?>>Vendredi</input>
-                                </fieldset>
-                                <br />
-                            </div>
-                            <div id="divplagehoraire">
-                                <p>Plage horaire</p>
-                                <div id="slider"></div>
-                                <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
-                                <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
-                            </div>
-                        </div>
-                        <div class="col-2 d-inline-flex flex-column justify-content-center">
-                                <p>A partir du</p>
-                                <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>" max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>" value="<?= $fbParams->fromDate; ?>" />
-                        </div>
-                    </div>
+                    <?php if ($stdEnv->photoShow): ?>
+                        var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
+                    <?php endif ?>
 
-            <!-- Modal -->
-            <div class="modal fade" id="creneauMailInput" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <p>Envoi invitation aux participants</p>
-                        </div>
-                        <div class="row">
-                            <div class="col-6" id="creneauBoxDesc">
-                                <p>Créneau</p>
-                                <span id="creneauInfo" class="text-nowrap text-break"></span>
-                                <hr>
-                                <p>Participants</p>
-                                <ul id="creneauMailParticipant_ul" />
-                            </div>
-                            <div class="col-5 align-content-between" id="creneauBoxInput">
-                                <label for="titrecreneau">Titre de l'évenement</label>
-                                <input id="titrecreneau" type="text" disabled placeholder="Titre de l'évenement" name="titrecreneau" value="<?= $fbParams->titleEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un titre pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
-                                <label for="summarycreneau">Description :</label>
-                                <textarea id="summarycreneau" disabled placeholder="Description de l'évenement" name="summarycreneau" value="<?= $fbParams->descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->descriptionEvent; ?></textarea>
-                                <label for="lieucreneau">Lieu :</label>
-                                <input id="lieucreneau" type="text" disabled placeholder="Lieu de l'évenement" name="lieucreneau" value="<?= $fbParams->lieuEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un lieu pour l\'évenement')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
-                            </div>
-                            <input type="datetime-local" disabled hidden="hidden" name="modalCreneauStart" />
-                            <input type="datetime-local" disabled hidden="hidden" name="modalCreneauEnd" />
-                        </div>
-                        <div class="modal-footer" id="creneauBoxFooter">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
-                        </div>
-                    </div>
+                    <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)): ?>
+                        $(function () {
+                            $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
+                        });
+                    <?php endif ?>
+                </script>
+            </div>
+            <div class="col">
+                <p>Nombre de créneaux</p>
+                <input id="creneaux" name="creneaux" type="number"
+                    value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
+            </div>
+            <div class="col">
+                <p>Durée des créneaux</p>
+
+                <select id="duree" name="duree" required=true>
+                    <option value="30" <?= ($fbParams->duree == 30) ? ' selected' : '' ?>>30 minutes</option>
+                    <option value="60" <?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected' : '' ?>>1h
+                    </option>
+                    <option value="90" <?= ($fbParams->duree == 90) ? ' selected' : '' ?>>1h30</option>
+                    <option value="120" <?= ($fbParams->duree == 120) ? ' selected' : '' ?>>2h</option>
+                    <option value="150" <?= ($fbParams->duree == 150) ? ' selected' : '' ?>>2h30</option>
+                    <option value="180" <?= ($fbParams->duree == 180) ? ' selected' : '' ?>>3h</option>
+                    <option value="210" <?= ($fbParams->duree == 210) ? ' selected' : '' ?>>3h30</option>
+                    <option value="240" <?= ($fbParams->duree == 240) ? ' selected' : '' ?>>4h</option>
+                </select>
+            </div>
+            <div class="col-2">
+                <p>Envoyer requête</p>
+                <input class="btn btn-sm btn-primary rounded" type="submit" name="submitRequete" value="Recherche de disponibilité" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <div id="divpersonselect">
+                    <br />
+                    <p>Utilisateurs sélectionnés</p>
+                    <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
+                    <ul id="person_ul" class="px-0">
+                    </ul>
                 </div>
             </div>
-        </form>
+            <div class="col-6">
+                <div id="divjours">
+                    <p>Jours séléctionnés</p>
+                    <fieldset>
+                        <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if (in_array('MO', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Lundi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if (in_array('TU', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Mardi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if (in_array('WE', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Mercredi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if (in_array('TH', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Jeudi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Vendredi</input>
+                        </fieldset>
+                        <br />
+                    </div>
+                    <div id="divplagehoraire">
+                        <p>Plage horaire</p>
+                        <div id="slider"></div>
+                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
+                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                </div>
+            </div>
+            <div class="col-2 d-inline-flex flex-column justify-content-center">
+                <p>A partir du</p>
+                <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
+                    max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
+                    value="<?= $fbParams->fromDate; ?>" />
+            </div>
+        </div>
+
+        <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
+    </form>
 
     <?php
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {
-        echo '<script>var jsListUidsOptionnels='. json_encode($fbParams->listUidsOptionnels) . ';</script>';
+        echo '<script>var jsListUidsOptionnels=' . json_encode($fbParams->listUidsOptionnels) . ';</script>';
     }
     ?>
     <div id="reponse" class="container my-4">
-    <?php if (isset($fbForm)) : ?>
-        <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
-            <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
-            <div class='shadow p-3 mb-5 bg-body rounded lead'>
-                <p><?= $txtFailParticipants ?></p>
-                <ul>
-                    <?php foreach ($fbUsersUnsetted as $fbUser): ?>
-                        <li><?= $fbUser->getUidInfos()->displayName ?></li>
-                    <?php endforeach ?>
-                </ul>
-            </div>
+        <?php if (isset($fbForm)): ?>
+            <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
+                <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
+                <div class='shadow p-3 mb-5 bg-body rounded lead'>
+                    <p>
+                        <?= $txtFailParticipants ?>
+                    </p>
+                    <ul>
+                        <?php foreach ($fbUsersUnsetted as $fbUser): ?>
+                            <li>
+                                <?= $fbUser->getUidInfos()->displayName ?>
+                            </li>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            <?php endif ?>
         <?php endif ?>
-    <?php endif ?>
 
-    <?php if (isset($listDate) && sizeof($listDate) == 0) : ?>
+        <?php if (isset($listDate) && sizeof($listDate) == 0): ?>
             <p>Aucun créneaux commun disponible pour ces utilisateurs</p>
-    <?php elseif (isset($listDate) && sizeof($listDate) > 0) : ?>
-        <?php
-        $formatter_day =  IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE");
-        $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
-        $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
+        <?php elseif (isset($listDate) && sizeof($listDate) > 0): ?>
+            <?php
+            $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE");
+            $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
+            $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
             <p>Créneaux disponibles</p>
             <ul class="col-11">
-                <?php foreach ($listDate as $date) : ?>
+                <?php foreach ($listDate as $date): ?>
                     <li class="row">
-                        <time class="col-5"><span class="d-inline-block col-2"><?= $formatter_day->format($date->startDate->getTimestamp()) ?></span> <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?></time>
-                        <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbForm->getFbUsers()))->typeInvationAction != TypeInviteAction::New) : ?>
-                            <div class='col-1 px-0 invitationEnvoyée' data-toggle="tooltip" data-html="true" data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
-                                <span class="text-success">Envoyé</span>
-                                <svg class="bi bi-check2-circle d-inline-block" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" viewBox="0 0 16 16">
-                                    <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
-                                    <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z" />
-                                </svg>
-                            </div>
-                        <?php endif ?>
-                        <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New): ?>
-                            <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
-                        <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                            <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                        <time class="col-5"><span class="d-inline-block col-2">
+                                <?= $formatter_day->format($date->startDate->getTimestamp()) ?>
+                            </span>
+                            <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?>
+                        </time>
+                        <?php if ($stdEnv->wsgroup): ?>
+                            <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbForm->getFbUsers()))->typeInvationAction != TypeInviteAction::New ): ?>
+                                <div class='col-1 px-0 invitationEnvoyée' data-toggle="tooltip" data-html="true"
+                                    data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
+                                    <span class="text-success">Envoyé</span>
+                                    <svg class="bi bi-check2-circle d-inline-block" xmlns="http://www.w3.org/2000/svg" width="16"
+                                        height="16" fill="green" viewBox="0 0 16 16">
+                                        <path
+                                            d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
+                                        <path
+                                            d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z" />
+                                    </svg>
+                                </div>
+                            <?php endif ?>
+                            <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New ): ?>
+                                <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
+                                    newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>"
+                                    timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                            <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
+                                <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
+                                    newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>"
+                                    timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                            <?php endif ?>
                         <?php endif ?>
                     </li>
                 <?php endforeach ?>

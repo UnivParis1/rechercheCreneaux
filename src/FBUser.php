@@ -53,7 +53,7 @@ class FBUser {
      */
     private static Duration $duration;
 
-    private stdClass $uidInfos;
+    private ?stdClass $uidInfos;
 
     private DateTimeZone $dateTimeZone;
 
@@ -88,7 +88,6 @@ class FBUser {
         $this->setDateTimeZone($dtz);
         $this::$url = $url;
         $this->isChanged = false;
-        $this->uidInfos = $this->_getUidInfos($uid);
         $this->estOptionnel = $estOptionnel;
 
         $fd = fopen($this::$url . $uid, "r");
@@ -96,6 +95,13 @@ class FBUser {
         fclose($fd);
 
         $this->content = $content;
+
+        if ($fbParams->stdEnv->wsgroup == true) {
+            $this->uidInfos = $this->_getUidInfos($uid);
+        }
+        else {
+            $this->uidInfos = null;
+        }
     }
 
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, bool $estOptionnel, FBParams $fbParams) : FBUser {
