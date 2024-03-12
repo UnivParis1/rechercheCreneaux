@@ -3,13 +3,26 @@ README pour le Repo Recherche Créneaux
 
 # Description du projet
 
-Ce projet vise à développer un outil pour la recherche de créneaux dans un planning.
+Ce projet vise à développer un outil pour la recherche de créneaux automatique dans un planning.
 
 Le but est de fournir une interface simple et intuitive pour rechercher des créneaux disponibles en fonction de différents critères, tels que les agendas par utilisateur, la date, l'heure, la durée
 
 ## Principe de fonctionnement
 
 Le projet se base sur la récupération des évenements FREE/BUSY depuis l'api d'un calendrier (kronoligh/google/...).
+
+* Pour trouver les créneaux, il y'a tout d'abord une génération des créneaux avec les paramètres demandés (jours, durée...) grâce à la
+librairie composer : rlanvin/php-rrule
+* Les créneaux busys sont récupérés sur l'api iCalendar FREE/BUSYS puis normalisés cad formattés aux creneaux générés pour préparer la comparaison
+* Les créneaux sont par la suite comparés avec les créneaux busys récupérés, class FBCompare
+
+
+### Workflow
+
++ Génération des creneaux demandés : FBCreneauxGeneres
++ Récupération des busys Utilisateurs: FBUser
++ Normalisation des créneaux busys : FBUser
++ Comparaison entre créneaux générés / creneaux Busys : FBCompare
 
 
 # Fonctionnalités
@@ -26,8 +39,19 @@ Le projet se base sur la récupération des évenements FREE/BUSY depuis l'api d
 
 # Librairies / Dépendance
 
-Pour la séléction des utilisateurs, le projet fait appel à une api : "wsgroups"
-qui renvoie les identifiants des utilisateurs de type "uid"
+## iCalendar Free/Busy Component
+
+Utilisation des composants api
+
+## Wsgroups
+
++ Pour la séléction des utilisateurs, le projet fait appel à une api : [UnivParis1/wsgroups](https://github.com/UnivParis1/wsgroups)
+
++ l'api qui renvoie les identifiants des utilisateurs de type uid/displayname
+
++ Cette api est centrale à l'application mais elle peut être configurée en option dans .env -> WSGROUP : false
+
++ Si il n'y a pas d'appel à wsgroup, l'application est limitée fonctionnellement
 
 Dans le cadre du développement du projet, l'appel se fait sur un agenda kronolith
 avec le paramètre du fichier .env : URL_FREEBUSY
@@ -41,7 +65,7 @@ La configuration se fait en créant un fichier .env sur la base du fichier .env.
 
 ## Fichier .env
 
-+ Fichier .env : mis à la racine du projet, variable de configurations
++ Fichier .env : mis à la racine du projet, variables de configuration
 
 ### Variables indispensables
 
