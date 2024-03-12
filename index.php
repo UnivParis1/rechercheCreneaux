@@ -263,11 +263,19 @@ if (FBForm::validParams($fbParams)) {
                     <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                 </div>
             </div>
-            <div class="col-2 d-inline-flex flex-column justify-content-center">
+            <div class="col-2 d-inline-flex flex-column justify-content-center align-items-start fw-bold">
                 <p>A partir du</p>
                 <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
                     max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
                     value="<?= $fbParams->fromDate; ?>" />
+                <p class="mt-4">Période de recherche</p>
+                <select class="col-7" name="rechercheSurXJours" required>
+                    <option value="7" <?= ($fbParams->rechercheSurXJours == 7) ? ' selected' : '' ?>>7 jours</option>
+                    <option value="15" <?= ($fbParams->rechercheSurXJours == 15) ? ' selected' : '' ?>> 15 jours</option>
+                    <option value="30" <?= ($fbParams->rechercheSurXJours == 30|| is_null($fbParams->rechercheSurXJours)) ? ' selected' : '' ?>>30 jours</option>
+                    <option value="60" <?= ($fbParams->rechercheSurXJours == 60) ? ' selected' : '' ?>>60 jours</option>
+                    <option value="120" <?= ($fbParams->rechercheSurXJours == 120) ? ' selected' : '' ?>>120 jours</option>
+                </select>
             </div>
         </div>
 
