@@ -146,7 +146,7 @@ function wsCallbackUid(event, ui) {
             addOptionUid(uid, displayName);
         }
     }
-    else if (ui.item.category == 'structures' || ui.item.category == 'local') {
+    else if (ui.item.category == 'groups_structures' || ui.item.category == 'local') {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",

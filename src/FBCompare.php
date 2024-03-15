@@ -67,12 +67,19 @@ class FBCompare
     {
         $busySeq = $this->mergedBusys;
         $creneauxGenerated = $this->creneauxGenerated;
+        $nowtimestamp = (new DateTime('now', $this->dateTimeZone))->getTimestamp();
 
-        $arr_creneaux = array();
+        $arr_creneaux = [];
 
+        $idx=0;
         foreach ($creneauxGenerated as $creneau) {
-            if ($this->_testGenPeriodVSBusySequence($busySeq, $creneau)) {
-                $arr_creneaux[] = $creneau;
+            if ($creneau->startDate->getTimestamp() > $nowtimestamp) {
+                if ($this->_testGenPeriodVSBusySequence($busySeq, $creneau)) {
+                    $arr_creneaux[] = $creneau;
+                    $idx++;
+                    if ($idx >= $this->nbcreneaux)
+                        break;
+                }
             }
         }
 
@@ -103,7 +110,7 @@ class FBCompare
 
     private function _mergeSequencesToArrayPeriods()
     {
-        $arr_merged = array();
+        $arr_merged = [];
         foreach ($this->arrayFBUsers as $FBUser) {
             $arrayPeriods = $FBUser->getSequence()->jsonSerialize();
             $arr_diff = array_udiff($arrayPeriods, $arr_merged, function ($obj1, $obj2) {
@@ -134,11 +141,11 @@ class FBCompare
     private function _arrayCreneauxAffiches(): array
     {
         $sequence = $this->creneauxFinaux;
-        $now = new DateTime('now', $this->dateTimeZone);
+        $nowtimestamp = (new DateTime('now', $this->dateTimeZone))->getTimestamp();
 
         $arrayCreneauxAffiches = array();
         foreach ($sequence as $period) {
-            if ($period->startDate->getTimestamp() > $now->getTimestamp()) {
+            if ($period->startDate->getTimestamp() > $nowtimestamp) {
                 $arrayCreneauxAffiches[] = $period;
             }
         }
@@ -165,7 +172,7 @@ class FBCompare
      */
     public static function algo_search_results(array $fbUsers, Sequence $creneauxGenerated, string $dtz, int $nbcreneaux) : ?stdClass {
         $returnStd = new stdClass();
-        $returnStd->fbUsersUnsetted = array();
+        $returnStd->fbUsersUnsetted = [];
         $fbUsersCP = $fbUsers;
 
         for ($i = 0; $i < count($fbUsers); $i++) {
