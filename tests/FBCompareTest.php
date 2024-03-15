@@ -28,7 +28,7 @@ class FBCompareTest extends TestCase
         $nbResultatsAffichésRef = $fbCompareRef->getNbResultatsAffichés();
         $creneauxFinauxArrayRef = $fbCompareRef->getArrayCreneauxAffiches();
 
-        $fbParams->nbcreneaux = 1;
+        $fbParams->nbcreneaux = 35;
         $fbCompareNew = new FBCompare($fbUsers, $creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
         $fbForm->setFbCompare($fbCompareNew);
 
