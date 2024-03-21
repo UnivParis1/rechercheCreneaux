@@ -253,6 +253,8 @@ if (FBForm::validParams($fbParams)) {
                             echo 'checked' ?>>Jeudi</input>
                             <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes))
                             echo 'checked' ?>>Vendredi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="SA" <?php if (in_array('SA', $fbParams->joursDemandes))
+                            echo 'checked' ?>>Samedi</input>
                         </fieldset>
                         <br />
                     </div>
