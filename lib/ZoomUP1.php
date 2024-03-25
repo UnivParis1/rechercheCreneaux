@@ -1,0 +1,37 @@
+<?php
+
+namespace RechercheCreneauxLib;
+use ZoomLibrary\Zoom;
+
+/**
+ * ZoomUP1
+ * classe étendant la librairie zoom-php
+ * la méthode tokenUP1 récupère le token zoom
+ */
+class ZoomUP1 extends Zoom {
+    public function tokenUP1($code)
+    {
+      $response = $this->CLIENT->request('POST', '/oauth/token', [
+          "headers" => [
+              "Authorization" => "Basic ". base64_encode($this->CLIENT_ID.':'.$this->CLIENT_SECRET)
+          ],
+          'form_params' => [
+              "grant_type" => "account_credentials",
+              "account_id" => $code
+          ],
+      ]);
+      $response_token =json_decode($response->getBody()->getContents(), true);
+      $token = json_encode($response_token);
+      file_put_contents($this->CREDENTIAL_PATH, $token);
+      if (!file_exists($this->CREDENTIAL_PATH)) {
+        return ['status' => false, 'message' => 'Error while saving file'];
+      }
+      $savedToken = json_decode(file_get_contents($this->CREDENTIAL_PATH), true); //getting json from saved json file
+      if (!empty(array_diff($savedToken,$response_token))) { // checking reponse token and saved tokends are same
+        return ['status' => false, 'message' => 'Error in saved token'];
+      }
+      return ['status' => true, 'message' => 'Token saved successfully'];
+    }
+}
+
+?>
