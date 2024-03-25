@@ -3,7 +3,7 @@
     "description": "recherche de creneaux sur les agendas de l'université Paris 1 Panthéon Sorbonne, utilise les FREE/BUSY icalendar",
     "type": "project",
     "license": "Apache-2.0",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
         "php": ">=8.1",
@@ -12,7 +12,8 @@
         "rlanvin/php-rrule": "^2.4.1",
         "vlucas/phpdotenv": "^5.6.0",
         "apereo/phpcas": "^1.6",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^10.5",
+        "aghilanbaskar/zoom-library": "^1.0"
     },
     "config": {
         "allow-plugins": {
@@ -21,7 +22,9 @@
         }
     },
     "autoload": {
-        "psr-4": {"RechercheCreneaux\\": "src/"}
+        "psr-4": {"RechercheCreneaux\\": "src/",
+		  "RechercheCreneauxLib\\": "lib/"
+	}
     },
     "require-dev": {
         "phpstan/phpstan": "^1.10"
