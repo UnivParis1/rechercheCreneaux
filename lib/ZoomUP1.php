@@ -9,6 +9,8 @@ use ZoomLibrary\Zoom;
  * la méthode tokenUP1 récupère le token zoom
  */
 class ZoomUP1 extends Zoom {
+
+    public bool $newToken = true;
     public function tokenUP1($code)
     {
       $response = $this->CLIENT->request('POST', '/oauth/token', [
@@ -23,15 +25,17 @@ class ZoomUP1 extends Zoom {
       $response_token =json_decode($response->getBody()->getContents(), true);
       $token = json_encode($response_token);
       file_put_contents($this->CREDENTIAL_PATH, $token);
-      if (!file_exists($this->CREDENTIAL_PATH)) {
-        return ['status' => false, 'message' => 'Error while saving file'];
-      }
+
+      if (!file_exists($this->CREDENTIAL_PATH))
+        throw new \Exception("Error file Token ! ");
+
+      $this->CREDENTIAL_DATA = $response_token;
+
       $savedToken = json_decode(file_get_contents($this->CREDENTIAL_PATH), true); //getting json from saved json file
-      if (!empty(array_diff($savedToken,$response_token))) { // checking reponse token and saved tokends are same
+      if (!$this->newToken && !empty(array_diff($savedToken,$response_token))) { // checking reponse token and saved tokends are same
         return ['status' => false, 'message' => 'Error in saved token'];
       }
+      $this->newToken = false;
       return ['status' => true, 'message' => 'Token saved successfully'];
     }
 }
-
-?>
