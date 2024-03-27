@@ -11,6 +11,14 @@ use ZoomLibrary\Zoom;
 class ZoomUP1 extends Zoom {
 
     public bool $newToken = true;
+
+    public function getCredentialData() {
+      return $this->CREDENTIAL_DATA;
+    }
+
+    public function getGuzzleHttpClient() {
+      return $this->CLIENT;
+    }
     public function tokenUP1($code)
     {
       $response = $this->CLIENT->request('POST', '/oauth/token', [
