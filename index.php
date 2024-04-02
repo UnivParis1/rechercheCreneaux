@@ -224,7 +224,7 @@ if (FBForm::validParams($fbParams)) {
                     <option value="240" <?= ($fbParams->duree == 240) ? ' selected' : '' ?>>4h</option>
                 </select>
             </div>
-            <div class="col-2">
+            <div class="col-2 overflow-scroll">
                 <p>Envoyer requête</p>
                 <input class="btn btn-sm btn-primary rounded" type="submit" name="submitRequete" value="Recherche de disponibilité" />
             </div>
