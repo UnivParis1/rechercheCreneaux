@@ -38,4 +38,40 @@ class ZoomUP1 extends Zoom {
       $this->newToken = false;
       return ['status' => true, 'message' => 'Token saved successfully'];
     }
+
+    public function inviteLink($meeting_id = '', $json = [])
+    {
+      try {
+        $response = $this->CLIENT->request('POST', "/v2/meetings/{$meeting_id}/invite_links", [
+            "headers" => [
+                "Authorization" => "Bearer ".$this->CREDENTIAL_DATA['access_token']
+            ],
+            'json' => $json
+        ]);
+
+        if ($response->getStatusCode() == 201) {
+          return array('status' => true, 'message' => 'Registration successfull', 'data' => json_decode($response->getBody(), true) );
+        }
+
+        throw new Exception("Not able to find error");
+      }
+      catch (\Exception $e) {
+        if( $e->getCode() == 401 && $this->refreshToken() ) {
+          return $this->inviteLink($meeting_id, $json);
+        }
+        if ($e->getCode() == 300) {
+          return array('status' => false, 'message' => 'Meeting {meetingId} is not found or has expired.');
+        }
+        if ($e->getCode() == 400) {
+          return array('status' => false, 'message' => 'Access error. Not have correct access. validation failed');
+        }
+        if ($e->getCode() == 404) {
+          return array('status' => false, 'message' => 'Meeting not found or Meeting host does not exist: {userId}.');
+        }
+        if( $e->getCode() != 401 ) {
+          return array('status' => false, 'message' => $e->getMessage());
+        }
+        return array('status' => false, 'message' => 'Not able to refresh token');
+      }
+    }
 }

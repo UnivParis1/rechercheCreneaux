@@ -97,7 +97,7 @@ class FBUser {
         $this->content = $content;
 
         if ($fbParams->stdEnv->wsgroup == true) {
-            $this->uidInfos = $this->_getUidInfos($uid);
+            $this->uidInfos = self::_getUidInfos($uid, $fbParams->stdEnv);
         }
         else {
             $this->uidInfos = null;
@@ -415,11 +415,12 @@ class FBUser {
      * _getUidInfos
      *
      * @param  string $uid
+     * @param  stdClass $stdEnv
      * @return stdClass
      */
-    private function _getUidInfos(string $uid)  {
-        $urlwsgroupUserInfos = $this->fbParams->stdEnv->urlwsgroupUserInfos;
-        $env = $this->fbParams->stdEnv->env;
+    public static function _getUidInfos(string $uid, $stdEnv)  {
+        $urlwsgroupUserInfos = $stdEnv->urlwsgroupUserInfos;
+        $env = $stdEnv->env;
         $urlwsgroup = $urlwsgroupUserInfos . ((strtolower($env) === 'prod') ? 'Trusted':'');
 
         $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
