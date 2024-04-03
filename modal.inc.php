@@ -37,6 +37,7 @@
             <div class="modal-footer" id="creneauBoxFooter">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
+                <a id="zoom" href>Creer zoom</a>
             </div>
         </div>
     </div>

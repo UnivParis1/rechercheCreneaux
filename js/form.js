@@ -167,6 +167,24 @@ function wsCallbackUid(event, ui) {
     return false;
 }
 
+function rechercheCreaneauGetIdx(start, end, jsSessionInfos) {
+    for (key in jsSessionInfos) {
+        let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
+        let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
+        let mstart = moment(modalCreneauStart);
+        let mend = moment(modalCreneauEnd);
+        if (start.diff(mstart) == 0 && end.diff(mend) == 0) {
+            return key;
+        }
+    }
+    return -1;
+}
+
+function formModalValidate() {
+    let vals = getCurrentOptions();
+    return testOptions(vals);
+}
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip({ 'html': true });
 
@@ -189,31 +207,29 @@ $(function () {
             $("input[name='actionFormulaireValider']").val("envoiInvitation");
         }
 
-        let vals = getCurrentOptions();
-
-        if (testOptions(vals) == true) {
+        if (formModalValidate() == true) {
             this.submit();
-            return true;
         } else {
             errorShow(true);
-            return false;
         }
     });
 
-    $('#divpersonselect').hide();
+    $("#zoom").on("click", function (event) {
+        event.preventDefault();
+        $("input[name='actionFormulaireValider']").val("zoomMeeting");
+        let datas = $("#form").serialize();
+        $.ajax({
+            type: "GET",
+            url: "zoom.php",
+            data: datas,
+            dataType: "json",
+            encode: true,
+          }).done(function (data) {
+            console.log(data);
+          });
+    });
 
-    function rechercheCreaneauGetIdx(start, end, jsSessionInfos) {
-        for (key in jsSessionInfos) {
-            let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
-            let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
-            let mstart = moment(modalCreneauStart);
-            let mend = moment(modalCreneauEnd);
-            if (start.diff(mstart) == 0 && end.diff(mend) == 0) {
-                return key;
-            }
-        }
-        return -1;
-    }
+    $('#divpersonselect').hide();
 
     let newParticipant=false;
     let start=null;
