@@ -72,34 +72,3 @@ li time {
 #slider{
     margin-top: 45px;
 }
-
-#creneauBoxInput {
-    border-left: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-#creneauBoxInput label {
-    margin-bottom: 5px;
-}
-
-#creneauBoxInput input {
-    border: 1px solid #ccc;
-    padding: 5px;
-}
-
-#creneauBoxDesc {
-    margin-left: 15px;
-}
-
-#creneauBoxDesc time {
-    display: inline-block;
-}
-
-.modal-footer {
-    margin-right: 15px;
-}
-
-#creneauBoxFooter {
-    border-top: none;
-}

@@ -259,8 +259,8 @@ $(function () {
     moment.locale('fr');
 
     $('#creneauMailInput').on('shown.bs.modal', function () {
-        $("#creneauBoxInput > input[type='text'],textarea").attr('disabled', false);
-        $("#creneauBoxInput > input[type='text'],textarea").attr('required', true);
+        $("#creneauBoxInput input[type='text']").attr('disabled', false);
+        $("#creneauBoxInput input[type='text']").attr('required', true);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
@@ -288,8 +288,8 @@ $(function () {
     });
 
     $('#creneauMailInput').on('hidden.bs.modal', function () {
-        $("#creneauBoxInput > input[type='text'],textarea").attr('disabled', true);
-        $("#creneauBoxInput > input[type='text'],textarea").attr('required', false);
+        $("#creneauBoxInput input[type='text']").attr('disabled', true);
+        $("#creneauBoxInput input[type='text']").attr('required', false);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
