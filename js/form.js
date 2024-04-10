@@ -2,10 +2,14 @@ let divpersonselect = "#divpersonselect";
 let idperson_ul = "#person_ul";
 let listDisplayname = new Map();
 
+let newParticipant=false;
+let start=null;
+let end=null;
+
 function errorShow(toShow) {
     if (toShow === true) {
         if ($(divpersonselect).is(":hidden"))
-            $(divpersonselect).show();
+           $(divpersonselect).show();
         $(divpersonselect + " .alertrequire").css('display', 'inherit');
     }
     if (toShow === false) {
@@ -185,9 +189,144 @@ function formModalValidate() {
     return testOptions(vals);
 }
 
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
+function onSubmit(event) {
+    event.preventDefault();
+    // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
+    if (event.originalEvent.submitter.name == "submitModal") {
+        $("input[name='actionFormulaireValider']").val("envoiInvitation");
+    }
 
+    if (formModalValidate() == true) {
+        this.submit();
+    } else {
+        errorShow(true);
+    }
+}
+
+function onTimeClick() {
+    let ts=$(this).attr("timestart");
+    let te=$(this).attr("timeend");
+
+    start = moment.unix(ts);
+    end = moment.unix(te);
+
+    $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
+
+    $("#creneauBoxInput ~ input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
+    $("#creneauBoxInput ~ input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
+
+    if ($(this).attr('newParticipant').valueOf() == 'true') {
+        newParticipant = true;
+    }
+    else {
+        newParticipant = false;
+    }
+}
+
+function bsModalShow() {
+    $("#creneauBoxInput input[type='text'],textarea").attr('disabled', false);
+    $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
+
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
+
+    zoomChange();
+
+    let currentObj=null; // objets courant à partir de jsSessionInfos
+    if (typeof jsSessionInfos != 'undefined' && newParticipant == true) {
+        let key = rechercheCreaneauGetIdx(start, end, jsSessionInfos);
+        if (key !== -1) {
+            currentObj = jsSessionInfos[key];
+            $('#titrecreneau').val(currentObj.infos.titleEvent);
+            $('#summarycreneau').val(currentObj.infos.descriptionEvent);
+            $('#lieucreneau').val(currentObj.infos.lieuEvent);
+        }
+    }
+    ul = $("#creneauMailParticipant_ul");
+    ul.empty();
+    listDisplayname.forEach(function(displayName, uid) {
+        let li=$('<li>');
+        li.text(displayName);
+        if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
+            li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
+        }
+        ul.append(li);
+    });
+}
+
+function bsModalHide() {
+    $("#creneauBoxInput input[type='text'],textarea").attr('disabled', true);
+    $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
+
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
+}
+
+let isLoading = false;
+let zoomError = false;
+
+function zoomClickError(data) {
+    zoomError=true;
+    let zoom = $("#zoom");
+    zoom.removeClass('btn-secondary');
+    zoom.removeClass('btn-success');
+    zoom.addClass('bg-danger');
+    zoom.text(data.msg);
+}
+
+function zoomClick(event) {
+        if (isLoading == true) {
+            return;
+        }
+        isLoading = true;
+        $("input[name='actionFormulaireValider']").val("zoomMeeting");
+
+        let zoom = $("#zoom");
+        let htmlZoomValue = zoom.html();
+        zoom.append(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                     <span class="sr-only">En cours...</span>`);
+
+        let datas = $("#form").serialize();
+        $.ajax({
+            type: "GET",
+            url: "zoom.php",
+            data: datas,
+            dataType: "json",
+            encode: true,
+          }).done(function (data) {
+            if (data.status == false) {
+                zoomClickError(data);
+            }
+            else {
+                zoom.text("Zoom crée");
+                $("#lieucreneau").replaceWith("<p><a href='"+ data.data.join_url +"'>Lien zoom</a></p>");
+                zoomError=true;
+            }
+          }).fail(function (data) {
+            zoomClickError(data);
+          }).always(function() {
+            zoom.attr('disabled', true);
+            isLoading=false;
+          })
+}
+
+function zoomChange() {
+        let button = $("#summarycreneau");
+        let zoom = $('#zoom');
+        let title = $('#titrecreneau');
+
+        if (button.val().length > 0 && title.val().length > 0 && zoomError==false) {
+            zoom.removeAttr('disabled');
+	        zoom.removeClass('btn-secondary');
+	        zoom.addClass('btn-success');
+        } else {
+            zoom.attr('disabled', true);
+	        zoom.removeClass('btn-success');
+	        zoom.addClass('btn-secondary');
+	}
+}
+
+$(function () {
     $("#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
         select: wsCallbackUid,
@@ -200,98 +339,16 @@ $(function () {
         }
     });
 
-    $("#form").on("submit", function (event) {
-        event.preventDefault();
-        // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
-        if (event.originalEvent.submitter.name == "submitModal") {
-            $("input[name='actionFormulaireValider']").val("envoiInvitation");
-        }
-
-        if (formModalValidate() == true) {
-            this.submit();
-        } else {
-            errorShow(true);
-        }
-    });
-
-    $("#zoom").on("click", function (event) {
-        event.preventDefault();
-        $("input[name='actionFormulaireValider']").val("zoomMeeting");
-        let datas = $("#form").serialize();
-        $.ajax({
-            type: "GET",
-            url: "zoom.php",
-            data: datas,
-            dataType: "json",
-            encode: true,
-          }).done(function (data) {
-            console.log(data);
-          });
-    });
-
     $('#divpersonselect').hide();
-
-    let newParticipant=false;
-    let start=null;
-    let end=null;
-
-    $("#reponse li a").on("click", function() {
-        let ts=$(this).attr("timestart");
-        let te=$(this).attr("timeend");
-
-        start = moment.unix(ts);
-        end = moment.unix(te);
-
-        $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
-
-        $("#creneauBoxInput ~ input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
-        $("#creneauBoxInput ~ input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
-
-        if ($(this).attr('newParticipant').valueOf() == 'true') {
-            newParticipant = true;
-        }
-        else {
-            newParticipant = false;
-        }
-    });
 
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
 
-    $('#creneauMailInput').on('shown.bs.modal', function () {
-        $("#creneauBoxInput input[type='text']").attr('disabled', false);
-        $("#creneauBoxInput input[type='text']").attr('required', true);
-
-        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
-        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
-
-        let currentObj=null; // objets courant à partir de jsSessionInfos
-        if (typeof jsSessionInfos != 'undefined' && newParticipant == true) {
-            let key = rechercheCreaneauGetIdx(start, end, jsSessionInfos);
-            if (key !== -1) {
-                currentObj = jsSessionInfos[key];
-                $('#titrecreneau').val(currentObj.infos.titleEvent);
-                $('#summarycreneau').val(currentObj.infos.descriptionEvent);
-                $('#lieucreneau').val(currentObj.infos.lieuEvent);
-            }
-        }
-        ul = $("#creneauMailParticipant_ul");
-        ul.empty();
-        listDisplayname.forEach(function(displayName, uid) {
-            let li=$('<li>');
-            li.text(displayName);
-            if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
-                li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
-            }
-            ul.append(li);
-        });
-    });
-
-    $('#creneauMailInput').on('hidden.bs.modal', function () {
-        $("#creneauBoxInput input[type='text']").attr('disabled', true);
-        $("#creneauBoxInput input[type='text']").attr('required', false);
-
-        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
-        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
-    });
+    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
+    $("#form").on("submit", onSubmit);
+    $("#reponse li a").on("click", onTimeClick);
+    $('#creneauMailInput').on('shown.bs.modal', bsModalShow);
+    $('#creneauMailInput').on('hidden.bs.modal', bsModalHide);
+    $("#zoom").on("click", zoomClick);
+    $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 });

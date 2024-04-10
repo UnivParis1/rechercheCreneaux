@@ -1,7 +1,7 @@
 <!-- Modal -->
 <div class="modal fade" id="creneauMailInput" tabindex="-1" aria-labelledby="modalInputLabel"
     aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <p>Envoi invitation aux participants</p>
@@ -27,10 +27,10 @@
                     <div class="row">
                         <label for="summarycreneau" class="form-label">Description</label>
                         <div class="input-group mb-3">
-                            <input id="summarycreneau" class="form-control" type="text" disabled placeholder="Description"
+                            <textarea id="summarycreneau" class="form-control" type="textarea" disabled placeholder="Description"
                                 name="summarycreneau" value="<?= $fbParams->descriptionEvent; ?>"
                                 oninvalid="this.setCustomValidity('Veuillez renseigner une description')"
-                                onchange="if(this.value.length>0) this.setCustomValidity('')" />
+                                onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->descriptionEvent; ?></textarea>
                         </div>
                     </div>
                     <div class="row">
@@ -44,7 +44,7 @@
                             </div>
                         </div>
                         <div class="col d-flex align-items-end">
-                            <button type="button" class="btn btn-secondary" data-mdb-ripple-init disabled>Zoom créé</button>
+                            <button id="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init disabled>Créer un Zoom</button>
                         </div>
                     </div>
                 </div>

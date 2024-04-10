@@ -2,6 +2,7 @@
 
 namespace RechercheCreneauxLib;
 use ZoomLibrary\Zoom;
+use Exception;
 
 /**
  * ZoomUP1
