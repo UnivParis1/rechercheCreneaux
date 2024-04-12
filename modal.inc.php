@@ -17,8 +17,8 @@
                 <div class="col-5 border-start" id="creneauBoxInput">
                     <div class="row">
                         <label for="titrecreneau" class="form-label">Titre de l'évenement</label>
-                        <div class="input-group mb-3">
-                            <input id="titrecreneau" class="form-control" type="text" disabled placeholder="Titre de l'évenement"
+                        <div id="titrecreneau" class="input-group mb-3">
+                            <input class="form-control" type="text" disabled placeholder="Titre de l'évenement"
                                 name="titrecreneau" value="<?= $fbParams->titleEvent; ?>"
                                 oninvalid="this.setCustomValidity('Veuillez renseigner un titre')"
                                 onchange="if(this.value.length>0) this.setCustomValidity('')" />
@@ -26,8 +26,8 @@
                     </div>
                     <div class="row">
                         <label for="summarycreneau" class="form-label">Description</label>
-                        <div class="input-group mb-3">
-                            <textarea id="summarycreneau" class="form-control" type="textarea" disabled placeholder="Description"
+                        <div id="summarycreneau" class="input-group mb-3">
+                            <textarea class="form-control" type="textarea" disabled placeholder="Description"
                                 name="summarycreneau" value="<?= $fbParams->descriptionEvent; ?>"
                                 oninvalid="this.setCustomValidity('Veuillez renseigner une description')"
                                 onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->descriptionEvent; ?></textarea>
@@ -36,15 +36,15 @@
                     <div class="row">
                         <div class="col">
                             <label class='form-label' for="lieucreneau">Lieu :</label>
-                            <div class="input-group">
-                                <input id="lieucreneau" class='form-control' type="text" disabled placeholder="Lieu"
+                            <div id="lieucreneau" class="input-group">
+                                <input class='form-control' type="text" disabled placeholder="Lieu"
                                     name="lieucreneau" value="<?= $fbParams->lieuEvent; ?>"
                                     oninvalid="this.setCustomValidity('Veuillez renseigner un lieu')"
                                     onchange="if(this.value.length>0) this.setCustomValidity('')" />
                             </div>
                         </div>
-                        <div class="col d-flex align-items-end">
-                            <button id="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init disabled>Créer un Zoom</button>
+                        <div id="zoom" class="col d-flex align-items-end">
+                            <button name="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init disabled>Créer un Zoom</button>
                         </div>
                     </div>
                 </div>

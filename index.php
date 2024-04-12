@@ -43,7 +43,7 @@ if (FBForm::validParams($fbParams)) {
 
     if ($stdEnv->wsgroup) {
         if ($fbForm->invitationProcess($listDate)) {
-            $jsonSessionInfos = $fbForm->fbParams->jsonSessionInfos;
+            $jsonSessionInviteInfos = $fbForm->fbParams->jsonSessionInviteInfos;
         }
     }
 }
@@ -109,8 +109,11 @@ if (FBForm::validParams($fbParams)) {
                                 }
                             });
                         <?php endif ?>
-                        <?php if (isset($jsonSessionInfos)): ?>
-                            var jsSessionInfos = JSON.parse('<?= $jsonSessionInfos ?>');
+                        <?php if (isset($jsonSessionInviteInfos)): ?>
+                            var jsSessionInviteInfos = JSON.parse('<?= $jsonSessionInviteInfos ?>');
+                        <?php endif ?>
+                        <?php if (isset($fbForm) && ! is_null($jsonSessionZoomInfos = $fbForm->fbParams->jsonSessionZoomInfos)): ?>
+                            var jsSessionZoomInfos = JSON.parse('<?= $jsonSessionZoomInfos ?>');
                         <?php endif ?>
                     <?php else: // sans wsgroup?>
                         <?php if ($fbParams->uids && isset($js_uids)): ?>

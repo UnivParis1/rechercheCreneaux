@@ -69,12 +69,12 @@ class FBForm {
         if (FBInvite::verifSiInvitation($this->fbParams)) {
             $fbInvite = new FBInvite($this, $this->fbParams, $this->stdEnv, $listDate);
             $fbInvite->sendInvite();
-            // Lors d'un premier appel, initialisation de jsonSessionInfos
-            if ($this->fbParams->jsonSessionInfos == null) {
-                if (!isset($_SESSION['inviteEnregistrement'])) {
+            // Lors d'un premier appel, initialisation de jsonSessionInviteInfos
+            if ($this->fbParams->jsonSessionInviteInfos == null) {
+                if (!isset($_SESSION[$this->fbParams->inviteEnregistrementSessionName])) {
                     throw new Exception('Erreur session inviteEnregistrement null sur form.php');
                 }
-                $this->fbParams->jsonSessionInfos = json_encode($_SESSION['inviteEnregistrement']);
+                $this->fbParams->jsonSessionInviteInfos = json_encode($_SESSION[$this->fbParams->inviteEnregistrementSessionName]);
             }
             return true;
         }

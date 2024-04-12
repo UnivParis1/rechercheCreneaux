@@ -1,10 +1,21 @@
-let divpersonselect = "#divpersonselect";
-let idperson_ul = "#person_ul";
+const divpersonselect = "#divpersonselect";
+const idperson_ul = "#person_ul";
+
+const titrecreneauSelector = "#titrecreneau input[name='titrecreneau']";
+const summarycreneauSelector = "#summarycreneau textarea[name='summarycreneau']";
+const lieucreneauSelector = "#lieucreneau input[name='lieucreneau']";
+const zoomButtonSelector = "#zoom button[name='zoom']";
+
+var jsSessionZoomInfos = typeof(jsSessionZoomInfos) == 'undefined' ? null : jsSessionZoomInfos;
+
 let listDisplayname = new Map();
 
 let newParticipant=false;
 let start=null;
 let end=null;
+
+let lieuCreneauElem=null;
+let zoomElem=null;
 
 function errorShow(toShow) {
     if (toShow === true) {
@@ -171,7 +182,7 @@ function wsCallbackUid(event, ui) {
     return false;
 }
 
-function rechercheCreaneauGetIdx(start, end, jsSessionInfos) {
+function creneauSessionIdx(start, end, jsSessionInfos) {
     for (key in jsSessionInfos) {
         let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
         let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
@@ -182,6 +193,41 @@ function rechercheCreaneauGetIdx(start, end, jsSessionInfos) {
         }
     }
     return -1;
+}
+
+function objSessionIdx(jsSessionInfos, start, end, typeObj) {
+    if (typeof jsSessionInfos != 'undefined') {
+        if ((typeObj.zoom) || (typeObj.invite && typeObj.newParticipant)) {
+            let key = creneauSessionIdx(start, end, jsSessionInfos);
+
+            if (key !== -1) {
+                return jsSessionInfos[key];
+            }
+        }
+    }
+    return null;
+}
+
+class bsModalShowZoom {
+    constructor(jsSessionZoomInfos) {
+        this.jsSessionZoomInfos = jsSessionZoomInfos;
+        this.key = creneauSessionIdx(start, end, jsSessionZoomInfos);
+        this.currentObj = (this.key !== -1) ? jsSessionZoomInfos[this.key] : null;
+    }
+
+    lieuCreneauDiv(url) {
+        return $("<p id='lieucreneau'><a href='"+ url +"'>Lien zoom</a></p>");
+    }
+
+    bsModalShowZoomDom() {
+        if(this.currentObj != null) {
+            $(zoomButtonSelector).text("Zoom crée");
+            $(zoomButtonSelector).attr('disabled', true);
+            $('#lieucreneau').empty().append(this.lieuCreneauDiv(this.currentObj.data.join_url));
+        } else {
+            $(zoomButtonSelector).text("Créer un Zoom");
+        }
+    }
 }
 
 function formModalValidate() {
@@ -223,25 +269,13 @@ function onTimeClick() {
     }
 }
 
-function bsModalShow() {
-    $("#creneauBoxInput input[type='text'],textarea").attr('disabled', false);
-    $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
-
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
-
-    zoomChange();
-
-    let currentObj=null; // objets courant à partir de jsSessionInfos
-    if (typeof jsSessionInfos != 'undefined' && newParticipant == true) {
-        let key = rechercheCreaneauGetIdx(start, end, jsSessionInfos);
-        if (key !== -1) {
-            currentObj = jsSessionInfos[key];
-            $('#titrecreneau').val(currentObj.infos.titleEvent);
-            $('#summarycreneau').val(currentObj.infos.descriptionEvent);
-            $('#lieucreneau').val(currentObj.infos.lieuEvent);
-        }
+function bsModalShowInvitationDOM(currentObj) {
+    if (currentObj != null) {
+        $(titrecreneauSelector).val(currentObj.infos.titleEvent);
+        $(summarycreneauSelector).val(currentObj.infos.descriptionEvent);
+        $(lieucreneauSelector).val(currentObj.infos.lieuEvent);
     }
+
     ul = $("#creneauMailParticipant_ul");
     ul.empty();
     listDisplayname.forEach(function(displayName, uid) {
@@ -254,8 +288,27 @@ function bsModalShow() {
     });
 }
 
+function bsModalShow() {
+    $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', false);
+    $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
+
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
+    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
+
+    zoomChange();
+
+    let currentInviteObj = objSessionIdx(jsSessionInviteInfos, start, end, {invite: true, newParticipant: newParticipant}); // objets courant à partir d'une variable jsSession définit dans l'index
+    bsModalShowInvitationDOM(currentInviteObj);
+
+    (new bsModalShowZoom(jsSessionZoomInfos)).bsModalShowZoomDom();
+    $(zoomButtonSelector).on("click", zoomClick);
+}
+
 function bsModalHide() {
-    $("#creneauBoxInput input[type='text'],textarea").attr('disabled', true);
+    $('#zoom').empty().append(zoomElem);
+    $("#lieucreneau").empty().append(lieuCreneauElem);
+
+    $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
     $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
 
     $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
@@ -267,23 +320,23 @@ let zoomError = false;
 
 function zoomClickError(data) {
     zoomError=true;
-    let zoom = $("#zoom");
+    let zoom = $(zoomButtonSelector);
     zoom.removeClass('btn-secondary');
     zoom.removeClass('btn-success');
     zoom.addClass('bg-danger');
     zoom.text(data.msg);
 }
 
-function zoomClick(event) {
+function zoomClick() {
         if (isLoading == true) {
             return;
         }
         isLoading = true;
         $("input[name='actionFormulaireValider']").val("zoomMeeting");
 
-        let zoom = $("#zoom");
-        let htmlZoomValue = zoom.html();
-        zoom.append(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        let zoom = $(zoomButtonSelector);
+
+        zoom.empty().append(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                      <span class="sr-only">En cours...</span>`);
 
         let datas = $("#form").serialize();
@@ -294,31 +347,43 @@ function zoomClick(event) {
             dataType: "json",
             encode: true,
           }).done(function (data) {
-            if (data.status == false) {
+            if (data.status == true) {
+                let bsZoom;
+                if (jsSessionZoomInfos==null) {
+                    jsSessionZoomInfos = [];
+                    jsSessionZoomInfos[0]=data.zoomMeeting[0];
+                    jsSessionZoomInfos[0].data = data.data;
+                } else {
+                    bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+                    if (bsZoom.currentObj == null) {
+                        jsSessionZoomInfos.push(Object.assign({data: data.data}, data.zoomMeeting.at(-1)));
+                    } else {
+                        jsSessionZoomInfos[bsZoom.key].data = data.data;
+                    }
+                }
+                bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+                bsZoom.bsModalShowZoomDom();
+            } else {
                 zoomClickError(data);
-            }
-            else {
-                zoom.text("Zoom crée");
-                $("#lieucreneau").replaceWith("<p><a href='"+ data.data.join_url +"'>Lien zoom</a></p>");
-                zoomError=true;
-            }
-          }).fail(function (data) {
-            zoomClickError(data);
-          }).always(function() {
-            zoom.attr('disabled', true);
-            isLoading=false;
-          })
+            }}).fail(function (data) {
+                zoomClickError(data);
+            }).always(function() {
+                zoom.attr('disabled', true);
+                isLoading=false;
+            });
 }
 
 function zoomChange() {
-        let button = $("#summarycreneau");
-        let zoom = $('#zoom');
-        let title = $('#titrecreneau');
+        let summary = $(summarycreneauSelector);
+        let zoom = $(zoomButtonSelector);
+        let title = $(titrecreneauSelector);
 
-        if (button.val().length > 0 && title.val().length > 0 && zoomError==false) {
+        let bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+
+        if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null && zoomError==false) {
             zoom.removeAttr('disabled');
-	        zoom.removeClass('btn-secondary');
-	        zoom.addClass('btn-success');
+            zoom.removeClass('btn-secondary');
+            zoom.addClass('btn-success');
         } else {
             zoom.attr('disabled', true);
 	        zoom.removeClass('btn-success');
@@ -343,12 +408,14 @@ $(function () {
 
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
+    lieuCreneauElem = $("#lieucreneau").clone(true).detach();
+    zoomElem = $("#zoom").clone(true).detach();
 
     $('[data-toggle="tooltip"]').tooltip({ 'html': true });
     $("#form").on("submit", onSubmit);
     $("#reponse li a").on("click", onTimeClick);
+    $(zoomButtonSelector).on("click", zoomClick);
     $('#creneauMailInput').on('shown.bs.modal', bsModalShow);
     $('#creneauMailInput').on('hidden.bs.modal', bsModalHide);
-    $("#zoom").on("click", zoomClick);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 });

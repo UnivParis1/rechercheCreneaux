@@ -10,43 +10,47 @@ use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
+use Exception;
 
 class FBZoom
 {
-    var $fbParams;
-    var $stdEnv;
-    var $userMailStd;
-    var $users;
-    var $zoom;
-    var $titleEvent;
-    var $descriptionEvent;
-    var $modalCreneauStart;
-    var $modalCreneauEnd;
-    var $duree;
+    private FBParams $fbParams;
+    private stdClass $stdEnv;
+    private stdClass $userMailStd;
+    private ZoomUP1 $zoom;
+    private array $users;
+    private string $titleEvent;
+    private string $descriptionEvent;
+    private string $modalCreneauStart;
+    private string $modalCreneauEnd;
+    private int $duree;
+    private string $sessionName;
 
-    public function __construct(FBParams $fbParams, $stdEnv) {
-
+    public function __construct(FBParams $fbParams, stdClass $stdEnv) {
         $titleEvent = $fbParams->titleEvent;
         $descriptionEvent = $fbParams->descriptionEvent;
         $duree = $fbParams->duree;
         $modalCreneauStart = $fbParams->modalCreneauStart;
         $modalCreneauEnd = $fbParams->modalCreneauEnd;
+        $sessionName = $fbParams->zoomSessionName;
 
         if ($fbParams->actionFormulaireValider !== 'zoomMeeting') {
-            throw new \Exception("action != zoomMeeting");
+            throw new Exception("action != zoomMeeting");
         }
 
         if (! ($titleEvent && $descriptionEvent && $modalCreneauStart && $modalCreneauEnd)) {
-            throw new \Exception('null modalCreneauStart && modalCreneauEnd');
+            throw new Exception('null modalCreneauStart && modalCreneauEnd');
         }
 
         $userMailStd = FBUser::_getUidInfos($fbParams->stdEnv->uidCasUser, $fbParams->stdEnv);
 
         $users = [];
         foreach ($fbParams->uids as $uid) {
-        $infos = FBUser::_getUidInfos($uid, $fbParams->stdEnv);
-        if ($infos->mail != $userMailStd->mail)
-            $users[] = $infos;
+            $infos = FBUser::_getUidInfos($uid, $fbParams->stdEnv);
+
+            if ($infos->mail != $userMailStd->mail) {
+                $users[] = $infos;
+            }
         }
 
         $zoom = new ZoomUP1([
@@ -62,6 +66,7 @@ class FBZoom
         $this->titleEvent = $titleEvent;
         $this->descriptionEvent = $descriptionEvent;
         $this->duree = $duree;
+        $this->sessionName = $sessionName;
         $this->modalCreneauStart = $modalCreneauStart;
         $this->modalCreneauEnd = $modalCreneauEnd;
         $this->userMailStd = $userMailStd;
@@ -71,15 +76,27 @@ class FBZoom
     }
 
     public function createZoomMeeting() {
-        if (!isset($_SESSION['zoomMeeting']))
-            $_SESSION['zoomMeeting'] = array();
+        $sessionName = $this->sessionName;
+
+        if (!isset($_SESSION[$sessionName]))
+            $_SESSION[$sessionName] = array();
 
         $zoom = $this->zoom;
         $userMailStd = $this->userMailStd;
         $stdEnv = $this->stdEnv;
 
-        if (! $this->verifZoomMeeting($this->modalCreneauStart, $this->modalCreneauEnd, $zoom, $userMailStd->mail, $stdEnv)) {
-            throw new \Exception('Meeting existant');
+        $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION[$sessionName], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
+        $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION[$sessionName]);
+
+        if (isset($_SESSION[$sessionName][$idxSessionDate])) {
+            if (! ($data = $_SESSION[$sessionName][$idxSessionDate]['data'])) {
+                throw new Exception("datas hors session");
+            }
+            return $data;
+        }
+
+        if (! self::verifZoomMeeting($this->modalCreneauStart, $this->modalCreneauEnd, $zoom, $userMailStd->mail, $stdEnv)) {
+            throw new Exception('Meeting existant');
         }
 
         $meetingData = array(
@@ -89,13 +106,21 @@ class FBZoom
         'duration' => $this->duree, // Durée de la réunion en minutes
         'timezone' => 'Europe/Paris' // Fuseau horaire de la réunion
         );
-        
-        $datas = $zoom->createMeeting($userMailStd->mail, $meetingData);
 
-        $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['zoomMeeting'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
-        $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['zoomMeeting']);
+        $data = $zoom->createMeeting($userMailStd->mail, $meetingData);
 
-        return $datas;
+        if (!isset($_SESSION[$sessionName][$idxSessionDate])) {
+            $_SESSION[$sessionName][$idxSessionDate] = array();
+            $_SESSION[$sessionName][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
+            $_SESSION[$sessionName][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'userHost' => $this->userMailStd, 'userParticipants' => $this->users];
+
+            // retour js cas 1er appel, impossible pour le front de récupérer la session php
+            // , valeur retourné par le js (avant d'affecter les datas à la session pour éviter la redondance)
+            // d'où l'affectation de la variable ici
+            $data[$sessionName] = $_SESSION[$sessionName];
+            $_SESSION[$sessionName][$idxSessionDate]['data'] = $data;
+        }
+        return $data;
     }
 
     public function listMeetings($mail) {
@@ -116,7 +141,7 @@ class FBZoom
         return $dataInviteLink;
     }
 
-    private function verifZoomMeeting(string $dstart, string $dend, ZoomUP1 $zoom, string $mail, stdClass $stdEnv) {
+    protected static function verifZoomMeeting(string $dstart, string $dend, ZoomUP1 $zoom, string $mail, stdClass $stdEnv) {
         $dPeriod = Period::fromDate(new DateTime($dstart), new DateTime($dend));
       
         $meetings = $zoom->listMeeting($mail, array('type' => 'scheduled'));

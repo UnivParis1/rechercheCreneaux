@@ -43,9 +43,14 @@ class FBParams {
 
     var ?array $listUidsOptionnels;
 
-    var ?string $jsonSessionInfos;
+    var ?string $jsonSessionInviteInfos;
+    var ?string $jsonSessionZoomInfos;
 
     public stdClass $stdEnv;
+
+    public string $inviteEnregistrementSessionName = 'inviteEnregistrement';
+
+    public string $zoomSessionName = 'zoomMeeting';
 
     public function __construct(stdClass $stdEnv) {
 
@@ -64,7 +69,8 @@ class FBParams {
         $this->modalCreneauStart = isset($stdEnv->varsHTTPGet['modalCreneauStart']) ? $stdEnv->varsHTTPGet['modalCreneauStart'] : null;
         $this->modalCreneauEnd = isset($stdEnv->varsHTTPGet['modalCreneauEnd']) ? $stdEnv->varsHTTPGet['modalCreneauEnd'] : null;
         $this->listUidsOptionnels = isset($stdEnv->varsHTTPGet['listUidsOptionnels']) ? $stdEnv->varsHTTPGet['listUidsOptionnels'] : null;
-        $this->jsonSessionInfos = isset($_SESSION['inviteEnregistrement']) ? json_encode($_SESSION['inviteEnregistrement']) : null;
+        $this->jsonSessionInviteInfos = isset($_SESSION[$this->inviteEnregistrementSessionName]) ? json_encode($_SESSION[$this->inviteEnregistrementSessionName]) : null;
+        $this->jsonSessionZoomInfos = isset($_SESSION[$this->zoomSessionName]) ? json_encode($_SESSION[$this->zoomSessionName]) : null;
         
         if ((new DateTime($this->fromDate)) < (new DateTime())) {
             $this->fromDate = (new DateTime())->format('Y-m-d');

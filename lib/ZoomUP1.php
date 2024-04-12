@@ -28,7 +28,7 @@ class ZoomUP1 extends Zoom {
       file_put_contents($this->CREDENTIAL_PATH, $token);
 
       if (!file_exists($this->CREDENTIAL_PATH))
-        throw new \Exception("Error file Token ! ");
+        throw new Exception("Error file Token ! ");
 
       $this->CREDENTIAL_DATA = $response_token;
 
@@ -56,7 +56,7 @@ class ZoomUP1 extends Zoom {
 
         throw new Exception("Not able to find error");
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         if( $e->getCode() == 401 && $this->refreshToken() ) {
           return $this->inviteLink($meeting_id, $json);
         }
