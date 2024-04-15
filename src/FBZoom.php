@@ -118,7 +118,7 @@ class FBZoom
             // , valeur retourné par le js (avant d'affecter les datas à la session pour éviter la redondance)
             // d'où l'affectation de la variable ici
             $data[$sessionName] = $_SESSION[$sessionName];
-            $_SESSION[$sessionName][$idxSessionDate]['data'] = $data;
+            $_SESSION[$sessionName][$idxSessionDate]['data'] = $data['data'];
         }
         return $data;
     }
