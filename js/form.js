@@ -7,6 +7,7 @@ const lieucreneauSelector = "#lieucreneau input[name='lieucreneau']";
 const zoomButtonSelector = "#zoom button[name='zoom']";
 
 var jsSessionZoomInfos = typeof(jsSessionZoomInfos) == 'undefined' ? null : jsSessionZoomInfos;
+var jsSessionInviteInfos = typeof(jsSessionInviteInfos) == 'undefined' ? null : jsSessionInviteInfos;
 
 let listDisplayname = new Map();
 
