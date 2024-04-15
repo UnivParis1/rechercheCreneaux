@@ -104,7 +104,7 @@ function addOptionWithUid(uid, displayName) {
         }
     }
 
-    optionnel.on('click', function() {
+    optionnel.click(function() {
         afficherPermutterHide(testOptions(getCurrentOptions()));
     });
 
@@ -114,7 +114,7 @@ function addOptionWithUid(uid, displayName) {
 
     $(idperson_ul).append(newLi);
 
-    button.on("click", function () {
+    button.click(function () {
         $(this).parent().remove();
         let opts = getCurrentOptions();
         let testFormInput = testOptions(opts);
@@ -301,12 +301,13 @@ function bsModalShow() {
     bsModalShowInvitationDOM(currentInviteObj);
 
     (new bsModalShowZoom(jsSessionZoomInfos)).bsModalShowZoomDom();
-    $(zoomButtonSelector).on("click", zoomClick);
+    $(zoomButtonSelector).click(zoomClick);
 }
 
 function bsModalHide() {
     $('#zoom').empty().append(zoomElem);
     $("#lieucreneau").empty().append(lieuCreneauElem);
+    $(zoomButtonSelector).click(zoomClick);
 
     $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
     $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
@@ -413,8 +414,8 @@ $(function () {
 
     $('[data-toggle="tooltip"]').tooltip({ 'html': true });
     $("#form").on("submit", onSubmit);
-    $("#reponse li a").on("click", onTimeClick);
-    $(zoomButtonSelector).on("click", zoomClick);
+    $("#reponse li a").click(onTimeClick);
+    $(zoomButtonSelector).click(zoomClick);
     $('#creneauMailInput').on('shown.bs.modal', bsModalShow);
     $('#creneauMailInput').on('hidden.bs.modal', bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
