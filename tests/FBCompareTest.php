@@ -27,6 +27,7 @@ class FBCompareTest extends TestCase
 
         $nbResultatsAffichésRef = $fbCompareRef->getNbResultatsAffichés();
         $creneauxFinauxArrayRef = $fbCompareRef->getArrayCreneauxAffiches();
+        if (count($creneauxFinauxArrayRef) == 0) throw new \Exception('ref count $creneauxFinauxArrayRef == 0. Test foireux à la base');
 
         $fbParams->nbcreneaux = 35;
         $fbCompareNew = new FBCompare($fbUsers, $creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
