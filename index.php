@@ -78,7 +78,7 @@ if ($stdEnv->cas === true) {
     $stdEnv->uidCasUser = phpCAS::getUser();
 }
 
-$stdEnv->maildebuginvite = (($stdEnv->env == 'dev' || $stdEnv->env == 'local') && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
+$stdEnv->maildebuginvite = (($stdEnv->env == 'dev' || $stdEnv->env == 'local' || $stdEnv->env == 'test')) && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
 
 date_default_timezone_set($stdEnv->dtz);
 
