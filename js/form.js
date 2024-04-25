@@ -216,15 +216,21 @@ class bsModalShowZoom {
         this.currentObj = (this.key !== -1) ? jsSessionZoomInfos[this.key] : null;
     }
 
+    lieuCreneauUrlStr(url) {
+        return "<a href='"+ url +"'>Lien zoom</a>";
+    }
+
     lieuCreneauDiv(url) {
-        return $("<p id='lieucreneau'><a href='"+ url +"'>Lien zoom</a></p>");
+        return $("<p id='lieucreneau'>"+this.lieuCreneauUrlStr(url)+"</p>");
     }
 
     bsModalShowZoomDom() {
         if(this.currentObj != null) {
+            let lieucreneauHtml = this.lieuCreneauDiv(this.currentObj.data.join_url);
             $(zoomButtonSelector).text("Zoom crée");
             $(zoomButtonSelector).attr('disabled', true);
-            $('#lieucreneau').empty().append(this.lieuCreneauDiv(this.currentObj.data.join_url));
+            $('#lieucreneau').empty().append(lieucreneauHtml);
+            $('#lieucreneau').append($('<input name="lieucreneau" type="hidden" value="' + he.escape(he.encode(this.currentObj.data.join_url))+ '"/>'));
         } else {
             $(zoomButtonSelector).text("Créer un Zoom");
         }
