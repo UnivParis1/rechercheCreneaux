@@ -132,11 +132,11 @@ if (FBForm::validParams($fbParams)) {
         <script src="<?= $stdEnv->prolongationEntJs ?>"></script>
     <?php endif ?>
 
-    <link href="./css/bootstrap.min.css" rel="stylesheet" />
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="./css/form.css" rel="stylesheet" />
 
-    <script src="./js/bootstrap.bundle.min.js"></script>
-    <script src="./js/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
 
     <?php if ($stdEnv->wsgroup): ?>
         <script type='text/javascript'
@@ -146,12 +146,12 @@ if (FBForm::validParams($fbParams)) {
         <script type='text/javascript' src='./js/noform.js'></script>
     <?php endif ?>
 
-    <link href="./css/nouislider.min.css" rel="stylesheet" />
-    <script src="./js/nouislider.min.js"></script>
-    <script src="./js/slider.js"></script>
+    <link href="bower_components/nouislider/dist/nouislider.min.css" rel="stylesheet" />
+    <script src="bower_components/nouislider/dist/nouislider.min.js"></script>
+    <script src="js/slider.js"></script>
 
-    <script src="./js/min/moment.min.js"></script>
-    <script src="./js/min/moment-with-locales.js"></script>
+    <script src="bower_components/moment/min/moment.min.js"></script>
+    <script src="bower_components/moment/min/moment-with-locales.js"></script>
 </head>
 
 <body>
@@ -214,8 +214,7 @@ if (FBForm::validParams($fbParams)) {
 
                 <select id="duree" name="duree" required=true>
                     <option value="30" <?= ($fbParams->duree == 30) ? ' selected' : '' ?>>30 minutes</option>
-                    <option value="60" <?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected' : '' ?>>1h
-                    </option>
+                    <option value="60" <?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected' : '' ?>>1h</option>
                     <option value="90" <?= ($fbParams->duree == 90) ? ' selected' : '' ?>>1h30</option>
                     <option value="120" <?= ($fbParams->duree == 120) ? ' selected' : '' ?>>2h</option>
                     <option value="150" <?= ($fbParams->duree == 150) ? ' selected' : '' ?>>2h30</option>
