@@ -38,7 +38,7 @@
                             <label class='form-label' for="lieucreneau">Lieu :</label>
                             <div id="lieucreneau" class="input-group">
                                 <input class='form-control' type="text" disabled placeholder="Lieu"
-                                    name="lieucreneau" value="<?= $fbParams->lieuEvent; ?>"
+                                    name="lieucreneau" value="<?php if (!is_null($fbParams->lieuEvent) && !str_contains($fbParams->lieuEvent, 'https://pantheon')) echo $fbParams->lieuEvent; ?>"
                                     oninvalid="this.setCustomValidity('Veuillez renseigner un lieu')"
                                     onchange="if(this.value.length>0) this.setCustomValidity('')" />
                             </div>
