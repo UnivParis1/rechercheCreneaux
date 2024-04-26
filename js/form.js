@@ -226,6 +226,9 @@ class bsModalShowZoom {
 
     bsModalShowZoomDom() {
         if(this.currentObj != null) {
+            $(titrecreneauSelector).val(this.currentObj.infos.titleEvent);
+            $(summarycreneauSelector).val(this.currentObj.infos.descriptionEvent);
+
             let lieucreneauHtml = this.lieuCreneauDiv(this.currentObj.data.join_url);
             $(zoomButtonSelector).text("Zoom crée");
             $(zoomButtonSelector).attr('disabled', true);
@@ -234,6 +237,69 @@ class bsModalShowZoom {
         } else {
             $(zoomButtonSelector).text("Créer un Zoom");
         }
+    }
+
+    bsModalShowInvitationDOM(currentObj) {
+        if (currentObj != null) {
+            $(titrecreneauSelector).val(currentObj.infos.titleEvent);
+            $(summarycreneauSelector).val(currentObj.infos.descriptionEvent);
+
+            // Dirty Hack : trouver un moyen d'avoir un event zoom différemment que la recherche de https://panthe dans le lieu
+            if ((currentObj.infos.lieuEvent.indexOf('https://pantheon')) != -1) {
+                $(lieucreneauSelector).val(currentObj.infos.lieuEvent);
+            }
+        }
+
+        let ul = $("#creneauMailParticipant_ul");
+        ul.empty();
+        listDisplayname.forEach(function(displayName, uid) {
+            let li=$('<li>');
+            li.text(displayName);
+            if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
+                li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
+            }
+            ul.append(li);
+        });
+    }
+
+    static bsModalShow() {
+        let idxErr = isZoomError();
+        if (idxErr != -1) {
+           zoomClickError(zoomErrors[idxErr].msg);
+           return;
+        }
+        let zoom = $(zoomButtonSelector);
+        zoom.removeClass('bg-danger');
+        zoom.addClass('btn-secondary');
+        zoom.addClass('btn-success');
+
+        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', false);
+        $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
+
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
+
+        zoomChange();
+
+        let currentInviteObj = objSessionIdx(jsSessionInviteInfos, start, end, {invite: true, newParticipant: newParticipant}); // objets courant à partir d'une variable jsSession définit dans l'index
+
+        let objModal = new bsModalShowZoom(jsSessionZoomInfos);
+        objModal.bsModalShowInvitationDOM(currentInviteObj);
+        objModal.bsModalShowZoomDom();
+
+        $(zoomButtonSelector).on('click', zoomClick);
+    }
+
+    static bsModalHide() {
+        $('#zoom').empty().append(zoomElem);
+        $("#lieucreneau").empty().append(lieuCreneauElem);
+        $(zoomButtonSelector).on('click', zoomClick);
+
+        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
+        $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
+
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
+        $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
     }
 }
 
@@ -276,63 +342,28 @@ function onTimeClick() {
     }
 }
 
-function bsModalShowInvitationDOM(currentObj) {
-    if (currentObj != null) {
-        $(titrecreneauSelector).val(currentObj.infos.titleEvent);
-        $(summarycreneauSelector).val(currentObj.infos.descriptionEvent);
-        $(lieucreneauSelector).val(currentObj.infos.lieuEvent);
+let isLoading = false;
+let zoomErrors = [];
+
+function isZoomError() {
+    return zoomErrors.findIndex(o => o.start.unix()==start.unix() && o.end.unix()==end);
+}
+
+function zoomClickError(msg) {
+    let zoom = $(zoomButtonSelector);
+    let objCurrent = {'start': start, 'end': end, 'msg': msg};
+    let idx=isZoomError();
+    if (idx == -1) {
+        zoomErrors.push(objCurrent);
     }
 
-    ul = $("#creneauMailParticipant_ul");
-    ul.empty();
-    listDisplayname.forEach(function(displayName, uid) {
-        let li=$('<li>');
-        li.text(displayName);
-        if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
-            li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
-        }
-        ul.append(li);
-    });
-}
+    objCurrent = zoomErrors.at(idx);
+    objCurrent.msg = msg;
 
-function bsModalShow() {
-    $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', false);
-    $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
-
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
-
-    zoomChange();
-
-    let currentInviteObj = objSessionIdx(jsSessionInviteInfos, start, end, {invite: true, newParticipant: newParticipant}); // objets courant à partir d'une variable jsSession définit dans l'index
-    bsModalShowInvitationDOM(currentInviteObj);
-
-    (new bsModalShowZoom(jsSessionZoomInfos)).bsModalShowZoomDom();
-    $(zoomButtonSelector).click(zoomClick);
-}
-
-function bsModalHide() {
-    $('#zoom').empty().append(zoomElem);
-    $("#lieucreneau").empty().append(lieuCreneauElem);
-    $(zoomButtonSelector).click(zoomClick);
-
-    $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
-    $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
-
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
-}
-
-let isLoading = false;
-let zoomError = false;
-
-function zoomClickError(data) {
-    zoomError=true;
-    let zoom = $(zoomButtonSelector);
     zoom.removeClass('btn-secondary');
     zoom.removeClass('btn-success');
     zoom.addClass('bg-danger');
-    zoom.text(data.msg);
+    zoom.text(msg);
 }
 
 function zoomClick() {
@@ -372,9 +403,9 @@ function zoomClick() {
                 bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
                 bsZoom.bsModalShowZoomDom();
             } else {
-                zoomClickError(data);
+                zoomClickError(data.msg);
             }}).fail(function (data) {
-                zoomClickError(data);
+                zoomClickError(data.msg);
             }).always(function() {
                 zoom.attr('disabled', true);
                 isLoading=false;
@@ -388,7 +419,7 @@ function zoomChange() {
 
         let bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
 
-        if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null && zoomError==false) {
+        if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null) {
             zoom.removeAttr('disabled');
             zoom.removeClass('btn-secondary');
             zoom.addClass('btn-success');
@@ -421,9 +452,9 @@ $(function () {
 
     $('[data-toggle="tooltip"]').tooltip({ 'html': true });
     $("#form").on("submit", onSubmit);
-    $("#reponse li a").click(onTimeClick);
-    $(zoomButtonSelector).click(zoomClick);
-    $('#creneauMailInput').on('shown.bs.modal', bsModalShow);
-    $('#creneauMailInput').on('hidden.bs.modal', bsModalHide);
+    $("#reponse li a").on("click", onTimeClick);
+    $(zoomButtonSelector).on("click", zoomClick);
+    $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
+    $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 });
