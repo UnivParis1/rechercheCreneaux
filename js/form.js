@@ -229,11 +229,11 @@ class bsModalShowZoom {
             $(titrecreneauSelector).val(this.currentObj.infos.titleEvent);
             $(summarycreneauSelector).val(this.currentObj.infos.descriptionEvent);
 
-            let lieucreneauHtml = this.lieuCreneauDiv(this.currentObj.data.join_url);
-            $(zoomButtonSelector).text("Zoom crée");
-            $(zoomButtonSelector).attr('disabled', true);
-            $('#lieucreneau').empty().append(lieucreneauHtml);
-            $('#lieucreneau').append($('<input name="lieucreneau" type="hidden" value="' + he.escape(he.encode(this.currentObj.data.join_url))+ '"/>'));
+            let url = this.currentObj.data.join_url;
+            $("#zoom").empty();
+            $(zoomButtonSelector).empty();
+            $('#lieucreneau').empty().append('<a href="' + url + '">'+ url +'</a>');
+            $('#lieucreneau').append('<input name="lieucreneau" hidden value="'+ url + '"/>');
         } else {
             $(zoomButtonSelector).text("Créer un Zoom");
         }
