@@ -232,8 +232,22 @@ class bsModalShowZoom {
             let url = this.currentObj.data.join_url;
             $("#zoom").empty();
             $(zoomButtonSelector).empty();
-            $('#lieucreneau').empty().append('<a href="' + url + '">'+ url +'</a>');
+            let urldiv = $('<div class="overflow-hidden">').append($('<a id="urlzooma" href="' + url + '">'+ url +'</a>'));
+
+            let copySpan = $('<div class="col-1 d-flex align-items-end"><span type="button" class="btn-clipboard" title="Copy to clipboard"><i class="bi bi-clipboard" aria-hidden="true"></i></span></div>');
+            copySpan.on("click", function (event) {
+                navigator.clipboard.writeText(url);
+                let cobj = $(this).children(2).children('i');
+                cobj.removeClass('bi-clipboard');
+                cobj.addClass('bi-check2');
+
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            $('#colLieu').removeClass('col').addClass('col-11');
+            $('#lieucreneau').empty().append(urldiv);
             $('#lieucreneau').append('<input name="lieucreneau" hidden value="'+ url + '"/>');
+            $('#colLieu').after(copySpan);
         } else {
             $(zoomButtonSelector).text("Créer un Zoom");
         }

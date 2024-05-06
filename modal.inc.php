@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col">
+                        <div class="col" id='colLieu'>
                             <label class='form-label' for="lieucreneau">Lieu :</label>
                             <div id="lieucreneau" class="input-group">
                                 <input class='form-control' type="text" disabled placeholder="Lieu"
