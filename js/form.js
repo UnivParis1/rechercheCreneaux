@@ -234,21 +234,25 @@ class bsModalShowZoom {
             $(zoomButtonSelector).empty();
             let urldiv = $('<div class="overflow-hidden">').append($('<a id="urlzooma" href="' + url + '">'+ url +'</a>'));
 
-            let copySpan = $('<div class="col-1 d-flex align-items-end"><span type="button" class="btn-clipboard" title="Copy to clipboard"><i class="bi bi-clipboard" aria-hidden="true"></i></span></div>');
+            let copySpan = $('<div id="copySpan" class="col-1 d-flex align-items-end"><span type="button" class="btn-clipboard" title="Copy to clipboard"><i class="bi bi-clipboard" aria-hidden="true"></i></span></div>');
+
             copySpan.on("click", function (event) {
-                navigator.clipboard.writeText(url);
                 let cobj = $(this).children(2).children('i');
                 cobj.removeClass('bi-clipboard');
                 cobj.addClass('bi-check2');
-
+                navigator.clipboard.writeText(url);
                 event.preventDefault();
                 event.stopPropagation();
             });
             $('#colLieu').removeClass('col').addClass('col-11');
             $('#lieucreneau').empty().append(urldiv);
             $('#lieucreneau').append('<input name="lieucreneau" hidden value="'+ url + '"/>');
-            $('#colLieu').after(copySpan);
+
+            if ($('#copySpan').length == 0) {
+                $('#colLieu').after(copySpan);
+            }
         } else {
+            $('#copySpan').remove();
             $(zoomButtonSelector).text("Créer un Zoom");
         }
     }
@@ -270,7 +274,7 @@ class bsModalShowZoom {
             let li=$('<li>');
             li.text(displayName);
             if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
-                li.append(' <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check2-circle" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"></path><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"></path>');
+                li.append('<span class="bi bi-check2-circle"></span>');
             }
             ul.append(li);
         });
@@ -307,6 +311,10 @@ class bsModalShowZoom {
     static bsModalHide() {
         $('#zoom').empty().append(zoomElem);
         $("#lieucreneau").empty().append(lieuCreneauElem);
+        $("#colLieu").empty().append(colLieu);
+        $('#colLieu').removeClass('col-11');
+        $('#colLieu').addClass('col');
+        $('#copySpan').remove();
         $(zoomButtonSelector).on('click', zoomClick);
 
         $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
@@ -462,6 +470,7 @@ $(function () {
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
     lieuCreneauElem = $("#lieucreneau").clone(true).detach();
+    colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
 
     $('[data-toggle="tooltip"]').tooltip({ 'html': true });
