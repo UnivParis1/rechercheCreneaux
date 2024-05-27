@@ -8,6 +8,7 @@ use stdClass;
 use Exception;
 use DateInterval;
 use DateTimeZone;
+use DateTime;
 use League\Period\Period;
 use League\Period\Duration;
 use League\Period\Sequence;
@@ -143,7 +144,7 @@ class FBUser {
         $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
         $sequence = FBUtils::sortSequence($sequence);
 
-        $periodBefore = Period::after(new \DateTime(), "{$this->fbParams->rechercheSurXJours} DAYS");
+        $periodBefore = Period::after(new DateTime($this->fbParams->fromDate), "{$this->fbParams->rechercheSurXJours} DAYS");
 
         return $sequence->filter(function (Period $interval) use ($periodBefore)  {
             if ($interval->endDate->getTimestamp() <= $periodBefore->endDate->getTimestamp()) {
