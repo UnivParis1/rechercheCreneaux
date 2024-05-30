@@ -65,14 +65,11 @@ if (FBForm::validParams($fbParams)) {
     <link href="node_modules/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="./css/form.css" rel="stylesheet" />
 
-    <script src="node_modules/requirejs/require.js"></script>
-
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
 
     <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript'
-            src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+        <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
         <script type='text/javascript' src='./js/form.js'></script>
     <?php else: ?>
         <script type='text/javascript' src='./js/noform.js'></script>
@@ -110,6 +107,10 @@ if (FBForm::validParams($fbParams)) {
                                 if (jsuids.length < 2) {
                                     errorShow(true);
                                 }
+                            });
+                        <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
+                            $(function () {
+                                setOptionsUid(['<?= $stdEnv->uidCasUser ?>']);
                             });
                         <?php endif ?>
                         <?php if (isset($jsonSessionInviteInfos)): ?>

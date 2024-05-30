@@ -20,12 +20,13 @@ let zoomElem=null;
 
 function errorShow(toShow) {
     if (toShow === true) {
-        if ($(divpersonselect).is(":hidden"))
-           $(divpersonselect).show();
-        $(divpersonselect + " .alertrequire").css('display', 'inherit');
+        if ($(divpersonselect).is(":hidden")) {
+            $(divpersonselect).show();
+        }
+        $(".alertrequire").show();
     }
     if (toShow === false) {
-        $(divpersonselect + " .alertrequire").css('display', 'none');
+        $(".alertrequire").hide();
     }
 }
 
@@ -105,7 +106,7 @@ function addOptionWithUid(uid, displayName) {
         }
     }
 
-    optionnel.click(function() {
+    optionnel.on("click", function () {
         afficherPermutterHide(testOptions(getCurrentOptions()));
     });
 
@@ -115,7 +116,7 @@ function addOptionWithUid(uid, displayName) {
 
     $(idperson_ul).append(newLi);
 
-    button.click(function () {
+    button.on("click", function () {
         $(this).parent().remove();
         let opts = getCurrentOptions();
         let testFormInput = testOptions(opts);
@@ -283,8 +284,8 @@ class bsModalShowZoom {
     static bsModalShow() {
         let idxErr = isZoomError();
         if (idxErr != -1) {
-           zoomClickError(zoomErrors[idxErr].msg);
-           return;
+            zoomClickError(zoomErrors[idxErr].msg);
+            return;
         }
         let zoom = $(zoomButtonSelector);
         zoom.removeClass('bg-danger');
@@ -389,71 +390,71 @@ function zoomClickError(msg) {
 }
 
 function zoomClick() {
-        if (isLoading == true) {
-            return;
-        }
-        isLoading = true;
-        $("input[name='actionFormulaireValider']").val("zoomMeeting");
+    if (isLoading == true) {
+        return;
+    }
+    isLoading = true;
+    $("input[name='actionFormulaireValider']").val("zoomMeeting");
 
-        let zoom = $(zoomButtonSelector);
+    let zoom = $(zoomButtonSelector);
 
-        zoom.empty().append(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    zoom.empty().append(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                      <span class="sr-only">En cours...</span>`);
 
-        let datas = $("#form").serialize();
-        $.ajax({
-            type: "GET",
-            url: "zoom.php",
-            data: datas,
-            dataType: "json",
-            encode: true,
-          }).done(function (data) {
-            if (data.status == true) {
-                let bsZoom;
+    let datas = $("#form").serialize();
+    $.ajax({
+        type: "GET",
+        url: "zoom.php",
+        data: datas,
+        dataType: "json",
+        encode: true,
+    }).done(function (data) {
+        if (data.status == true) {
+            let bsZoom;
                 if (jsSessionZoomInfos==null) {
-                    jsSessionZoomInfos = [];
+                jsSessionZoomInfos = [];
                     jsSessionZoomInfos[0]=data.zoomMeeting[0];
-                    jsSessionZoomInfos[0].data = data.data;
-                } else {
-                    bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
-                    if (bsZoom.currentObj == null) {
-                        jsSessionZoomInfos.push(Object.assign({data: data.data}, data.zoomMeeting.at(-1)));
-                    } else {
-                        jsSessionZoomInfos[bsZoom.key].data = data.data;
-                    }
-                }
-                bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
-                bsZoom.bsModalShowZoomDom();
+                jsSessionZoomInfos[0].data = data.data;
             } else {
-                zoomClickError(data.msg);
+                bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+                if (bsZoom.currentObj == null) {
+                        jsSessionZoomInfos.push(Object.assign({data: data.data}, data.zoomMeeting.at(-1)));
+                } else {
+                    jsSessionZoomInfos[bsZoom.key].data = data.data;
+                }
+            }
+            bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+            bsZoom.bsModalShowZoomDom();
+        } else {
+            zoomClickError(data.msg);
             }}).fail(function (data) {
-                zoomClickError(data.msg);
+        zoomClickError(data.msg);
             }).always(function() {
-                zoom.attr('disabled', true);
+        zoom.attr('disabled', true);
                 isLoading=false;
-            });
+    });
 }
 
 function zoomChange() {
-        let summary = $(summarycreneauSelector);
-        let zoom = $(zoomButtonSelector);
-        let title = $(titrecreneauSelector);
+    let summary = $(summarycreneauSelector);
+    let zoom = $(zoomButtonSelector);
+    let title = $(titrecreneauSelector);
 
-        let bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
+    let bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
 
-        if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null) {
-            zoom.removeAttr('disabled');
-            zoom.removeClass('btn-secondary');
-            zoom.addClass('btn-success');
-        } else {
-            zoom.attr('disabled', true);
-	        zoom.removeClass('btn-success');
-	        zoom.addClass('btn-secondary');
-	}
+    if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null) {
+        zoom.removeAttr('disabled');
+        zoom.removeClass('btn-secondary');
+        zoom.addClass('btn-success');
+    } else {
+        zoom.attr('disabled', true);
+        zoom.removeClass('btn-success');
+        zoom.addClass('btn-secondary');
+    }
 }
 
 $(function () {
-    $("#person").autocompleteUserAndGroup(
+    $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
         select: wsCallbackUid,
         wantedAttr: "uid",
@@ -465,7 +466,7 @@ $(function () {
         }
     });
 
-    $('#divpersonselect').hide();
+    // $('#divpersonselect').hide();
 
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
