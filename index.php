@@ -251,10 +251,11 @@ if (FBForm::validParams($fbParams)) {
             $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
             $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
             <p>Créneaux disponibles</p>
-            <ul class="col-11">
+            <ul class="col-11 mb-5">
                 <?php foreach ($listDate as $date): ?>
-                    <li class="row">
-                        <time class="col-5"><span class="d-inline-block col-2">
+                    <li class="row d-flex align-items-center">
+                        <input type="checkbox" class="col-1 mb-2" checked onclick="eventoCheck(this);" />
+                        <time class="col-5"><span class="col-2">
                                 <?= $formatter_day->format($date->startDate->getTimestamp()) ?>
                             </span>
                             <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?>
@@ -268,11 +269,11 @@ if (FBForm::validParams($fbParams)) {
                                 </div>
                             <?php endif ?>
                             <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New ): ?>
-                                <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
+                                <a href="#" class="col-5 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
                                     newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>"
                                     timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                             <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                                <a href="#" class="col px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
+                                <a href="#" class="col-5 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
                                     newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>"
                                     timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                             <?php endif ?>
@@ -280,7 +281,10 @@ if (FBForm::validParams($fbParams)) {
                     </li>
                 <?php endforeach ?>
             </ul>
-        <?php endif ?>
+            <div class="col-9 d-flex justify-content-center">
+               <button id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="">Créer un Evento à partir des créneaux sélectionnés</button>
+            </div>
+        <?Php endif ?>
     </div>
 </body>
 

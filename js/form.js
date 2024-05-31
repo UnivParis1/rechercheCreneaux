@@ -482,3 +482,22 @@ $(function () {
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 });
+
+function eventoCheck(elementHTML) {
+    let ulParent = elementHTML.parentElement.parentElement;
+
+    let evento = $('#evento');
+    if (ulParent.querySelectorAll('input[type="checkbox"]:checked').length == 0) {
+        evento.attr('disabled', true);
+        if (evento.hasClass('btn-success')) {
+            evento.removeClass('btn-success');
+        }
+        evento.addClass('btn-secondary');
+    } else {
+        evento.attr('disabled', false);
+        if (evento.hasClass('btn-secondary')) {
+            evento.removeClass('btn-secondary');
+        }
+        evento.addClass('btn-success');
+    }
+}
