@@ -481,6 +481,45 @@ $(function () {
     $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
+
+    function loadIframe(url) {
+        return new Promise(function(resolve, reject) {
+        var iframe = document.createElement('iframe');
+        iframe.src = url;
+        
+        iframe.onload = function() {
+            resolve(iframe);
+        } 
+        });
+    }
+ 
+    if (typeof(jsEventoLoginUrl) != 'undefined') {
+        loadIframe(jsEventoLoginUrl)
+        .catch(function(error) {
+        console.error(error);
+        });
+
+        $('#evento').on("click", function() {
+            $('#reponse ul li input:checked~a');
+            alert("enfin");
+
+            $.ajax({
+                url: "https://evento.univ-paris1.fr/rest.php/survey",
+                type: "GET",
+                dataType: 'json',
+                xhrFields: {
+                     withCredentials: true
+                },
+                success: function (response) {
+                    console.log("success ajax");
+                }
+            }).done(function() {
+                console.log("test ok");
+            });
+
+            console.log("debug");
+        });
+    }
 });
 
 function eventoCheck(elementHTML) {
