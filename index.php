@@ -282,8 +282,12 @@ if (FBForm::validParams($fbParams)) {
                 <?php endforeach ?>
             </ul>
             <div class="col-9 d-flex justify-content-center">
-               <button id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="">Créer un Evento à partir des créneaux sélectionnés</button>
+               <span id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="">Créer un Evento à partir des créneaux sélectionnés</span>
             </div>
+            <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
+                <script>var jsEventoLoginUrl = "https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session";</script>
+                <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" style="width:0;height:0;border:0; border:none;"></iframe>
+            <?php endif ?>
         <?Php endif ?>
     </div>
 </body>

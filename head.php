@@ -31,13 +31,14 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
-$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM'])->isBoolean();
+$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO'])->isBoolean();
 
 $stdEnv->wsgroup = (boolean) json_decode(strtolower($_ENV['WSGROUP']));
 $stdEnv->photoShow = (boolean) json_decode(strtolower($_ENV['PHOTO_SHOW']));
 $stdEnv->prolongationBandeau = (boolean) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
 $stdEnv->cas = (boolean) json_decode(strtolower($_ENV['CAS']));
 $stdEnv->zoom = (boolean) json_decode(strtolower($_ENV['ZOOM']));
+$stdEnv->evento = (boolean) json_decode(strtolower($_ENV['EVENTO']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
@@ -80,6 +81,10 @@ if ($stdEnv->zoom === true) {
 
     if (!file_exists($stdEnv->zoomLibCredentialPath))
         file_put_contents($stdEnv->zoomLibCredentialPath, '');
+}
+
+if ($stdEnv->evento == true) {
+    $stdEnv->eventoShibentityid = $_ENV['EVENTO_SHIBENTITYID'];
 }
 
 $stdEnv->maildebuginvite = (($stdEnv->env == 'dev' || $stdEnv->env == 'local' || $stdEnv->env == 'test') && isset($_ENV['MAIL_DEV_SEND_DEBUG'])) ? $_ENV['MAIL_DEV_SEND_DEBUG'] : null;
