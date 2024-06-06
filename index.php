@@ -217,6 +217,7 @@ if (FBForm::validParams($fbParams)) {
         </div>
 
         <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
+        <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): require_once('modal_evento.inc.php'); endif?>
     </form>
 
     <?php
@@ -251,7 +252,7 @@ if (FBForm::validParams($fbParams)) {
             $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
             $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
             <p>Créneaux disponibles</p>
-            <ul class="col-11 mb-5">
+            <ul class="col-11 mb-1">
                 <?php foreach ($listDate as $date): ?>
                     <li class="row d-flex align-items-center">
                         <input type="checkbox" class="col-1 mb-2" checked onclick="eventoCheck(this);" />
@@ -281,14 +282,13 @@ if (FBForm::validParams($fbParams)) {
                     </li>
                 <?php endforeach ?>
             </ul>
-            <div class="col-9 d-flex justify-content-center">
-               <span id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="">Créer un Evento à partir des créneaux sélectionnés</span>
-            </div>
             <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
-                <script>var jsEventoLoginUrl = "https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session";</script>
-                <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" style="width:0;height:0;border:0; border:none;"></iframe>
+            <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" name="evento-iframe" style="width:0;height:0;border:0; border:none;"></iframe>
+            <div class="col-9 d-flex justify-content-end">
+               <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="Créer un Evento à partir des créneaux sélectionnés" />
+            </div>
             <?php endif ?>
-        <?Php endif ?>
+        <?php endif ?>
     </div>
 </body>
 
