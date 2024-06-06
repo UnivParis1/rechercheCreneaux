@@ -345,14 +345,18 @@ function onSubmit(event) {
     }
 }
 
+function textTimeStr(ts, te) {
+    start = moment.unix(ts);
+    end = moment.unix(te);
+
+    return start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h');
+}
+
 function onTimeClick() {
     let ts=$(this).attr("timestart");
     let te=$(this).attr("timeend");
 
-    start = moment.unix(ts);
-    end = moment.unix(te);
-
-    $('#creneauBoxDesc #creneauInfo').text(start.format('LL') + " de " + start.format('HH:mm').replace(':', 'h') + ' à ' + end.format('HH:mm').replace(':','h'));
+    $('#creneauBoxDesc #creneauInfo').text(textTimeStr(ts, te));
 
     $("#creneauBoxInput ~ input[name='modalCreneauStart']").val(start.format(moment.HTML5_FMT.DATETIME_LOCAL));
     $("#creneauBoxInput ~ input[name='modalCreneauEnd']").val(end.format(moment.HTML5_FMT.DATETIME_LOCAL));
@@ -466,8 +470,6 @@ $(function () {
         }
     });
 
-    // $('#divpersonselect').hide();
-
     // Set FR pour le formattage des dates avec la librairie moment.js
     moment.locale('fr');
     lieuCreneauElem = $("#lieucreneau").clone(true).detach();
@@ -482,61 +484,61 @@ $(function () {
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 
-    function loadIframe(url) {
-        return new Promise(function(resolve, reject) {
-        var iframe = document.createElement('iframe');
-        iframe.src = url;
-        
-        iframe.onload = function() {
-            resolve(iframe);
-        } 
-        });
-    }
- 
-    if (typeof(jsEventoLoginUrl) != 'undefined') {
-        loadIframe(jsEventoLoginUrl)
-        .catch(function(error) {
-        console.error(error);
+    $('#modalEvento .modal-footer input[name="submitModal"]').on("click", function() {
+        // récupère les éléments cliqués
+        $('#reponse ul li input:checked~a');
+        alert('ok');
+        $.ajax({
+            url: "https://evento.univ-paris1.fr/rest.php/survey",
+            type: "GET",
+            dataType: 'json',
+            xhrFields: {
+                 withCredentials: true
+            },
+            success: function (response) {
+                console.log("success ajax " + response.readyState);
+            }
+        }).done(function() {
+            console.log("test ok");
         });
 
-        $('#evento').on("click", function() {
-            $('#reponse ul li input:checked~a');
-            alert("enfin");
-
-            $.ajax({
-                url: "https://evento.univ-paris1.fr/rest.php/survey",
-                type: "GET",
-                dataType: 'json',
-                xhrFields: {
-                     withCredentials: true
-                },
-                success: function (response) {
-                    console.log("success ajax");
-                }
-            }).done(function() {
-                console.log("test ok");
-            });
-
-            console.log("debug");
-        });
-    }
+        console.log("debug");
+    });
 });
+
+function createEventoForm(selector) {
+    let ulEventoCreneaux = $('#modalEventoCreneaux');
+
+    ulEventoCreneaux.empty();
+
+    selector.each(function() {
+        let ts = $(this).attr('timestart');
+        let te = $(this).attr('timeend');
+
+        ulEventoCreneaux.append('<li>' + textTimeStr(ts, te) + '</li>');
+    });
+}
 
 function eventoCheck(elementHTML) {
     let ulParent = elementHTML.parentElement.parentElement;
 
     let evento = $('#evento');
-    if (ulParent.querySelectorAll('input[type="checkbox"]:checked').length == 0) {
-        evento.attr('disabled', true);
+
+    let selector = $('#reponse ul li input[type="checkbox"]:checked ~ a');
+
+    if (selector.length == 0) {
+        evento.attr('disabled', 'disabled');
         if (evento.hasClass('btn-success')) {
             evento.removeClass('btn-success');
         }
         evento.addClass('btn-secondary');
     } else {
-        evento.attr('disabled', false);
+        evento.removeAttr('disabled');
         if (evento.hasClass('btn-secondary')) {
             evento.removeClass('btn-secondary');
         }
         evento.addClass('btn-success');
     }
+
+    createEventoForm(selector);
 }
