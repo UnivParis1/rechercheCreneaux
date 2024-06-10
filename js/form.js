@@ -484,10 +484,18 @@ $(function () {
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
     $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 
-    $('#modalEvento .modal-footer input[name="submitModal"]').on("click", function() {
+    $('#modalEvento .modal-footer button[name="submit"]').on("click", function(event) {
         // récupère les éléments cliqués
-        $('#reponse ul li input:checked~a');
-        alert('ok');
+
+        //$('#reponse ul li input:checked~a');
+        if (eventoFormCheck() == false) {
+            return;
+        }
+
+        $('#modalEvento').modal('hide');
+        $('#spinnerEvento').modal('show');
+
+        return;
         $.ajax({
             url: "https://evento.univ-paris1.fr/rest.php/survey",
             type: "GET",
@@ -506,7 +514,29 @@ $(function () {
     });
 });
 
-function createEventoForm(selector) {
+function eventoFormCheck() {
+    let titreSel = $("input[name='titrevento']");
+    if (titreSel.val().length == 0) {
+        $("input[name='titrevento']").get(0).setCustomValidity(true);
+        $("input[name='titrevento']").get(0).reportValidity();
+        return false;
+    } else {
+        $("input[name='titrevento']").get(0).setCustomValidity('');
+    }
+
+    let descSel = $("textarea[name='summaryevento']");
+    if (descSel.val().length == 0) {
+        $("textarea[name='summaryevento']").get(0).setCustomValidity(true);
+        $("textarea[name='summaryevento']").get(0).reportValidity();
+        return false;
+    } else {
+       $("textarea[name='summaryevento']").get(0).setCustomValidity('');
+    }
+
+    return true;
+}
+
+function updateEventoCreneaux(selector) {
     let ulEventoCreneaux = $('#modalEventoCreneaux');
 
     ulEventoCreneaux.empty();
@@ -519,9 +549,7 @@ function createEventoForm(selector) {
     });
 }
 
-function eventoCheck(elementHTML) {
-    let ulParent = elementHTML.parentElement.parentElement;
-
+function eventoCheck() {
     let evento = $('#evento');
 
     let selector = $('#reponse ul li input[type="checkbox"]:checked ~ a');
@@ -540,5 +568,5 @@ function eventoCheck(elementHTML) {
         evento.addClass('btn-success');
     }
 
-    createEventoForm(selector);
+    updateEventoCreneaux(selector);
 }
