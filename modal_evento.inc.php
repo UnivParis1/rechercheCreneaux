@@ -1,6 +1,5 @@
 <!-- Modal -->
-<div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel"
-    aria-hidden="true">
+<div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -46,8 +45,18 @@
             </div>
             <div class="modal-footer border-0 me-3 pe-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="submit" class="btn btn-primary" name="submit">Créer Evento</button>
+<!--                <button type="submit"  id="eventoSubmit" class="btn btn-primary" data-bs-target="#spinnerEvento" data-bs-toggle="modal" name="submit">Créer Evento</button>-->
+                <button type="button" id="eventoSubmit" class="btn btn-primary" name="submit">Créer Evento</button>
             </div>
         </div>
     </div>
+</div>
+<div class="modal fade" id="spinnerEvento" aria-hidden="true" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-body d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+  </div>
 </div>
