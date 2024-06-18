@@ -84,6 +84,8 @@ if ($stdEnv->zoom === true) {
 }
 
 if ($stdEnv->evento == true) {
+    $dotenv->required(['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID']);
+    $stdEnv->eventoWsUrl = $_ENV['EVENTO_WS_URL'];
     $stdEnv->eventoShibentityid = $_ENV['EVENTO_SHIBENTITYID'];
 }
 

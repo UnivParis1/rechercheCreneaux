@@ -487,7 +487,6 @@ $(function () {
     $('#modalEvento .modal-footer button[name="submit"]').on("click", function(event) {
         // récupère les éléments cliqués
 
-        //$('#reponse ul li input:checked~a');
         if (eventoFormCheck() == false) {
             return;
         }
@@ -495,24 +494,97 @@ $(function () {
         $('#modalEvento').modal('hide');
         $('#spinnerEvento').modal('show');
 
-        return;
-        $.ajax({
-            url: "https://evento.univ-paris1.fr/rest.php/survey",
-            type: "GET",
-            dataType: 'json',
-            xhrFields: {
-                 withCredentials: true
-            },
-            success: function (response) {
-                console.log("success ajax " + response.readyState);
-            }
-        }).done(function() {
-            console.log("test ok");
-        });
+        let titre = $("input[name='titrevento']").val();
+        let desc = $("textarea[name='summaryevento']").val();
 
+        let id = eventoGetSurvey(titre, desc);
+
+        if (id == false) {
+            let dataPost = eventoDatasRequest(titre, desc, 1);
+            dataPost.questions[0].propositions = undefined;
+
+            eventoAjaxSurvey(dataPost, 'POST');
+        }
         console.log("debug");
     });
 });
+
+function eventoDatasRequest(titre, desc, phase) {
+    let questions = $('#reponse ul li input:checked~a');
+
+    let jsonData = Object.assign({}, phase == 1 ? eventoDraftBase : eventoSurveyBase);
+    let propositionBase = Object.assign({}, jsonData.questions[0].propositions[0]);
+
+    jsonData.title = titre;
+    jsonData.description = desc;
+
+    let lastQEndTs = questions[questions.length - 1].getAttribute('timeend');
+    jsonData.settings.auto_close = moment(moment.unix(lastQEndTs).add('1','day')).unix();
+
+    let insertProposition = [];
+    for (let i =0; i < questions.length; i++) {
+        let question = questions.get(i);
+        let timestart = question.getAttribute('timestart');
+        let timeend = question.getAttribute('timeend');
+
+        let base_day = moment(moment.unix(timestart).format('Y-m-d') + ' 00:00:00', 'YYYY-m-d').unix();
+
+        let propose = Object.assign({}, propositionBase);
+        propose.base_day = base_day;
+        propose.local_base_day = base_day;
+        propose.base_time = timestart - base_day;
+        propose.end_time = timeend - base_day;
+        propose.label = moment.unix(base_day).format('LLLL').replace(' 00:00', '') + ' de ' + moment.unix(timestart).format('HH:mm').replace(':','H') + ' à ' + moment.unix(timeend).format('HH:mm').replace(':','H');
+
+        insertProposition.push(propose);
+    }
+    jsonData.questions[0].propositions = insertProposition;
+
+    return jsonData;
+}
+
+function eventoAjaxSurvey(datas, type) {
+    let id = false;
+
+    $.ajax({
+        url: eventoWsUrl + "survey",
+        type: type,
+        dataType: 'json',
+        data: datas,
+        crossDomain: true,
+        xhrFields: {
+             withCredentials: true
+        },
+        done: function () {
+            console.log('done');
+        },
+        fail: function (data) {
+            console.log('fail');
+        },
+        success: function(data) {
+            console.log("success");
+            if (typeof(data.path)!= 'undefined') {
+                if (data.data.path.indexOf('https://evento.renater.fr/survey/') != -1 ) {
+                    let urlEvento = data.data.path.replace('renater', 'univ-paris1');
+                    let div = $('#eventoDiv');
+                    div.empty();
+                    div.append("<a href='" + urlEvento + "'>" + urlEvento + "</a>");
+                    $('#spinnerEvento').modal().hide();
+                    $(".modal-backdrop").remove()
+                }
+            }
+        },
+        complete: function() {
+            console.log('complete');
+        }});
+
+    return id;
+}
+
+function eventoGetSurvey(titre, desc) {
+    // recherche evento existant avec titre et description
+    return eventoAjaxSurvey({title: titre, description: desc}, 'GET');
+}
 
 function eventoFormCheck() {
     let titreSel = $("input[name='titrevento']");
