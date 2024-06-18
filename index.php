@@ -217,7 +217,7 @@ if (FBForm::validParams($fbParams)) {
         </div>
 
         <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
-        <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): require_once('modal_evento.inc.php'); endif?>
+        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid): require_once('modal_evento.inc.php'); endif?>
     </form>
 
     <?php
@@ -284,7 +284,7 @@ if (FBForm::validParams($fbParams)) {
             </ul>
             <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
             <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" name="evento-iframe" style="width:0;height:0;border:0; border:none;"></iframe>
-            <div class="col-9 d-flex justify-content-end">
+            <div id="eventoDiv" class="col-9 d-flex justify-content-start">
                <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="Créer un Evento à partir des créneaux sélectionnés" />
             </div>
             <?php endif ?>

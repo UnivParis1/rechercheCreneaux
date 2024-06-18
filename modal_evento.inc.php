@@ -1,3 +1,5 @@
+<script type='text/javascript' src="js/eventoSurveyBase.js"></script>
+<script>var eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
 <!-- Modal -->
 <div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
