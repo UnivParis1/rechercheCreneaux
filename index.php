@@ -68,19 +68,22 @@ if (FBForm::validParams($fbParams)) {
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
 
-    <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
-        <script type='text/javascript' src='./js/form.js'></script>
-    <?php else: ?>
-        <script type='text/javascript' src='./js/noform.js'></script>
-    <?php endif ?>
-
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
     <script src="node_modules/nouislider/dist/nouislider.min.js"></script>
     <script src="js/slider.js"></script>
 
     <script src="node_modules/moment/min/moment.min.js"></script>
     <script src="node_modules/moment/min/moment-with-locales.js"></script>
+
+    <?php if ($stdEnv->wsgroup): ?>
+        <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+        <script type='text/javascript' src='./js/form.js'></script>
+    <?php else: ?>
+        <script type='text/javascript' src='./js/noform.js'></script>
+    <?php endif ?>
+    <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid): ?>
+        <script type='text/javascript' src='./js/evento.js'></script>
+    <?php endif ?>
 </head>
 
 <body>
