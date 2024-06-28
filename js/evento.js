@@ -77,18 +77,18 @@ function eventoAjaxSurvey(datas, type) {
         fail: function (data) {
             console.log('fail');
         },
-        success: function(data) {
+        success: function(response) {
             console.log("success");
-            if (typeof(data.path)!= 'undefined') {
-                if (data.data.path.indexOf('https://evento.renater.fr/survey/') != -1 ) {
-                    let urlEvento = data.data.path.replace('renater', 'univ-paris1');
+            if (typeof(response.path)!= 'undefined') {
+                if (response.data.path.indexOf('https://evento.renater.fr/survey/') != -1 ) {
+                    let urlEvento = response.data.path.replace('renater', 'univ-paris1');
                     let div = $('#eventoDiv');
                     div.empty();
                     div.append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
                     $('#spinnerEvento').modal().hide();
                     $(".modal-backdrop").remove();
 
-                    eventoAjaxDraftPropals();
+                    eventoAjaxDraftPropals(response.data.id, response.data.title, response.data.description, response.data.path);
                 }
             }
         },
@@ -97,6 +97,40 @@ function eventoAjaxSurvey(datas, type) {
         }});
 
     return id;
+}
+
+function eventoAjaxDraftPropals(id, title, desc, path) {
+    let jsonData = Object.assign({}, eventoSurveyDraftPropositions);
+
+    jsonData.id = id;
+    jsonData.title = title;
+    jsonData.description = desc;
+    jsonData.path = path;
+
+    jsonData.updated.raw = moment().format('X');
+
+    $.ajax({
+        url: eventoWsUrl + "survey?_=" + moment().format('x'),
+        type: 'POST',
+        dataType: 'json',
+        data: jsonData,
+        crossDomain: true,
+        xhrFields: {
+             withCredentials: true
+        },
+        done: function () {
+            console.log('doneDraft');
+        },
+        fail: function (data) {
+            console.log('failDraft');
+        },
+        success: function(response) {
+            console.log('successDraft');
+        },
+        complete: function() {
+            console.log('completeDraft');
+        }
+    });
 }
 
 function eventoGetSurvey(titre, desc) {
