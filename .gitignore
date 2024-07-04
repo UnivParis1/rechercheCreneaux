@@ -4,5 +4,5 @@
 /.idea/
 /.env
 /composer.lock
-
-
+/yarn.lock
+/node_modules/.yarn-integrity
