@@ -6,3 +6,10 @@
 /composer.lock
 /yarn.lock
 /node_modules/.yarn-integrity
+/node_modules/.yarn-state.yml
+/node_modules/.yarn-integrity
+/node_modules/.bin/
+/yarn-error.log
+/package-lock.json
+/.yarnrc.yml
+/.yarn/

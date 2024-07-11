@@ -1,7 +1,22 @@
-$(function () {
+requirejs.config({
+    baseUrl: '../node_modules/',
+    paths: {
+      jquery: 'jquery/dist/jquery',
+      bootstrap: 'bootstrap/dist/js/bootstrap.min',
+      '@popperjs/core': '@popperjs/core/dist/umd/popper.min'
+    },
+    shim: {
+      jquery: {
+        exports: '$'
+      },
+      bootstrap: ['jquery']
+    },
+    nodeRequire: require
+  });
+
+requirejs(['jquery', 'bootstrap'], function($) {
 
     $('#modalEvento .modal-footer button[name="submit"]').on("click", function(event) {
-        // récupère les éléments cliqués
 
         if (eventoFormCheck() == false) {
             return;
@@ -13,17 +28,17 @@ $(function () {
         let titre = $("input[name='titrevento']").val();
         let desc = $("textarea[name='summaryevento']").val();
 
-        let id = eventoGetSurvey(titre, desc);
+        // recherche evento existant avec titre et description
+        let id = eventoAjaxSurvey({title: titre, description: desc}, 'GET');
 
         if (id == false) {
             let dataPost = eventoDatasRequest(titre, desc, 1);
-            dataPost.questions[0].propositions = undefined;
 
             eventoAjaxSurvey(dataPost, 'POST');
         }
         console.log("debug");
     });
-});
+}); 
 
 function eventoDatasRequest(titre, desc, phase) {
     let questions = $('#reponse ul li input:checked~a');
@@ -60,13 +75,14 @@ function eventoDatasRequest(titre, desc, phase) {
 }
 
 function eventoAjaxSurvey(datas, type) {
-    let id = false;
+   let id = false;
 
     $.ajax({
         url: eventoWsUrl + "survey",
         type: type,
-        dataType: 'json',
-        data: datas,
+        contentType: 'application/json',
+//        data: datas,
+        data: JSON.stringify(datas),
         crossDomain: true,
         xhrFields: {
              withCredentials: true
@@ -80,62 +96,22 @@ function eventoAjaxSurvey(datas, type) {
         success: function(response) {
             console.log("success");
             if (typeof(response.path)!= 'undefined') {
-                if (response.data.path.indexOf('https://evento.renater.fr/survey/') != -1 ) {
+
+                if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
                     let urlEvento = response.data.path.replace('renater', 'univ-paris1');
                     let div = $('#eventoDiv');
                     div.empty();
                     div.append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
-                    $('#spinnerEvento').modal().hide();
-                    $(".modal-backdrop").remove();
-
-                    eventoAjaxDraftPropals(response.data.id, response.data.title, response.data.description, response.data.path);
                 }
             }
         },
         complete: function() {
             console.log('complete');
+            $(".modal-backdrop").remove();
+            $('#spinnerEvento').hide();
         }});
 
     return id;
-}
-
-function eventoAjaxDraftPropals(id, title, desc, path) {
-    let jsonData = Object.assign({}, eventoSurveyDraftPropositions);
-
-    jsonData.id = id;
-    jsonData.title = title;
-    jsonData.description = desc;
-    jsonData.path = path;
-
-    jsonData.updated.raw = moment().format('X');
-
-    $.ajax({
-        url: eventoWsUrl + "survey?_=" + moment().format('x'),
-        type: 'POST',
-        dataType: 'json',
-        data: jsonData,
-        crossDomain: true,
-        xhrFields: {
-             withCredentials: true
-        },
-        done: function () {
-            console.log('doneDraft');
-        },
-        fail: function (data) {
-            console.log('failDraft');
-        },
-        success: function(response) {
-            console.log('successDraft');
-        },
-        complete: function() {
-            console.log('completeDraft');
-        }
-    });
-}
-
-function eventoGetSurvey(titre, desc) {
-    // recherche evento existant avec titre et description
-    return eventoAjaxSurvey({title: titre, description: desc}, 'GET');
 }
 
 function eventoFormCheck() {
