@@ -82,7 +82,6 @@ if (FBForm::validParams($fbParams)) {
         <script type='text/javascript' src='./js/noform.js'></script>
     <?php endif ?>
     <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid): ?>
-        <script src="node_modules/requirejs/bin/r.js"></script>
         <script type='text/javascript' src='./js/evento.js'></script>
     <?php endif ?>
 </head>

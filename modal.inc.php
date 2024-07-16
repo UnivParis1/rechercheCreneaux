@@ -27,7 +27,7 @@
                         <label for="summarycreneau" class="form-label">Description</label>
                         <div id="summarycreneau" class="input-group mb-3">
                             <textarea class="form-control" type="textarea" disabled placeholder="Description"
-                                name="summarycreneau" value="<?= $fbParams->descriptionEvent; ?>"
+                                name="summarycreneau" <?php echo (isset($fbParams->descriptionEvent)) ? 'value="'.$fbParams->descriptionEvent . '"':''; ?>
                                 oninvalid="this.setCustomValidity('Veuillez renseigner une description')"
                                 onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->descriptionEvent; ?></textarea>
                         </div>
@@ -53,6 +53,7 @@
             <div class="modal-footer border-0 me-3 pe-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
+<!--                <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" formnovalidate />-->
             </div>
         </div>
     </div>

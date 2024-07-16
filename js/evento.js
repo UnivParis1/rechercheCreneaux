@@ -1,23 +1,6 @@
-requirejs.config({
-    baseUrl: '../node_modules/',
-    paths: {
-      jquery: 'jquery/dist/jquery',
-      bootstrap: 'bootstrap/dist/js/bootstrap.min',
-      '@popperjs/core': '@popperjs/core/dist/umd/popper.min'
-    },
-    shim: {
-      jquery: {
-        exports: '$'
-      },
-      bootstrap: ['jquery']
-    },
-    nodeRequire: require
-  });
-
-requirejs(['jquery', 'bootstrap'], function($) {
-
-    $('#modalEvento .modal-footer button[name="submit"]').on("click", function(event) {
-
+$(function() {
+    $('#eventoSubmit').on("click", function() {
+        $("#eventoSubmit").removeAttr("formnovalidate");
         if (eventoFormCheck() == false) {
             return;
         }
@@ -36,7 +19,6 @@ requirejs(['jquery', 'bootstrap'], function($) {
 
             eventoAjaxSurvey(dataPost, 'POST');
         }
-        console.log("debug");
     });
 }); 
 
@@ -70,6 +52,14 @@ function eventoDatasRequest(titre, desc, phase) {
         insertProposition.push(propose);
     }
     jsonData.questions[0].propositions = insertProposition;
+
+    jsonData.guests = [];
+    jsonData.new_guests = [];
+
+    listDisplayname.forEach(function (datas) {
+        jsonData.new_guests.push(datas.mail);
+        jsonData.guests.push({email:datas.mail,name:datas.displayName});
+    });
 
     return jsonData;
 }

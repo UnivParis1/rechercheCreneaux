@@ -8,7 +8,7 @@ var eventoDraftBase = {
 	"closed": "",
 	"settings": {
 		"limit_participants": 0,
-		"limit_participants_nb": "10",
+		"limit_participants_nb": 70,
 		"disable_answer_edition": 0,
 		"dont_notify_on_reply": 0,
 		"hide_answers": 0,
@@ -43,9 +43,12 @@ var eventoDraftBase = {
 		}
 	],
 	"owners": [],
-	"guests": [],
-	"new_guests": [],
-	"notify_new_guests": false,
+	"guests": [{
+		"email": null,
+		"name": null
+	}],
+	"new_guests": [null],
+	"notify_new_guests": true,
 	"notify_update": false,
 	"initialStep": "general",
 	"all_calendars": 1,
@@ -57,6 +60,6 @@ var eventoDraftBase = {
 	"same_hours_for_all": 1,
 	"whole_day": 0,
 	"slot": 1,
-	"accept_terms": 0,
-	"is_draft": 1
+	"accept_terms": 1,
+	"is_draft": 0
 };

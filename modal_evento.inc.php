@@ -1,5 +1,5 @@
 <script type='text/javascript' src="js/eventoSurveyBase.js"></script>
-<script>var eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
+<script>const eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
 <!-- Modal -->
 <div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -48,7 +48,7 @@
             <div class="modal-footer border-0 me-3 pe-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
 <!--                <button type="submit"  id="eventoSubmit" class="btn btn-primary" data-bs-target="#spinnerEvento" data-bs-toggle="modal" name="submit">Créer Evento</button>-->
-                <button type="button" id="eventoSubmit" class="btn btn-primary" name="submit">Créer Evento</button>
+                <button type="button" id="eventoSubmit" class="btn btn-primary" name="submitEvento" formnovalidate>Créer Evento</button>
             </div>
         </div>
     </div>

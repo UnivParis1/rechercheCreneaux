@@ -71,15 +71,15 @@ function setOptionsUid(jsuids) {
             dataType: 'jsonp',
             success: function (response) {
                 if (typeof response[0].mail != "undefined") {
-                    addOptionUid(response[0].uid, response[0].displayName);
+                    addOptionUid(response[0].uid, response[0].displayName, response[0].mail);
                 }
             }
         });
     }
 }
 
-function addOptionWithUid(uid, displayName) {
-    listDisplayname.set(uid, displayName);
+function addOptionWithUid(uid, displayName, mail) {
+    listDisplayname.set(uid, {displayName: displayName, mail: mail});
 
     if ($(divpersonselect).is(":hidden"))
         $(divpersonselect).show();
@@ -128,7 +128,7 @@ function addOptionWithUid(uid, displayName) {
     });
 }
 
-function addOptionUid(uid, displayName) {
+function addOptionUid(uid, displayName, mail) {
     //let uid=this.value;
     let vals = getCurrentOptions();
 
@@ -140,7 +140,7 @@ function addOptionUid(uid, displayName) {
     }
 
     if (testUidVals === false) {
-        addOptionWithUid(uid, displayName);
+        addOptionWithUid(uid, displayName, mail);
     }
     vals = getCurrentOptions();
 
@@ -160,7 +160,7 @@ function wsCallbackUid(event, ui) {
         if (typeof ui.item.mail == "undefined") {
             alert("Le courriel de l'utilisateur " + ui.item.displayName + " étant absent, son entrée n'est pas ajoutée à la liste");
         } else {
-            addOptionUid(uid, displayName);
+            addOptionUid(uid, displayName, ui.item.mail);
         }
     }
     else if (ui.item.category == 'groups_structures' || ui.item.category == 'local') {
@@ -271,9 +271,9 @@ class bsModalShowZoom {
 
         let ul = $("#creneauMailParticipant_ul");
         ul.empty();
-        listDisplayname.forEach(function(displayName, uid) {
+        listDisplayname.forEach(function(obj, uid) {
             let li=$('<li>');
-            li.text(displayName);
+            li.text(obj.displayName);
             if (currentObj != null && typeof currentObj.mails[uid] != 'undefined' && currentObj.mails[uid].sended == true) {
                 li.append('<span class="bi bi-check2-circle"></span>');
             }
@@ -318,8 +318,8 @@ class bsModalShowZoom {
         $('#copySpan').remove();
         $(zoomButtonSelector).on('click', zoomClick);
 
-        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
-        $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
+        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea,#creneauBoxInput button").attr('disabled', true);
+        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea").attr('required', false);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
