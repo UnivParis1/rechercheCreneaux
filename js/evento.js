@@ -40,13 +40,17 @@ function eventoDatasRequest(titre, desc, phase) {
         let timestart = question.getAttribute('timestart');
         let timeend = question.getAttribute('timeend');
 
-        let base_day = moment(moment.unix(timestart).format('Y-m-d') + ' 00:00:00', 'YYYY-m-d').unix();
+        let base_day = moment(moment.unix(timestart).format('Y-M-D') + ' 00:00:00', 'YYYY-M-D').unix();
+        // dirty hack pour faire correspondre les bonnes infos sur evento
+        base_day = base_day + (3600*24);
+        let local_base_day = base_day + (3600*2);
 
         let propose = Object.assign({}, propositionBase);
+
         propose.base_day = base_day;
-        propose.local_base_day = base_day;
-        propose.base_time = timestart - base_day;
-        propose.end_time = timeend - base_day;
+        propose.local_base_day = local_base_day;
+        propose.base_time = timestart - local_base_day;
+        propose.end_time = timeend - local_base_day;
         propose.label = moment.unix(base_day).format('LLLL').replace(' 00:00', '') + ' de ' + moment.unix(timestart).format('HH:mm').replace(':','H') + ' à ' + moment.unix(timeend).format('HH:mm').replace(':','H');
 
         insertProposition.push(propose);
