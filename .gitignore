@@ -11,5 +11,4 @@
 /node_modules/.bin/
 /yarn-error.log
 /package-lock.json
-/.yarnrc.yml
 /.yarn/
