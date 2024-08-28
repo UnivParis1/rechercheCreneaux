@@ -11,25 +11,33 @@ $(function() {
         let titre = $("input[name='titrevento']").val();
         let desc = $("textarea[name='summaryevento']").val();
 
+        let isNotNotif = $('#NotifEvento').is(':checked');
+        let isAuth = $('#AuthEvento').is(':checked');
         // recherche evento existant avec titre et description
         let id = eventoAjaxSurvey({title: titre, description: desc}, 'GET');
 
         if (id == false) {
-            let dataPost = eventoDatasRequest(titre, desc, 1);
+            let dataPost = eventoDatasRequest({titre: titre, desc: desc, phase: 1, isNotNotif: isNotNotif, isAuth: isAuth});
 
             eventoAjaxSurvey(dataPost, 'POST');
         }
     });
 }); 
 
-function eventoDatasRequest(titre, desc, phase) {
+function eventoDatasRequest(args) {
     let questions = $('#reponse ul li input:checked~a');
 
-    let jsonData = Object.assign({}, phase == 1 ? eventoDraftBase : eventoSurveyBase);
+    let jsonData = Object.assign({}, args.phase == 1 ? eventoDraftBase : eventoSurveyBase);
     let propositionBase = Object.assign({}, jsonData.questions[0].propositions[0]);
 
-    jsonData.title = titre;
-    jsonData.description = desc;
+    jsonData.title = args.titre;
+    jsonData.description = args.desc;
+
+    args.isAuth ? jsonData.settings.enable_anonymous_answer = 0 : 1;
+    args.isAuth ? jsonData.settings.reply_access = "opened_to_authenticated" : "opened_to_everyone";
+
+    args.isNotNotif ? jsonData.settings.dont_receive_invitation_copy = 1 : 0;
+    args.isNotNotif ? jsonData.settings.dont_notify_on_reply = 1 : 0;
 
     let lastQEndTs = questions[questions.length - 1].getAttribute('timeend');
     jsonData.settings.auto_close = moment(moment.unix(lastQEndTs).add('1','day')).unix();

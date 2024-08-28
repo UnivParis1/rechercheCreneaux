@@ -43,6 +43,14 @@
                             <textarea class="form-control" type="textarea" placeholder="Description" name="summaryevento" value="<?= $fbParams->descriptionEvent; ?>" oninvalid="this.setCustomValidity('Veuillez renseigner une description')" onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->descriptionEvent; ?></textarea>
                         </div>
                     </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="NotifEvento" checked>
+                        <label class="form-check-label" for="NotifEvento">Ne pas notifier les invités</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="AuthEvento" checked>
+                        <label class="form-check-label" for="AuthEvento">Invités authentifiés</label>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer border-0 me-3 pe-2">
