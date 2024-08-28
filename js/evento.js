@@ -102,8 +102,16 @@ function eventoAjaxSurvey(datas, type) {
                 if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
                     let urlEvento = response.data.path.replace('renater', 'univ-paris1');
                     let div = $('#eventoDiv');
-                    div.empty();
-                    div.append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
+                    div.empty().append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
+
+                    let copySpan = $('<span type="button" class="btn-clipboard d-inline px-2" title="Copier le lien"><i class="bi bi-clipboard" aria-hidden="true"></i></span>');
+
+                    copySpan.on("click", function () {
+                        $(this).children().removeClass('bi-clipboard').addClass("bi-check2");
+                        navigator.clipboard.writeText(urlEvento);
+                    });
+
+                    div.append(copySpan);
                 }
             }
         },
