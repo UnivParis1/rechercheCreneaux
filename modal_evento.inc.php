@@ -44,12 +44,12 @@
                         </div>
                     </div>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="NotifEvento" checked>
-                        <label class="form-check-label" for="NotifEvento">Ne pas notifier les invités</label>
+                        <input class="form-check-input" type="checkbox" role="switch" id="AuthEvento" checked>
+                        <label class="form-check-label" for="AuthEvento">Participants authentifiés</label>
                     </div>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="AuthEvento" checked>
-                        <label class="form-check-label" for="AuthEvento">Invités authentifiés</label>
+                        <input class="form-check-input" type="checkbox" role="switch" id="NotifEvento">
+                        <label class="form-check-label" for="NotifEvento">Inviter les participants</label>
                     </div>
                 </div>
             </div>

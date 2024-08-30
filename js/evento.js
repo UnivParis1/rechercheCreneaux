@@ -11,13 +11,13 @@ $(function() {
         let titre = $("input[name='titrevento']").val();
         let desc = $("textarea[name='summaryevento']").val();
 
-        let isNotNotif = $('#NotifEvento').is(':checked');
+        let isNotif = $('#NotifEvento').is(':checked');
         let isAuth = $('#AuthEvento').is(':checked');
         // recherche evento existant avec titre et description
         let id = eventoAjaxSurvey({title: titre, description: desc}, 'GET');
 
         if (id == false) {
-            let dataPost = eventoDatasRequest({titre: titre, desc: desc, phase: 1, isNotNotif: isNotNotif, isAuth: isAuth});
+            let dataPost = eventoDatasRequest({titre: titre, desc: desc, phase: 1, isNotif: isNotif, isAuth: isAuth});
 
             eventoAjaxSurvey(dataPost, 'POST');
         }
@@ -33,11 +33,12 @@ function eventoDatasRequest(args) {
     jsonData.title = args.titre;
     jsonData.description = args.desc;
 
-    args.isAuth ? jsonData.settings.enable_anonymous_answer = 0 : 1;
-    args.isAuth ? jsonData.settings.reply_access = "opened_to_authenticated" : "opened_to_everyone";
+    args.isAuth ? jsonData.settings.enable_anonymous_answer = 0 : jsonData.settings.enable_anonymous_answer = 1;
+    args.isAuth ? jsonData.settings.reply_access = "opened_to_authenticated" : jsonData.settings.reply_access = "opened_to_everyone";
 
-    args.isNotNotif ? jsonData.settings.dont_receive_invitation_copy = 1 : 0;
-    args.isNotNotif ? jsonData.settings.dont_notify_on_reply = 1 : 0;
+    args.isNotif ? jsonData.settings.dont_receive_invitation_copy = 0 : jsonData.settings.dont_receive_invitation_copy = 1;
+    args.isNotif ? jsonData.notify_new_guests = true : jsonData.notify_new_guests = false;
+    args.isNotif ? jsonData.notify_update = true : jsonData.notify_update = false;
 
     let lastQEndTs = questions[questions.length - 1].getAttribute('timeend');
     jsonData.settings.auto_close = moment(moment.unix(lastQEndTs).add('1','day')).unix();
@@ -68,10 +69,12 @@ function eventoDatasRequest(args) {
     jsonData.guests = [];
     jsonData.new_guests = [];
 
-    listDisplayname.forEach(function (datas) {
-        jsonData.new_guests.push(datas.mail);
-        jsonData.guests.push({email:datas.mail,name:datas.displayName});
-    });
+    if (jsonData.notify_new_guests == true) {
+        listDisplayname.forEach(function (datas) {
+            jsonData.new_guests.push(datas.mail);
+            jsonData.guests.push({email:datas.mail,name:datas.displayName});
+        });
+    }
 
     return jsonData;
 }
@@ -101,6 +104,15 @@ function eventoAjaxSurvey(datas, type) {
 
                 if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
                     let urlEvento = response.data.path.replace('renater', 'univ-paris1');
+
+                    if (datas.notify_new_guests == false) {
+                        listDisplayname.forEach((elem)  => {
+                            datas.new_guests.push(elem.mail);
+                            datas.guests.push({email: elem.mail, name: elem.displayName});
+                        });
+                        $.ajax({url: eventoWsUrl + 'survey/' + response.data.id, type: 'PUT', data: JSON.stringify(datas), contentType: 'application/json', crossDomain: true, xhrFields: { withCredentials: true }});
+                    }
+
                     let div = $('#eventoDiv');
                     div.empty().append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
 
