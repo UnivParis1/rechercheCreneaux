@@ -48,7 +48,7 @@
                         <label class="form-check-label" for="AuthEvento">Participants authentifiés</label>
                     </div>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="NotifEvento">
+                        <input class="form-check-input" type="checkbox" role="switch" id="NotifEvento" checked>
                         <label class="form-check-label" for="NotifEvento">Inviter les participants</label>
                     </div>
                 </div>
