@@ -36,7 +36,7 @@ function eventoDatasRequest(args) {
     args.isAuth ? jsonData.settings.enable_anonymous_answer = 0 : jsonData.settings.enable_anonymous_answer = 1;
     args.isAuth ? jsonData.settings.reply_access = "opened_to_authenticated" : jsonData.settings.reply_access = "opened_to_everyone";
 
-    args.isNotif ? jsonData.settings.dont_receive_invitation_copy = 0 : jsonData.settings.dont_receive_invitation_copy = 1;
+//    args.isNotif ? jsonData.settings.dont_receive_invitation_copy = 0 : jsonData.settings.dont_receive_invitation_copy = 1;
     args.isNotif ? jsonData.notify_new_guests = true : jsonData.notify_new_guests = false;
     args.isNotif ? jsonData.notify_update = true : jsonData.notify_update = false;
 
@@ -86,7 +86,6 @@ function eventoAjaxSurvey(datas, type) {
         url: eventoWsUrl + "survey",
         type: type,
         contentType: 'application/json',
-//        data: datas,
         data: JSON.stringify(datas),
         crossDomain: true,
         xhrFields: {
@@ -104,14 +103,6 @@ function eventoAjaxSurvey(datas, type) {
 
                 if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
                     let urlEvento = response.data.path.replace('renater', 'univ-paris1');
-
-                    if (datas.notify_new_guests == false) {
-                        listDisplayname.forEach((elem)  => {
-                            datas.new_guests.push(elem.mail);
-                            datas.guests.push({email: elem.mail, name: elem.displayName});
-                        });
-                        $.ajax({url: eventoWsUrl + 'survey/' + response.data.id, type: 'PUT', data: JSON.stringify(datas), contentType: 'application/json', crossDomain: true, xhrFields: { withCredentials: true }});
-                    }
 
                     let div = $('#eventoDiv');
                     div.empty().append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
