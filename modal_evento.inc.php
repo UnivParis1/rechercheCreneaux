@@ -9,7 +9,7 @@
             </div>
             <div class="row mt-2">
                 <div class="col-6 ms-3">
-                    <p>Créneau</p>
+                    <p id="modalEventoP">Créneau<?php if (count($listDate) > 1): ?>x<?php endif ?></p>
                     <span class="text-nowrap"></span>
                     <?php 
                         $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd MMMM yyyy");

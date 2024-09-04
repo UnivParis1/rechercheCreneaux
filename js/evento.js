@@ -179,6 +179,12 @@ function eventoCheck() {
             evento.removeClass('btn-secondary');
         }
         evento.addClass('btn-success');
+
+        if (selector.length > 1) {
+            $("#modalEventoP").text('Créneaux');
+        } else if (selector.length == 1) {
+            $("#modalEventoP").text('Créneau');
+        }
     }
 
     updateEventoCreneaux(selector);
