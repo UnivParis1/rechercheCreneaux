@@ -13,30 +13,54 @@ $(function() {
 
         let isNotif = $('#NotifEvento').is(':checked');
         let isAuth = $('#AuthEvento').is(':checked');
-        // recherche evento existant avec titre et description
-        let id = eventoAjaxSurvey({title: titre, description: desc}, 'GET');
 
-        if (id == false) {
-            let dataPost = eventoDatasRequest({titre: titre, desc: desc, phase: 1, isNotif: isNotif, isAuth: isAuth});
+        let id = isEventoSession ? idEvento : false;
 
-            eventoAjaxSurvey(dataPost, 'POST');
+        let path = id ? urlEvento : false;
+
+        let dataPost = eventoDatasRequest({id: id, path: path, titre: titre, desc: desc, isNotif: isNotif, isAuth: isAuth});
+
+        let url = eventoWsUrl + "survey";
+        if (id) {
+            url = url + "/" + id;
+        }
+        eventoAjaxSurvey(dataPost, (id == false) ? 'POST' : 'PUT', url);
+    });
+
+    $("#modalEvento").on("shown.bs.modal", function () {
+
+        let selectLi = $('#reponse ul li input[type="checkbox"]:checked ~ a');
+
+        if (selectLi.length > 0) {
+
+            $('#modalEventoCreneaux').empty();
+
+            selectLi.each(function () {
+                let ts = $(this).attr("timestart");
+                let te = $(this).attr("timeend");
+
+                $('#modalEventoCreneaux').append('<li>' + textTimeStr(ts, te) + '</li>');
+            });
         }
     });
+
 }); 
 
 function eventoDatasRequest(args) {
     let questions = $('#reponse ul li input:checked~a');
 
-    let jsonData = Object.assign({}, args.phase == 1 ? eventoDraftBase : eventoSurveyBase);
+    let jsonData = Object.assign({}, eventoDraftBase);
     let propositionBase = Object.assign({}, jsonData.questions[0].propositions[0]);
 
     jsonData.title = args.titre;
     jsonData.description = args.desc;
 
+    jsonData.id = args.id ? args.id : "";
+    jsonData.path = args.path ? args.path : "";
+
     args.isAuth ? jsonData.settings.enable_anonymous_answer = 0 : jsonData.settings.enable_anonymous_answer = 1;
     args.isAuth ? jsonData.settings.reply_access = "opened_to_authenticated" : jsonData.settings.reply_access = "opened_to_everyone";
 
-//    args.isNotif ? jsonData.settings.dont_receive_invitation_copy = 0 : jsonData.settings.dont_receive_invitation_copy = 1;
     args.isNotif ? jsonData.notify_new_guests = true : jsonData.notify_new_guests = false;
     args.isNotif ? jsonData.notify_update = true : jsonData.notify_update = false;
 
@@ -79,11 +103,11 @@ function eventoDatasRequest(args) {
     return jsonData;
 }
 
-function eventoAjaxSurvey(datas, type) {
+function eventoAjaxSurvey(datas, type, url) {
    let id = false;
 
     $.ajax({
-        url: eventoWsUrl + "survey",
+        url: url, 
         type: type,
         contentType: 'application/json',
         data: JSON.stringify(datas),
@@ -115,6 +139,35 @@ function eventoAjaxSurvey(datas, type) {
                     });
 
                     div.append(copySpan);
+
+                    // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
+                    if (datas.notify_new_guests == false) {
+                        listDisplayname.forEach(function (elem) {
+                            datas.new_guests.push(elem.mail);
+                            datas.guests.push({email:elem.mail,name:elem.displayName});
+                        });
+                    }
+
+                    // ajout des paramètre de la réponse ajax aux données envoyés à l'enregistrement de la session
+                    datas.id = response.data.id;
+                    datas.path = urlEvento;
+                    $.get('dumb_evento_up.php', datas);
+
+                    let titre = $("input[name='titrevento']").val();
+                    let desc = $("textarea[name='summaryevento']").val();
+
+                    // ajout d'un input hidden pour passer le titre et la description en paramètre
+                    if ($("#form input[name='eventoTitre']").length == 0) {
+                        $("#form").append($("<input type='hidden' name='eventoTitre' value='"+ titre +"'>"));
+                    } else {
+                       $("#form input[name='eventoTitre']").val(titre);
+                    }
+
+                    if ($("#form input[name='summaryevento']").length == 0) {
+                        $("#form").append($("<input type='hidden' name='summaryevento' value='"+ desc +"'>"));
+                    } else {
+                       $("#form input[name='summaryevento']").val(desc);
+                    }
                 }
             }
         },
@@ -149,7 +202,7 @@ function eventoFormCheck() {
     return true;
 }
 
-function updateEventoCreneaux(selector) {
+function updateHTMLEventoCreneaux(selector) {
     let ulEventoCreneaux = $('#modalEventoCreneaux');
 
     ulEventoCreneaux.empty();
@@ -187,5 +240,5 @@ function eventoCheck() {
         }
     }
 
-    updateEventoCreneaux(selector);
+    updateHTMLEventoCreneaux(selector);
 }

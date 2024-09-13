@@ -46,6 +46,11 @@ if (FBForm::validParams($fbParams)) {
             $jsonSessionInviteInfos = $fbForm->fbParams->jsonSessionInviteInfos;
         }
     }
+
+    if ($stdEnv->evento && $stdEnv->eventoShibentityid) {
+        $fbEventoSession = new FBEventoSession($stdEnv->uidCasUser, $fbForm->fbParams, $fbForm->getFbUsers(), $creneauxFinauxArray);
+        $isEventoSession = $fbEventoSession->donneeExistante;
+    }
 }
 ?>
 
@@ -86,7 +91,7 @@ if (FBForm::validParams($fbParams)) {
     <?php endif ?>
 </head>
 
-<body>
+    <body>
     <form id="form" class="container" action="">
         <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
         <div class="row">
@@ -94,54 +99,61 @@ if (FBForm::validParams($fbParams)) {
                 <p>Séléction des utilisateurs</p>
                 <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
 
-                <script>
-                    var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
-                    let slider = document.getElementById('slider');
-                    <?php if ($stdEnv->wsgroup): ?>
-                        var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
-                        var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
+    <script>
+        var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
+        let slider = document.getElementById('slider');
+        <?php if ($stdEnv->wsgroup): ?>
+            var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
+            var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
-                        <?php if ($fbParams->uids && isset($js_uids)): ?>
-                            var jsuids = <?= "$js_uids" ?>;
+            <?php if ($fbParams->uids && isset($js_uids)): ?>
+                var jsuids = <?= "$js_uids" ?>;
 
-                            $(function () {
-                                setOptionsUid(jsuids);
+                $(function () {
+                    setOptionsUid(jsuids);
 
-                                if (jsuids.length < 2) {
-                                    errorShow(true);
-                                }
-                            });
-                        <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-                            $(function () {
-                                setOptionsUid(['<?= $stdEnv->uidCasUser ?>']);
-                            });
-                        <?php endif ?>
-                        <?php if (isset($jsonSessionInviteInfos)): ?>
-                            var jsSessionInviteInfos = JSON.parse('<?= $jsonSessionInviteInfos ?>');
-                        <?php endif ?>
-                        <?php if (isset($fbForm) && ! is_null($jsonSessionZoomInfos = $fbForm->fbParams->jsonSessionZoomInfos)): ?>
-                            var jsSessionZoomInfos = JSON.parse('<?= $jsonSessionZoomInfos ?>');
-                        <?php endif ?>
-                    <?php else: // sans wsgroup?>
-                        <?php if ($fbParams->uids && isset($js_uids)): ?>
-                            var jsuids = <?= "$js_uids" ?>;
+                    if (jsuids.length < 2) {
+                        errorShow(true);
+                    }
+                });
+            <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
+                $(function () {
+                    setOptionsUid(['<?= $stdEnv->uidCasUser ?>']);
+                });
+            <?php endif ?>
+            <?php if (isset($jsonSessionInviteInfos)): ?>
+                var jsSessionInviteInfos = JSON.parse('<?= $jsonSessionInviteInfos ?>');
+            <?php endif ?>
+            <?php if (isset($fbForm) && ! is_null($jsonSessionZoomInfos = $fbForm->fbParams->jsonSessionZoomInfos)): ?>
+                var jsSessionZoomInfos = JSON.parse('<?= $jsonSessionZoomInfos ?>');
+            <?php endif ?>
+        <?php else: // sans wsgroup?>
+            <?php if ($fbParams->uids && isset($js_uids)): ?>
+                var jsuids = <?= "$js_uids" ?>;
 
-                            $(function () {
-                                setOptionsUid(jsuids);
-                            });
-                        <?php endif ?>
-                    <?php endif ?>
+                $(function () {
+                    setOptionsUid(jsuids);
+                });
+            <?php endif ?>
+        <?php endif ?>
 
-                    <?php if ($stdEnv->photoShow): ?>
-                        var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
-                    <?php endif ?>
+        <?php if ($stdEnv->photoShow): ?>
+            var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
+        <?php endif ?>
 
-                    <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)): ?>
-                        $(function () {
-                            $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
-                        });
-                    <?php endif ?>
-                </script>
+        <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)): ?>
+            $(function () {
+                $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
+            });
+        <?php endif ?>
+
+        var isEventoSession = <?php echo (isset($isEventoSession) && $isEventoSession) ? "true" : "false" ?>;
+
+        <?php if (isset($isEventoSession) && $isEventoSession): ?>
+            var idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
+            var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
+        <?php endif ?>
+    </script>
             </div>
             <div class="col">
                 <p>Nombre de créneaux</p>
@@ -220,8 +232,7 @@ if (FBForm::validParams($fbParams)) {
         </div>
 
         <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
-        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid): require_once('modal_evento.inc.php'); endif?>
-    </form>
+        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once('modal_evento.inc.php'); endif?>
 
     <?php
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {
@@ -253,12 +264,14 @@ if (FBForm::validParams($fbParams)) {
             <?php
             $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE");
             $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
-            $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm") ?>
+            $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
+            $idx=0; ?>
+
             <p>Créneaux disponibles</p>
             <ul class="col-11 mb-1">
                 <?php foreach ($listDate as $date): ?>
                     <li class="row d-flex align-items-center">
-                        <input type="checkbox" class="col-1 mb-2" checked onclick="eventoCheck(this);" />
+                        <input type="checkbox" name="idxCreneauxChecked[]" value="<?= $idx ?>" class="col-1 mb-2" onclick="eventoCheck(this);" <?= $fbParams->idxCreneauxChecked == null ? 'checked' : (in_array($idx, $fbParams->idxCreneauxChecked) ? 'checked' : '') ?> />
                         <time class="col-5"><span class="col-2">
                                 <?= $formatter_day->format($date->startDate->getTimestamp()) ?>
                             </span>
@@ -266,6 +279,8 @@ if (FBForm::validParams($fbParams)) {
                         </time>
                         <?php if ($stdEnv->wsgroup): ?>
                             <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbForm->getFbUsers()))->typeInvationAction != TypeInviteAction::New ): ?>
+                                <!-- balise a pour fonctionner avec evento  (hack, trouver une methode plus élégante ...) -->
+                                <a href="#" class="d-none" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>" ></a>
                                 <div class='col-1 px-0 invitationEnvoyée' data-toggle="tooltip" data-html="true"
                                     data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
                                     <span class="text-success">Envoyé</span>
@@ -283,16 +298,18 @@ if (FBForm::validParams($fbParams)) {
                             <?php endif ?>
                         <?php endif ?>
                     </li>
+                <?php $idx++; ?>
                 <?php endforeach ?>
             </ul>
             <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
             <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" name="evento-iframe" style="width:0;height:0;border:0; border:none;"></iframe>
             <div id="eventoDiv" class="col-9 d-flex justify-content-start">
-               <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="Créer un Evento à partir des créneaux sélectionnés" />
+                <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="<?= ($isEventoSession) ? "Mettre à jour l'Evento" : "Créer un Evento" ?> à partir des créneaux sélectionnés" />
             </div>
             <?php endif ?>
         <?php endif ?>
     </div>
+    </form>
 </body>
 
 </html>
