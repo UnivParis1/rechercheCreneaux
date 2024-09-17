@@ -1,5 +1,5 @@
 $(function() {
-    $('#eventoSubmit').on("click", function() {
+    $('#eventoSubmit').on("click", () => {
         $("#eventoSubmit").removeAttr("formnovalidate");
         if (eventoFormCheck() == false) {
             return;
@@ -26,28 +26,20 @@ $(function() {
         }
         eventoAjaxSurvey(dataPost, (id == false) ? 'POST' : 'PUT', url);
     });
-
-    $("#modalEvento").on("shown.bs.modal", function () {
-
-        let selectLi = $('#reponse ul li input[type="checkbox"]:checked ~ a');
-
-        if (selectLi.length > 0) {
-
-            $('#modalEventoCreneaux').empty();
-
-            selectLi.each(function () {
-                let ts = $(this).attr("timestart");
-                let te = $(this).attr("timeend");
-
-                $('#modalEventoCreneaux').append('<li>' + textTimeStr(ts, te) + '</li>');
-            });
-        }
-    });
-
-}); 
+});
 
 function eventoDatasRequest(args) {
-    let questions = $('#reponse ul li input:checked~a');
+
+    let idxChecked = $('#modalEventoCreneaux li > input:checked');
+
+    let questions = [];
+
+    idxChecked.each(() =>  {
+        // l'index commence à 0 ...
+        let idx = Number(this.value) + 1;
+        let select = $("#listReponse li:nth-child("+ idx +") a");
+        questions.push({'timestart': select.attr('timestart'), timeend: select.attr('timeend')});
+    });
 
     let jsonData = Object.assign({}, eventoDraftBase);
     let propositionBase = Object.assign({}, jsonData.questions[0].propositions[0]);
@@ -64,14 +56,13 @@ function eventoDatasRequest(args) {
     args.isNotif ? jsonData.notify_new_guests = true : jsonData.notify_new_guests = false;
     args.isNotif ? jsonData.notify_update = true : jsonData.notify_update = false;
 
-    let lastQEndTs = questions[questions.length - 1].getAttribute('timeend');
+    let lastQEndTs = questions[questions.length - 1].timeend;
     jsonData.settings.auto_close = moment(moment.unix(lastQEndTs).add('1','day')).unix();
 
     let insertProposition = [];
-    for (let i =0; i < questions.length; i++) {
-        let question = questions.get(i);
-        let timestart = question.getAttribute('timestart');
-        let timeend = question.getAttribute('timeend');
+    for (const question of questions) {
+        let timestart = question.timestart;
+        let timeend = question.timeend;
 
         let base_day = moment(moment.unix(timestart).format('Y-M-D') + ' 00:00:00', 'YYYY-M-D').unix();
         // dirty hack pour faire correspondre les bonnes infos sur evento
@@ -94,7 +85,7 @@ function eventoDatasRequest(args) {
     jsonData.new_guests = [];
 
     if (jsonData.notify_new_guests == true) {
-        listDisplayname.forEach(function (datas) {
+        listDisplayname.forEach((datas) => {
             jsonData.new_guests.push(datas.mail);
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
@@ -112,16 +103,10 @@ function eventoAjaxSurvey(datas, type, url) {
         contentType: 'application/json',
         data: JSON.stringify(datas),
         crossDomain: true,
-        xhrFields: {
-             withCredentials: true
-        },
-        done: function () {
-            console.log('done');
-        },
-        fail: function (data) {
-            console.log('fail');
-        },
-        success: function(response) {
+        xhrFields: {withCredentials: true},
+        done: () => console.log('done'),
+        fail: () => console.log('fail'),
+        success: (response) => {
             console.log("success");
             if (typeof(response.path)!= 'undefined') {
 
@@ -133,7 +118,7 @@ function eventoAjaxSurvey(datas, type, url) {
 
                     let copySpan = $('<span type="button" class="btn-clipboard d-inline px-2" title="Copier le lien"><i class="bi bi-clipboard" aria-hidden="true"></i></span>');
 
-                    copySpan.on("click", function () {
+                    copySpan.on("click", () => {
                         $(this).children().removeClass('bi-clipboard').addClass("bi-check2");
                         navigator.clipboard.writeText(urlEvento);
                     });
@@ -142,7 +127,7 @@ function eventoAjaxSurvey(datas, type, url) {
 
                     // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
                     if (datas.notify_new_guests == false) {
-                        listDisplayname.forEach(function (elem) {
+                        listDisplayname.forEach((elem) => {
                             datas.new_guests.push(elem.mail);
                             datas.guests.push({email:elem.mail,name:elem.displayName});
                         });
@@ -171,7 +156,7 @@ function eventoAjaxSurvey(datas, type, url) {
                 }
             }
         },
-        complete: function() {
+        complete: () => {
             console.log('complete');
             $(".modal-backdrop").remove();
             $('#spinnerEvento').hide();
@@ -202,23 +187,10 @@ function eventoFormCheck() {
     return true;
 }
 
-function updateHTMLEventoCreneaux(selector) {
-    let ulEventoCreneaux = $('#modalEventoCreneaux');
-
-    ulEventoCreneaux.empty();
-
-    selector.each(function() {
-        let ts = $(this).attr('timestart');
-        let te = $(this).attr('timeend');
-
-        ulEventoCreneaux.append('<li>' + textTimeStr(ts, te) + '</li>');
-    });
-}
-
 function eventoCheck() {
-    let evento = $('#evento');
+    let evento = $('#eventoSubmit');
 
-    let selector = $('#reponse ul li input[type="checkbox"]:checked ~ a');
+    let selector = $('#modalEventoCreneaux li > input:checked');
 
     if (selector.length == 0) {
         evento.attr('disabled', 'disabled');
@@ -232,13 +204,5 @@ function eventoCheck() {
             evento.removeClass('btn-secondary');
         }
         evento.addClass('btn-success');
-
-        if (selector.length > 1) {
-            $("#modalEventoP").text('Créneaux');
-        } else if (selector.length == 1) {
-            $("#modalEventoP").text('Créneau');
-        }
     }
-
-    updateHTMLEventoCreneaux(selector);
 }

@@ -106,9 +106,7 @@ function addOptionWithUid(uid, displayName, mail) {
         }
     }
 
-    optionnel.on("click", function () {
-        afficherPermutterHide(testOptions(getCurrentOptions()));
-    });
+    optionnel.on("click", () => afficherPermutterHide(testOptions(getCurrentOptions())));
 
     newLi.append(optionnel);
     // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
@@ -116,7 +114,7 @@ function addOptionWithUid(uid, displayName, mail) {
 
     $(idperson_ul).append(newLi);
 
-    button.on("click", function () {
+    button.on("click", () => {
         $(this).parent().remove();
         let opts = getCurrentOptions();
         let testFormInput = testOptions(opts);
@@ -412,7 +410,7 @@ function zoomClick() {
         data: datas,
         dataType: "json",
         encode: true,
-    }).done(function (data) {
+    }).done( (data) => {
         if (data.status == true) {
             let bsZoom;
                 if (jsSessionZoomInfos==null) {
@@ -431,12 +429,12 @@ function zoomClick() {
             bsZoom.bsModalShowZoomDom();
         } else {
             zoomClickError(data.msg);
-            }}).fail(function (data) {
-        zoomClickError(data.msg);
-            }).always(function() {
-        zoom.attr('disabled', true);
+            }}).fail( (data) => {
+                    zoomClickError(data.msg);
+            }).always( () => {
+                zoom.attr('disabled', true);
                 isLoading=false;
-    });
+            });
 }
 
 function zoomChange() {
@@ -457,7 +455,7 @@ function zoomChange() {
     }
 }
 
-$(function () {
+$(function() {
     $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
         select: wsCallbackUid,

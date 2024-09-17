@@ -268,10 +268,9 @@ if (FBForm::validParams($fbParams)) {
             $idx=0; ?>
 
             <p>Créneaux disponibles</p>
-            <ul class="col-11 mb-1">
-                <?php foreach ($listDate as $date): ?>
-                    <li class="row d-flex align-items-center">
-                        <input type="checkbox" name="idxCreneauxChecked[]" value="<?= $idx ?>" class="col-1 mb-2" onclick="eventoCheck(this);" <?= $fbParams->idxCreneauxChecked == null ? 'checked' : (in_array($idx, $fbParams->idxCreneauxChecked) ? 'checked' : '') ?> />
+            <ul id="listReponse" class="col-11 mb-1">
+                <?php for ($idx = 0; $idx < count($listDate) && $date=$listDate[$idx]; $idx++): ?>
+                    <li class="row d-flex">
                         <time class="col-5"><span class="col-2">
                                 <?= $formatter_day->format($date->startDate->getTimestamp()) ?>
                             </span>
@@ -288,23 +287,18 @@ if (FBForm::validParams($fbParams)) {
                                 </div>
                             <?php endif ?>
                             <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New ): ?>
-                                <a href="#" class="col-5 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
-                                    newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>"
-                                    timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                                <a href="#" class="col-4 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                             <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                                <a href="#" class="col-5 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput"
-                                    newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>"
-                                    timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                                <a href="#" class="col-4 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                             <?php endif ?>
                         <?php endif ?>
                     </li>
-                <?php $idx++; ?>
-                <?php endforeach ?>
+                <?php endfor ?>
             </ul>
             <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
             <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" name="evento-iframe" style="width:0;height:0;border:0; border:none;"></iframe>
-            <div id="eventoDiv" class="col-9 d-flex justify-content-start">
-                <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="<?= ($isEventoSession) ? "Mettre à jour l'Evento" : "Créer un Evento" ?> à partir des créneaux sélectionnés" />
+            <div id="eventoDiv" class="col-8 d-flex justify-content-start pe-4">
+                <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="<?= $isEventoSession ? "Mettre à jour l'Evento" : "Créer un Evento" ?>" />
             </div>
             <?php endif ?>
         <?php endif ?>

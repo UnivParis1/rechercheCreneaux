@@ -16,11 +16,13 @@
                         $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
                         $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
                     ?>
-                    <ul id='modalEventoCreneaux'>
-                    <?php foreach ($listDate as $date): ?>
-                    <?php $strD = $formatter_day->format($date->startDate->getTimestamp()) . ' de ' . str_replace(':', 'h', $date->startDate->format('h:i')) . ' à ' . str_replace(':','h', $date->endDate->format('h:i'));?>
-                        <li><?= $strD; ?></li>
-                    <?php endforeach ?>
+                    <ul id='modalEventoCreneaux' class="list-group">
+                    <?php for ($idx = 0; $idx < count($listDate) && $date = $listDate[$idx]; $idx++): ?>
+                        <li class="list-group-item p-0">
+                            <input type="checkbox" name="idxCreneauxChecked[]" value="<?= $idx ?>" class="col-1 mb-2" onclick="eventoCheck(this);" <?= $fbParams->idxCreneauxChecked == null ? 'checked' : (in_array($idx, $fbParams->idxCreneauxChecked) ? 'checked' : '') ?> />
+                            <?= $formatter_day->format($date ->startDate->getTimestamp()) . ' de ' . str_replace(':', 'h', $date->startDate->format('h:i')) . ' à ' . str_replace(':','h', $date->endDate->format('h:i'));?>
+                        </li>
+                    <?php endfor ?>
                     </ul>
                     <hr>
                     <p>Participants</p>
