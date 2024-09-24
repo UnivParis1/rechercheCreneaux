@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-5 border-start" id="creneauBoxInput">
                     <div class="row">
-                        <label for="titrecreneau" class="form-label">Titre de l'évenement</label>
+                        <label for="titrecreneau" class="form-label">Titre de l'évenement * </label>
                         <div id="titrecreneau" class="input-group mb-3">
                             <input class="form-control" type="text" disabled placeholder="Titre de l'évenement"
                                 name="titrecreneau" value="<?= $fbParams->titleEvent; ?>"
@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label for="summarycreneau" class="form-label">Description</label>
+                        <label for="summarycreneau" class="form-label">Description * </label>
                         <div id="summarycreneau" class="input-group mb-3">
                             <textarea class="form-control" type="textarea" disabled placeholder="Description"
                                 name="summarycreneau" <?php echo (isset($fbParams->descriptionEvent)) ? 'value="'.$fbParams->descriptionEvent . '"':''; ?>
@@ -52,8 +52,7 @@
             </div>
             <div class="modal-footer border-0 me-3 pe-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" />
-<!--                <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" formnovalidate />-->
+                <input type="submit" class="btn btn-primary" name="submitModal" value="Envoyer" formnovalidate />
             </div>
         </div>
     </div>

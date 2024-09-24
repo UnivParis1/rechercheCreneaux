@@ -5,13 +5,19 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <p><?= $isEventoSession ? "Mise à jour":"Creation" ?> de l'evento</p>
+                <div id="eventoModalHeader" class="d-inline-flex">
+                    <p><?= $isEventoSession ? "Mise à jour":"Creation" ?> de l'evento</p>
+                    <div class="fs-2 ps-5 fw-bold">
+                        <a href="<?= $fbEventoSession->event['path'] ?? '#'  ?>" target='_blank'><?= $fbEventoSession->titreEvento ?? ''  ?></a>
+                        <span  type="button" class="btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien"><i class="bi bi-clipboard h4 d-inline-flex" onclick="copyClipboard(event)"></i></span>
+                    </div>
+                </div>
             </div>
             <div class="row mt-2">
                 <div class="col-6 ms-3">
-                    <p id="modalEventoP">Créneau<?php if (isset($listDate) && ($listDate) > 1): ?>x<?php endif ?></p>
+                    <p id="modalEventoP">Créneau<?php if (isset($listDate) && $listDate > 1): ?>x<?php endif ?></p>
                     <span class="text-nowrap"></span>
-                    <?php 
+                    <?php
                         $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd MMMM yyyy");
                         $formatter_start = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "dd/MM/yyyy HH'h'mm");
                         $formatter_end = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "HH'h'mm");
@@ -34,7 +40,7 @@
                     <?php endif ?>
                     </ul>
                 </div>
-                <div class="col-5 border-start"> 
+                <div class="col-5 border-start">
                     <div class="row">
                         <label for="titrevento" class="form-label">Titre de l'évenement</label>
                         <div class="input-group mb-3">

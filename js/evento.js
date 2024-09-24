@@ -34,7 +34,7 @@ function eventoDatasRequest(args) {
 
     let questions = [];
 
-    idxChecked.each(() =>  {
+    idxChecked.each(function() {
         // l'index commence à 0 ...
         let idx = Number(this.value) + 1;
         let select = $("#listReponse li:nth-child("+ idx +") a");
@@ -113,18 +113,6 @@ function eventoAjaxSurvey(datas, type, url) {
                 if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
                     let urlEvento = response.data.path.replace('renater', 'univ-paris1');
 
-                    let div = $('#eventoDiv');
-                    div.empty().append("<a href='" + urlEvento + "' target='_blank'>" + urlEvento + "</a>");
-
-                    let copySpan = $('<span type="button" class="btn-clipboard d-inline px-2" title="Copier le lien"><i class="bi bi-clipboard" aria-hidden="true"></i></span>');
-
-                    copySpan.on("click", () => {
-                        $(this).children().removeClass('bi-clipboard').addClass("bi-check2");
-                        navigator.clipboard.writeText(urlEvento);
-                    });
-
-                    div.append(copySpan);
-
                     // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
                     if (datas.notify_new_guests == false) {
                         listDisplayname.forEach((elem) => {
@@ -136,12 +124,27 @@ function eventoAjaxSurvey(datas, type, url) {
                     // ajout des paramètre de la réponse ajax aux données envoyés à l'enregistrement de la session
                     datas.id = response.data.id;
                     datas.path = urlEvento;
+
+                    // envoie les données, dumb_evento_up.php ne fait que les stocker en variable de session
                     $.get('dumb_evento_up.php', datas);
 
                     let titre = $("input[name='titrevento']").val();
                     let desc = $("textarea[name='summaryevento']").val();
 
-                    // ajout d'un input hidden pour passer le titre et la description en paramètre
+                    $("#eventoModalHeader p").text("Mise à jour de l'evento");
+
+                    $("#eventoModalHeader a").attr('href', urlEvento);
+                    $("#eventoModalHeader a").text(titre);
+                    $("#eventoModalHeader a").removeAttr('hidden');
+
+                    $("#eventoModalHeader span").removeClass('d-none');
+
+                    // affichage cohérent html index
+                    $("input#evento[name='evento'][type='button']").val("Mettre à jour l'Evento");
+                    $("#evento + span[type='button'] i").attr('data-creneau-url', urlEvento);
+                    $("#evento + span[type='button']").removeClass('d-none');
+
+                    // ajout d'un input hidden pour passer le titre et la description en paramètre (pour assurer l'état des variables sur l'url $_GET )
                     if ($("#form input[name='eventoTitre']").length == 0) {
                         $("#form").append($("<input type='hidden' name='eventoTitre' value='"+ titre +"'>"));
                     } else {
@@ -205,4 +208,12 @@ function eventoCheck() {
         }
         evento.addClass('btn-success');
     }
+}
+
+// méthode copie url evento index
+function copyClipboard(event) {
+    let url = event.target.getAttribute('data-creneau-url');
+    event.target.classList.remove('bi-clipboard');
+    event.target.classList.add('bi-check2');
+    navigator.clipboard.writeText(url);
 }
