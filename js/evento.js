@@ -212,7 +212,7 @@ function eventoCheck() {
 
 // méthode copie url evento index
 function copyClipboard(event) {
-    let url = event.target.getAttribute('data-creneau-url');
+    let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
     event.target.classList.remove('bi-clipboard');
     event.target.classList.add('bi-check2');
     navigator.clipboard.writeText(url);
