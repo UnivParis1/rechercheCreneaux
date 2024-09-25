@@ -1,4 +1,12 @@
 $(function() {
+
+    $('#modalEvento').on('shown.bs.modal', () => {
+        $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
+        $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
+        $("#evento + span[type='button'] i").removeClass('bi-check2');
+        $("#evento + span[type='button'] i").addClass('bi-clipboard');
+    });
+
     $('#eventoSubmit').on("click", () => {
         $("#eventoSubmit").removeAttr("formnovalidate");
         if (eventoFormCheck() == false) {
@@ -135,7 +143,9 @@ function eventoAjaxSurvey(datas, type, url) {
 
                     $("#eventoModalHeader a").attr('href', urlEvento);
                     $("#eventoModalHeader a").text(titre);
-                    $("#eventoModalHeader a").removeAttr('hidden');
+
+                    $("#evento + span[type='button'] i").removeClass('bi-check2');
+                    $("#evento + span[type='button'] i").addClass('bi-clipboard');
 
                     $("#eventoModalHeader span").removeClass('d-none');
 
@@ -213,7 +223,11 @@ function eventoCheck() {
 // méthode copie url evento index
 function copyClipboard(event) {
     let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
-    event.target.classList.remove('bi-clipboard');
-    event.target.classList.add('bi-check2');
+
+    if ($(event.target).hasClass('bi-clipboard')) {
+        $(event.target).removeClass('bi-clipboard');
+        $(event.target).addClass('bi-check2');
+    }
+
     navigator.clipboard.writeText(url);
 }

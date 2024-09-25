@@ -9,7 +9,7 @@
                     <p><?= $isEventoSession ? "Mise à jour":"Creation" ?> de l'evento</p>
                     <div class="fs-2 ps-5 fw-bold">
                         <a href="<?= $fbEventoSession->event['path'] ?? '#'  ?>" target='_blank'><?= $fbEventoSession->titreEvento ?? ''  ?></a>
-                        <span  type="button" class="btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien"><i class="bi bi-clipboard h4 d-inline-flex" onclick="copyClipboard(event)"></i></span>
+                        <span  type="button" class="btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien" onclick="copyClipboard(event)"><i class="bi bi-clipboard h4 d-inline-flex"></i></span>
                     </div>
                 </div>
             </div>
