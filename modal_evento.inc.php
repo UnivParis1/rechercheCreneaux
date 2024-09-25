@@ -42,13 +42,13 @@
                 </div>
                 <div class="col-5 border-start">
                     <div class="row">
-                        <label for="titrevento" class="form-label">Titre de l'évenement</label>
+                        <label for="titrevento" class="form-label">Titre de l'évenement *</label>
                         <div class="input-group mb-3">
                             <input class="form-control" type="text" placeholder="Titre de l'évenement" name="titrevento" value="<?= $fbParams->titreEvento ? $fbParams->titreEvento : ($fbEventoSession->donneeExistante ? $fbEventoSession->titreEvento : ($fbParams->titleEvent ? $fbParams->titleEvent : '')); ?>" oninvalid="this.setCustomValidity('Veuillez renseigner un titre')" onchange="if(this.value.length>0) this.setCustomValidity('')" />
                         </div>
                     </div>
                     <div class="row">
-                        <label for="summaryevento" class="form-label">Description</label>
+                        <label for="summaryevento" class="form-label">Description *</label>
                         <div class="input-group mb-3">
                             <textarea class="form-control" type="textarea" placeholder="Description" name="summaryevento" oninvalid="this.setCustomValidity('Veuillez renseigner une description')" onchange="if(this.value.length>0) this.setCustomValidity('')"><?= $fbParams->summaryevento ? $fbParams->summaryevento : ($fbEventoSession->donneeExistante ? $fbEventoSession->summaryevento : ($fbParams->descriptionEvent ? $fbParams->descriptionEvent : '')); ?></textarea>
                         </div>

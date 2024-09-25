@@ -114,7 +114,7 @@ function addOptionWithUid(uid, displayName, mail) {
 
     $(idperson_ul).append(newLi);
 
-    button.on("click", () => {
+    button.on("click", function() {
         $(this).parent().remove();
         let opts = getCurrentOptions();
         let testFormInput = testOptions(opts);
