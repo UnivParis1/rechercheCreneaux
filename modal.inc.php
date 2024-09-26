@@ -34,7 +34,7 @@
                     </div>
                     <div class="row">
                         <div class="col" id='colLieu'>
-                            <label class='form-label' for="lieucreneau">Lieu :</label>
+                            <label class='form-label' for="lieucreneau">Lieu * </label>
                             <div id="lieucreneau" class="input-group">
                                 <input class='form-control' type="text" disabled placeholder="Lieu"
                                     name="lieucreneau" value="<?php if (!is_null($fbParams->lieuEvent) && !str_contains($fbParams->lieuEvent, 'https://pantheon')) echo $fbParams->lieuEvent; ?>"
@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         <div id="zoom" class="col d-flex align-items-end">
-                            <button name="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init disabled>Créer un Zoom</button>
+                            <button name="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init>Créer un Zoom</button>
                         </div>
                     </div>
                 </div>

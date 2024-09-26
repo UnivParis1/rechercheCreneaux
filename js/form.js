@@ -126,7 +126,7 @@ function addOptionWithUid(uid, displayName, mail) {
     });
 }
 
-function formInvitationCheck() {
+function formInvitationCheck(type="Invitation") {
     let titreSel = $("input[name='titrecreneau']");
     if (titreSel.val().length == 0) {
         $("input[name='titrecreneau']").get(0).setCustomValidity(true);
@@ -145,6 +145,11 @@ function formInvitationCheck() {
         return false;
     } else {
        $("textarea[name='summarycreneau']").get(0).setCustomValidity('');
+    }
+
+    // on ne valide pas le lieu lorsqu'on crée un zoom
+    if (type == "Zoom") {
+        return true;
     }
 
     let lieuSel = $("input[name='lieucreneau']");
@@ -284,9 +289,6 @@ class bsModalShowZoom {
             if ($('#copySpan').length == 0) {
                 $('#colLieu').after(copySpan);
             }
-        } else {
-            $('#copySpan').remove();
-            $(zoomButtonSelector).text("Créer un Zoom");
         }
     }
 
@@ -330,8 +332,6 @@ class bsModalShowZoom {
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
 
-        zoomChange();
-
         let currentInviteObj = objSessionIdx(jsSessionInviteInfos, start, end, {invite: true, newParticipant: newParticipant}); // objets courant à partir d'une variable jsSession définit dans l'index
 
         let objModal = new bsModalShowZoom(jsSessionZoomInfos);
@@ -368,7 +368,7 @@ function onSubmit(event) {
     // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
     if (event.originalEvent.submitter.name == "submitModal") {
         $("input[name='actionFormulaireValider']").val("envoiInvitation");
-        if (formInvitationCheck() == false) {
+        if (formInvitationCheck("Invitation") == false) {
             event.stopPropagation();
             return false;
         }
@@ -430,6 +430,11 @@ function zoomClickError(msg) {
 }
 
 function zoomClick() {
+
+    if (formInvitationCheck("Zoom") == false) {
+        return;
+    }
+
     if (isLoading == true) {
         return;
     }
@@ -475,24 +480,6 @@ function zoomClick() {
             });
 }
 
-function zoomChange() {
-    let summary = $(summarycreneauSelector);
-    let zoom = $(zoomButtonSelector);
-    let title = $(titrecreneauSelector);
-
-    let bsZoom = new bsModalShowZoom(jsSessionZoomInfos);
-
-    if (summary.val().length > 0 && title.val().length > 0 && bsZoom.currentObj == null) {
-        zoom.removeAttr('disabled');
-        zoom.removeClass('btn-secondary');
-        zoom.addClass('btn-success');
-    } else {
-        zoom.attr('disabled', true);
-        zoom.removeClass('btn-success');
-        zoom.addClass('btn-secondary');
-    }
-}
-
 $(function() {
     $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
@@ -518,5 +505,4 @@ $(function() {
     $(zoomButtonSelector).on("click", zoomClick);
     $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
-    $("#summarycreneau,#titrecreneau").on("change keyup", zoomChange);
 });
