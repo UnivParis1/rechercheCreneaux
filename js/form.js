@@ -106,7 +106,7 @@ function addOptionWithUid(uid, displayName, mail) {
         }
     }
 
-    optionnel.on("click", () => afficherPermutterHide(testOptions(getCurrentOptions())));
+    optionnel.on("click", function() {afficherPermutterHide(testOptions(getCurrentOptions()));});
 
     newLi.append(optionnel);
     // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
@@ -124,6 +124,30 @@ function addOptionWithUid(uid, displayName, mail) {
             $(divpersonselect).hide();
         }
     });
+}
+
+function formInvitationCheck() {
+    let titreSel = $("input[name='titrecreneau']");
+    if (titreSel.val().length == 0) {
+        $("input[name='titrecreneau']").get(0).setCustomValidity(true);
+        $("input[name='titrecreneau']").get(0).reportValidity();
+        $("input[name='titrecreneau']").trigger('focus');
+        return false;
+    } else {
+        $("input[name='titrecreneau']").get(0).setCustomValidity('');
+    }
+
+    let descSel = $("textarea[name='summarycreneau']");
+    if (descSel.val().length == 0) {
+        $("textarea[name='summarycreneau']").get(0).setCustomValidity(true);
+        $("textarea[name='summarycreneau']").get(0).reportValidity();
+        $("textarea[name='summarycreneau']").trigger('focus');
+        return false;
+    } else {
+       $("textarea[name='summarycreneau']").get(0).setCustomValidity('');
+    }
+
+    return true;
 }
 
 function addOptionUid(uid, displayName, mail) {
@@ -334,6 +358,10 @@ function onSubmit(event) {
     // change la valeur de l'input pour indiquer l'action à réaliser à la soumission du formulaire
     if (event.originalEvent.submitter.name == "submitModal") {
         $("input[name='actionFormulaireValider']").val("envoiInvitation");
+        if (formInvitationCheck() == false) {
+            event.stopPropagation();
+            return false;
+        }
     }
 
     if (formModalValidate() == true) {
