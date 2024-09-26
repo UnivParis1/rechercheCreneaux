@@ -147,6 +147,16 @@ function formInvitationCheck() {
        $("textarea[name='summarycreneau']").get(0).setCustomValidity('');
     }
 
+    let lieuSel = $("input[name='lieucreneau']");
+    if (lieuSel.val().length == 0) {
+        $("input[name='lieucreneau']").get(0).setCustomValidity(true);
+        $("input[name='lieucreneau']").get(0).reportValidity();
+        $("input[name='lieucreneau']").trigger('focus');
+        return false;
+    } else {
+        $("input[name='lieucreneau']").get(0).setCustomValidity('');
+    }
+
     return true;
 }
 
