@@ -56,7 +56,7 @@ class FBZoom
         $zoom = new ZoomUP1([
             'client_id' => $stdEnv->zoomClientId,
             'client_secret' => $stdEnv->zoomClientSecret,
-            'redirect_uri' => 'https://creneaux-dev.univ-paris1.fr/zoom.php',
+            'redirect_uri' => $stdEnv->appUrl . '/zoom.php',
             'credential_path' => $stdEnv->zoomLibCredentialPath
           ]);
 

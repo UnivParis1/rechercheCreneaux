@@ -19,7 +19,7 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
-$dotenv->required(['ENV', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
+$dotenv->required(['ENV','APP_URL' ,'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
 $dotenv->required('RECHERCHE_SUR_X_JOURS')->isInteger();
 
 setlocale(LC_TIME, $_ENV['LOCALE']);
@@ -33,6 +33,7 @@ $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
 $dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO'])->isBoolean();
 
+$stdEnv->appUrl = $_ENV['APP_URL'];
 $stdEnv->wsgroup = (boolean) json_decode(strtolower($_ENV['WSGROUP']));
 $stdEnv->photoShow = (boolean) json_decode(strtolower($_ENV['PHOTO_SHOW']));
 $stdEnv->prolongationBandeau = (boolean) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
