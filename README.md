@@ -30,6 +30,7 @@ librairie composer : rlanvin/php-rrule
 + Recherche de créneaux par date, heure, durée
 + Affichage des créneaux disponibles sous forme de liste
 + Possibilité d'envoyer une invitation aux participants réserver des créneaux
++ Création Evento : crée automatiquement un sondage listant plusieurs créneaux par appels ajax sur l'application evento de chez Renater
 
 
 # Technologies utilisées
@@ -56,6 +57,11 @@ Utilisation des composants api
 Dans le cadre du développement du projet, l'appel se fait sur un agenda kronolith
 avec le paramètre du fichier .env : URL_FREEBUSY
 
+## Evento
+
+Possibilité de créer un sondage sur plusieurs créneaux
+
++ Projet Moment de chez Renater: [https://sourcesup.renater.fr/projects/moment/](https://sourcesup.renater.fr/projects/moment/) 
 
 # Quickstart
 
@@ -71,6 +77,12 @@ La configuration se fait en créant un fichier .env sur la base du fichier .env.
 
 + URL_FREEBUSY : url api récupération du calendrier.
 
+### Répertoires hors git
+
+Les répertoires vendor et node_modules sont hors git il faut les synchroniser sur les instances de test/prod :
+
++ vendor/
++ node_modules/
 
 # Tests Phpunit
 
