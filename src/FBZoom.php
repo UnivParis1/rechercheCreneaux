@@ -104,8 +104,13 @@ class FBZoom
         'type' => 2, // 1 pour une réunion instantanée, 2 pour une réunion planifiée
         'start_time' => (new DateTimeImmutable($this->modalCreneauStart))->setTimeZone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:sp'), // Format ISO 8601 pour l'heure de début
         'duration' => $this->duree, // Durée de la réunion en minutes
-        'timezone' => 'Europe/Paris' // Fuseau horaire de la réunion
+        'timezone' => 'Europe/Paris', // Fuseau horaire de la réunion
+        'meeting_invitees' => []
         );
+
+        foreach ($this->users as $invite) {
+            $meetingData['meeting_invitees'][]['email'] = $invite->mail;
+        }
 
         $data = $zoom->createMeeting($userMailStd->mail, $meetingData);
 
