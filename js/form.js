@@ -18,6 +18,33 @@ let end=null;
 let lieuCreneauElem=null;
 let zoomElem=null;
 
+$(function() {
+    $("input#person").autocompleteUserAndGroup(
+        urlwsgroupUsersAndGroups, {
+        select: wsCallbackUid,
+        wantedAttr: "uid",
+        wsParams: {
+            CAS: 1,
+            filter_category: "groups",
+            filter_group_cn: "collab.*|employees.*",
+            filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
+        }
+    });
+
+    // Set FR pour le formattage des dates avec la librairie moment.js
+    moment.locale('fr');
+    lieuCreneauElem = $("#lieucreneau").clone(true).detach();
+    colLieu = $("#colLieu").clone(true).detach();
+    zoomElem = $("#zoom").clone(true).detach();
+
+    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
+    $("#form").on("submit", onSubmit);
+    $("#reponse li a").on("click", onTimeClick);
+    $(zoomButtonSelector).on("click", zoomClick);
+    $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
+    $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
+});
+
 function errorShow(toShow) {
     if (toShow === true) {
         if ($(divpersonselect).is(":hidden")) {
@@ -321,10 +348,6 @@ class bsModalShowZoom {
             zoomClickError(zoomErrors[idxErr].msg);
             return;
         }
-        let zoom = $(zoomButtonSelector);
-        zoom.removeClass('bg-danger');
-        zoom.addClass('btn-secondary');
-        zoom.addClass('btn-success');
 
         $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', false);
         $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
@@ -350,8 +373,8 @@ class bsModalShowZoom {
         $('#copySpan').remove();
         $(zoomButtonSelector).on('click', zoomClick);
 
-        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea,#creneauBoxInput button").attr('disabled', true);
-        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea").attr('required', false);
+        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
+        $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
@@ -480,29 +503,3 @@ function zoomClick() {
             });
 }
 
-$(function() {
-    $("input#person").autocompleteUserAndGroup(
-        urlwsgroupUsersAndGroups, {
-        select: wsCallbackUid,
-        wantedAttr: "uid",
-        wsParams: {
-            CAS: 1,
-            filter_category: "groups",
-            filter_group_cn: "collab.*|employees.*",
-            filter_eduPersonAffiliation: "teacher|researcher|staff|emeritus"
-        }
-    });
-
-    // Set FR pour le formattage des dates avec la librairie moment.js
-    moment.locale('fr');
-    lieuCreneauElem = $("#lieucreneau").clone(true).detach();
-    colLieu = $("#colLieu").clone(true).detach();
-    zoomElem = $("#zoom").clone(true).detach();
-
-    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
-    $("#form").on("submit", onSubmit);
-    $("#reponse li a").on("click", onTimeClick);
-    $(zoomButtonSelector).on("click", zoomClick);
-    $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
-    $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
-});

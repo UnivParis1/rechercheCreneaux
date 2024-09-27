@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         <div id="zoom" class="col d-flex align-items-end">
-                            <button name="zoom" type="button" class="btn btn-secondary" data-mdb-ripple-init>Créer un Zoom</button>
+                            <button name="zoom" type="button" class="btn btn-secondary btn-success" data-mdb-ripple-init>Créer un Zoom</button>
                         </div>
                     </div>
                 </div>
