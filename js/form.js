@@ -349,8 +349,8 @@ class bsModalShowZoom {
             return;
         }
 
-        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', false);
-        $("#creneauBoxInput input[type='text'],textarea").attr('required', true);
+        $("#creneauBoxInput input[type='text'], #creneauBoxInput textarea, #creneauBoxInput button").attr('disabled', false);
+        $("#creneauBoxInput input[type='text'], #creneauBoxInput textarea").attr('required', true);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', false);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', true);
@@ -373,8 +373,8 @@ class bsModalShowZoom {
         $('#copySpan').remove();
         $(zoomButtonSelector).on('click', zoomClick);
 
-        $("#creneauBoxInput input[type='text'],textarea,button").attr('disabled', true);
-        $("#creneauBoxInput input[type='text'],textarea").attr('required', false);
+        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea,#creneauBoxInput button").attr('disabled', true);
+        $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea").attr('required', false);
 
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', true);
         $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', false);
