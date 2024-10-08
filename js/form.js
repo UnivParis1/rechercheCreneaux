@@ -22,6 +22,8 @@ let end=null;
 let lieuCreneauElem=null;
 let zoomElem=null;
 
+requirejs([autocompleteUser], function($) {
+
 $(function() {
     $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
@@ -51,6 +53,7 @@ $(function() {
     $('#duree option[value='+ jsduree +']').prop('selected', true);
 });
 
+});
 function errorShow(toShow) {
     if (toShow === true) {
         if ($(divpersonselect).is(":hidden")) {
