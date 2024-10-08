@@ -18,6 +18,8 @@ let end=null;
 let lieuCreneauElem=null;
 let zoomElem=null;
 
+requirejs([autocompleteUser], function($) {
+
 $(function() {
     $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
@@ -45,6 +47,7 @@ $(function() {
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
 });
 
+});
 function errorShow(toShow) {
     if (toShow === true) {
         if ($(divpersonselect).is(":hidden")) {

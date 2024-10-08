@@ -80,7 +80,15 @@ if (FBForm::validParams($fbParams)) {
     <script src="js/slider.js"></script>
 
     <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
+        <script type='text/javascript' src="node_modules/requirejs/require.js"></script>
+        <script>
+            requirejs.config({
+                'baseUrl': "js/",
+                'paths': {
+                    "autocompleteUser": "autocompleteUser"
+                }
+            });
+        </script>
         <script type='text/javascript' src='./js/form.js'></script>
     <?php else: ?>
         <script type='text/javascript' src='./js/noform.js'></script>
@@ -109,17 +117,17 @@ if (FBForm::validParams($fbParams)) {
             <?php if ($fbParams->uids && isset($js_uids)): ?>
                 var jsuids = <?= "$js_uids" ?>;
 
-                $(function () {
+/*                $(function () {
                     setOptionsUid(jsuids);
 
                     if (jsuids.length < 2) {
                         errorShow(true);
                     }
-                });
+                });*/
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-                $(function () {
+/*                $(function () {
                     setOptionsUid(['<?= $stdEnv->uidCasUser ?>']);
-                });
+                });*/
             <?php endif ?>
             <?php if (isset($jsonSessionInviteInfos)): ?>
                 var jsSessionInviteInfos = JSON.parse('<?= addslashes($jsonSessionInviteInfos) ?>');
@@ -131,9 +139,9 @@ if (FBForm::validParams($fbParams)) {
             <?php if ($fbParams->uids && isset($js_uids)): ?>
                 var jsuids = <?= "$js_uids" ?>;
 
-                $(function () {
+/*                $(function () {
                     setOptionsUid(jsuids);
-                });
+                });*/
             <?php endif ?>
         <?php endif ?>
 
