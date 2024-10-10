@@ -172,6 +172,8 @@ if (FBForm::validParams($fbParams)) {
                     <option value="180" <?= ($fbParams->duree == 180) ? ' selected' : '' ?>>3h</option>
                     <option value="210" <?= ($fbParams->duree == 210) ? ' selected' : '' ?>>3h30</option>
                     <option value="240" <?= ($fbParams->duree == 240) ? ' selected' : '' ?>>4h</option>
+                    <option value="480" <?= ($fbParams->duree == 480) ? ' selected' : '' ?>>8h</option>
+                    <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
                 </select>
             </div>
             <div class="col-2 overflow-scroll">
@@ -212,7 +214,7 @@ if (FBForm::validParams($fbParams)) {
                         <p>Plage horaire</p>
                         <div id="slider"></div>
                         <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
-                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                 </div>
             </div>
             <div class="col-2 d-inline-flex flex-column justify-content-center align-items-start fw-bold">
