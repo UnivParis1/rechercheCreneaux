@@ -1,3 +1,7 @@
+define('form', ['order!jquery','moment', 'order!bootstrap', 'autocompleteUser', 'nouislider', 'slider'], function($, moment) {
+
+moment.locale("fr");
+
 const divpersonselect = "#divpersonselect";
 const idperson_ul = "#person_ul";
 
@@ -9,7 +13,7 @@ const zoomButtonSelector = "#zoom button[name='zoom']";
 var jsSessionZoomInfos = typeof(jsSessionZoomInfos) == 'undefined' ? null : jsSessionZoomInfos;
 var jsSessionInviteInfos = typeof(jsSessionInviteInfos) == 'undefined' ? null : jsSessionInviteInfos;
 
-let listDisplayname = new Map();
+var listDisplayname = new Map();
 
 let newParticipant=false;
 let start=null;
@@ -17,8 +21,6 @@ let end=null;
 
 let lieuCreneauElem=null;
 let zoomElem=null;
-
-requirejs([autocompleteUser], function($) {
 
 $(function() {
     $("input#person").autocompleteUserAndGroup(
@@ -33,8 +35,6 @@ $(function() {
         }
     });
 
-    // Set FR pour le formattage des dates avec la librairie moment.js
-    moment.locale('fr');
     lieuCreneauElem = $("#lieucreneau").clone(true).detach();
     colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
@@ -45,9 +45,12 @@ $(function() {
     $(zoomButtonSelector).on("click", zoomClick);
     $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
     $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
+
+    setOptionsUid(jsuids);
+
+    $('#duree option[value='+ jsduree +']').prop('selected', true);
 });
 
-});
 function errorShow(toShow) {
     if (toShow === true) {
         if ($(divpersonselect).is(":hidden")) {
@@ -522,3 +525,7 @@ function zoomClick() {
             });
 }
 
+return {
+    'listDisplayname': listDisplayname,
+}
+});
