@@ -1,3 +1,5 @@
+define('evento', ['jquery', 'moment', 'form'], function($, moment, form) {
+
 $(function() {
     // test si l'evento en cours n'est pas clos
     if (isEventoSession == true && typeof idEvento != 'undefined' && typeof urlEvento != 'undefined') {
@@ -187,7 +189,7 @@ function eventoDatasRequest(args) {
     jsonData.new_guests = [];
 
     if (jsonData.notify_new_guests == true) {
-        listDisplayname.forEach((datas) => {
+        form.listDisplayname.forEach((datas) => {
             jsonData.new_guests.push(datas.mail);
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
@@ -261,14 +263,6 @@ function eventoCheck() {
     }
 }
 
-// méthode copie url evento index
-function copyClipboard(event) {
-    let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
 
-    if ($(event.target).hasClass('bi-clipboard')) {
-        $(event.target).removeClass('bi-clipboard');
-        $(event.target).addClass('bi-check2');
-    }
 
-    navigator.clipboard.writeText(url);
-}
+});

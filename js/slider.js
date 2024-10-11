@@ -1,3 +1,4 @@
+define(['jquery', 'nouislider'], function($, noUiSlider) {
 // création du slider pour la séléction des plages horaires
 $(function() {    
     let slider = document.getElementById('slider');
@@ -101,4 +102,6 @@ $(function() {
 
         slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17])
     });
+});
+
 });

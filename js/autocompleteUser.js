@@ -1,3 +1,4 @@
+define(['jquery'], function() {
 
 (function() {
     function loadCSS(url) {
@@ -1034,3 +1035,4 @@ var myRenderGroupItem = function (navigate) {
   };
 
 })(jQuery);
+});

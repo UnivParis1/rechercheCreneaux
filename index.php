@@ -71,13 +71,7 @@ if (FBForm::validParams($fbParams)) {
     <link href="node_modules/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="./css/form.css" rel="stylesheet" />
 
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="node_modules/jquery/dist/jquery.min.js"></script>
-
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
-    <script src="node_modules/nouislider/dist/nouislider.min.js"></script>
-    <script src="node_modules/moment/min/moment-with-locales.js"></script>
-    <script src="js/slider.js"></script>
 
     <?php if ($stdEnv->wsgroup): ?>
         <script type='text/javascript' src="node_modules/requirejs/require.js"></script>
@@ -85,16 +79,48 @@ if (FBForm::validParams($fbParams)) {
             requirejs.config({
                 'baseUrl': "js/",
                 'paths': {
-                    "autocompleteUser": "autocompleteUser"
+                    'order': '//requirejs.org/docs/release/1.0.5/minified/order',
+                    'jquery' :'../node_modules/jquery/dist/jquery.min',
+                    'bootstrap' : '../node_modules/bootstrap/dist/js/bootstrap.bundle.min',
+                    'nouislider' : '../node_modules/nouislider/dist/nouislider.min',
+                    'moment' : '../node_modules/moment/min/moment-with-locales.min',
+                },
+                'shims' : {
+                    'jquery': {
+                        exports: '$'
+                    },
+                    'bootstrap': {
+                        deps: ['jquery'],
+                        exports: '$'
+                    },
+                    'autocompleteUser': {
+                        exports: '$'
+                    },
+                    'nouislider': {
+                        exports: 'noUiSlider'
+                    },
+                    'slider': {
+                        deps: ['nouislider']
+                    }
                 }
             });
+
+            requirejs(['order!form', 'order!evento']);
+
+            // méthode copie url evento index
+            function copyClipboard(event) {
+                let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
+
+                if ($(event.target).hasClass('bi-clipboard')) {
+                    $(event.target).removeClass('bi-clipboard');
+                    $(event.target).addClass('bi-check2');
+                }
+
+                navigator.clipboard.writeText(url);
+            }
         </script>
-        <script type='text/javascript' src='./js/form.js'></script>
     <?php else: ?>
         <script type='text/javascript' src='./js/noform.js'></script>
-    <?php endif ?>
-    <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid): ?>
-        <script type='text/javascript' src='./js/evento.js'></script>
     <?php endif ?>
 </head>
 
@@ -116,18 +142,8 @@ if (FBForm::validParams($fbParams)) {
 
             <?php if ($fbParams->uids && isset($js_uids)): ?>
                 var jsuids = <?= "$js_uids" ?>;
-
-/*                $(function () {
-                    setOptionsUid(jsuids);
-
-                    if (jsuids.length < 2) {
-                        errorShow(true);
-                    }
-                });*/
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-/*                $(function () {
-                    setOptionsUid(['<?= $stdEnv->uidCasUser ?>']);
-                });*/
+                var jsuids = ['<?= $stdEnv->uidCasUser ?>'];
             <?php endif ?>
             <?php if (isset($jsonSessionInviteInfos)): ?>
                 var jsSessionInviteInfos = JSON.parse('<?= addslashes($jsonSessionInviteInfos) ?>');
@@ -135,24 +151,9 @@ if (FBForm::validParams($fbParams)) {
             <?php if (isset($fbForm) && ! is_null($jsonSessionZoomInfos = $fbForm->fbParams->jsonSessionZoomInfos)): ?>
                 var jsSessionZoomInfos = JSON.parse('<?= addslashes($jsonSessionZoomInfos) ?>');
             <?php endif ?>
-        <?php else: // sans wsgroup?>
-            <?php if ($fbParams->uids && isset($js_uids)): ?>
-                var jsuids = <?= "$js_uids" ?>;
-
-/*                $(function () {
-                    setOptionsUid(jsuids);
-                });*/
-            <?php endif ?>
         <?php endif ?>
-
         <?php if ($stdEnv->photoShow): ?>
             var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
-        <?php endif ?>
-
-        <?php if (isset($fbParams->duree) && !is_null($fbParams->duree)): ?>
-            $(function () {
-                $('#duree option[value="<?= $fbParams->duree ?>"').prop('selected', true);
-            });
         <?php endif ?>
 
         var isEventoSession = <?php echo (isset($isEventoSession) && $isEventoSession) ? "true" : "false" ?>;
