@@ -1,3 +1,5 @@
+define('evento', ['jquery', 'moment', 'form'], function($, moment, form) {
+
 $(function() {
 
     $('#modalEvento').on('shown.bs.modal', () => {
@@ -93,7 +95,7 @@ function eventoDatasRequest(args) {
     jsonData.new_guests = [];
 
     if (jsonData.notify_new_guests == true) {
-        listDisplayname.forEach((datas) => {
+        form.listDisplayname.forEach((datas) => {
             jsonData.new_guests.push(datas.mail);
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
@@ -123,7 +125,7 @@ function eventoAjaxSurvey(datas, type, url) {
 
                     // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
                     if (datas.notify_new_guests == false) {
-                        listDisplayname.forEach((elem) => {
+                        form.listDisplayname.forEach((elem) => {
                             datas.new_guests.push(elem.mail);
                             datas.guests.push({email:elem.mail,name:elem.displayName});
                         });
@@ -220,14 +222,6 @@ function eventoCheck() {
     }
 }
 
-// méthode copie url evento index
-function copyClipboard(event) {
-    let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
 
-    if ($(event.target).hasClass('bi-clipboard')) {
-        $(event.target).removeClass('bi-clipboard');
-        $(event.target).addClass('bi-check2');
-    }
 
-    navigator.clipboard.writeText(url);
-}
+});

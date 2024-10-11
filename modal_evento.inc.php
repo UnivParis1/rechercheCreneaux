@@ -8,7 +8,7 @@
                 <div id="eventoModalHeader" class="d-inline-flex">
                     <p><?= $isEventoSession ? "Mise à jour":"Creation" ?> de l'evento</p>
                     <div class="fs-2 ps-5 fw-bold">
-                        <a href="<?= $fbEventoSession->event['path'] ?? '#'  ?>" target='_blank'><?= $fbEventoSession->titreEvento ?? ''  ?></a>
+                        <a href="<?= ($isEventoSession && $fbEventoSession->event['path']) ? $fbEventoSession->event['path'] : '#'  ?>" target='_blank'><?= ($isEventoSession && $fbEventoSession->titreEvento) ? $fbEventoSession->titreEvento: ''  ?></a>
                         <span  type="button" class="btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien" onclick="copyClipboard(event)"><i class="bi bi-clipboard h4 d-inline-flex"></i></span>
                     </div>
                 </div>
