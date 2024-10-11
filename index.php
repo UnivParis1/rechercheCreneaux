@@ -195,26 +195,20 @@ if (FBForm::validParams($fbParams)) {
                 <div id="divjours">
                     <p>Jours séléctionnés</p>
                     <fieldset>
-                        <input type="checkbox" name="joursCreneaux[]" value="MO" <?php if (in_array('MO', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Lundi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="TU" <?php if (in_array('TU', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Mardi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="WE" <?php if (in_array('WE', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Mercredi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="TH" <?php if (in_array('TH', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Jeudi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="FR" <?php if (in_array('FR', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Vendredi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="SA" <?php if (in_array('SA', $fbParams->joursDemandes))
-                            echo 'checked' ?>>Samedi</input>
-                        </fieldset>
-                        <br />
+                        <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?>>Lundi</input>
+                        <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mardi</input>
+                        <input type="checkbox" name="joursCreneaux[]" value="WE" <?= in_array('WE', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mercredi</input>
+                        <input type="checkbox" name="joursCreneaux[]" value="TH" <?= in_array('TH', $fbParams->joursDemandes) ? 'checked' : '' ?>>Jeudi</input>
+                        <input type="checkbox" name="joursCreneaux[]" value="FR" <?= in_array('FR', $fbParams->joursDemandes) ? 'checked' : '' ?>>Vendredi</input>
+                        <input type="checkbox" name="joursCreneaux[]" value="SA" <?= in_array('SA', $fbParams->joursDemandes) ? 'checked' : '' ?>>Samedi</input>
+                    </fieldset>
+                    <br />
                     </div>
-                    <div id="divplagehoraire">
-                        <p>Plage horaire</p>
-                        <div id="slider"></div>
-                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
-                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                <div id="divplagehoraire">
+                    <p>Plage horaire</p>
+                    <div id="slider"></div>
+                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
+                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                 </div>
             </div>
             <div class="col-2 d-inline-flex flex-column justify-content-center align-items-start fw-bold">
