@@ -151,14 +151,6 @@ if (FBForm::validParams($fbParams)) {
             <?php if (isset($fbForm) && ! is_null($jsonSessionZoomInfos = $fbForm->fbParams->jsonSessionZoomInfos)): ?>
                 var jsSessionZoomInfos = JSON.parse('<?= addslashes($jsonSessionZoomInfos) ?>');
             <?php endif ?>
-        <?php else: // sans wsgroup?>
-            <?php if ($fbParams->uids && isset($js_uids)): ?>
-                var jsuids = <?= "$js_uids" ?>;
-
-/*                $(function () {
-                    setOptionsUid(jsuids);
-                });*/
-            <?php endif ?>
         <?php endif ?>
         <?php if ($stdEnv->photoShow): ?>
             var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
