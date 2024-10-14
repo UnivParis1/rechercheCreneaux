@@ -34,8 +34,8 @@ class FBEventoSession {
             return;
         }
 
-        // verifier les users si tous les events users sont présents dans Fbusers[]
-        if (!self::usersExistantEvent($event, $fbUsers)) {
+        // verifier les users si au moins 1 Fbusers[] users est présents dans les events
+        if (!self::usersExistantEvent($fbUsers,$event)) {
             $this->event = [];
             return;
         }
@@ -48,21 +48,15 @@ class FBEventoSession {
         $this->event = $event;
     }
 
-    private static function usersExistantEvent($event, array $fbUsers) {
-        foreach ($event['new_guests'] as $mail) {
-            $test = false;
-            foreach ($fbUsers as $fbUser) {
+    private static function usersExistantEvent(array $fbUsers, $event) {
+        foreach ($fbUsers as $fbUser) {
+            foreach ($event['new_guests'] as $mail) {
                 if ($mail == $fbUser->getUidInfos()->mail) {
-                   $test = true;
-                   break;
+                   return true;
                 }
             }
-            if ($test == false) {
-                return false;
-            }
         }
-
-        return true;
+        return false;
     }
 
     private static function compareCreneaux($creneaux, $propositions) {
