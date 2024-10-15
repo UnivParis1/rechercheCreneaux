@@ -75,10 +75,8 @@ if (FBForm::validParams($fbParams)) {
 
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
     <script src="node_modules/nouislider/dist/nouislider.min.js"></script>
-    <script src="js/slider.js"></script>
-
-    <script src="node_modules/moment/min/moment.min.js"></script>
     <script src="node_modules/moment/min/moment-with-locales.js"></script>
+    <script src="js/slider.js"></script>
 
     <?php if ($stdEnv->wsgroup): ?>
         <script type='text/javascript' src="https://wsgroups.univ-paris1.fr/web-widget/autocompleteUser-resources.html.js"></script>
@@ -100,6 +98,7 @@ if (FBForm::validParams($fbParams)) {
                 <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
 
     <script>
+        var jstimezone = "<?= $stdEnv->dtz ?>";
         var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
         let slider = document.getElementById('slider');
         <?php if ($stdEnv->wsgroup): ?>

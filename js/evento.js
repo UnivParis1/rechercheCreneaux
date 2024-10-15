@@ -1,5 +1,4 @@
 $(function() {
-
     // test si l'evento en cours n'est pas clos
     if (isEventoSession == true && typeof idEvento != 'undefined' && typeof urlEvento != 'undefined') {
         eventoAjaxSurvey(eventoDatasRequest({id: idEvento, path: urlEvento}), 'GET', eventoWsUrl + "survey" + "/" + idEvento, function(response) {
@@ -167,9 +166,10 @@ function eventoDatasRequest(args) {
         let timeend = question.timeend;
 
         let base_day = moment(moment.unix(timestart).format('Y-M-D') + ' 00:00:00', 'YYYY-M-D').unix();
-        // dirty hack pour faire correspondre les bonnes infos sur evento
-        base_day = base_day + (3600*24);
-        let local_base_day = base_day + (3600*2);
+
+        // pour quelle raison il faut rajouter 1 jour pour evento, je l'ignore
+        base_day = moment.unix(base_day).add(1, 'day').unix();
+        let local_base_day = base_day + (base_day - (new Date(moment.unix(base_day).utc().format().slice(0, -1)).valueOf())/1000);
 
         let propose = Object.assign({}, propositionBase);
 
