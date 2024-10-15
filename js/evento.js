@@ -13,6 +13,18 @@ $(function() {
         });
     }
 
+    // test si l'evento en cours n'est pas clos
+    if (isEventoSession == true && typeof idEvento != 'undefined' && typeof urlEvento != 'undefined') {
+        eventoAjaxSurvey(eventoDatasRequest({id: idEvento, path: urlEvento}), 'GET', eventoWsUrl + "survey" + "/" + idEvento, function(response) {
+            if (response[0].is_closed == true) {
+                domEnleverMAJHtml();
+                isEventoSession = false;
+                idEvento = false;
+                urlEvento = false;
+            }
+        });
+    }
+
     $('#modalEvento').on('shown.bs.modal', () => {
         $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
         $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
