@@ -24,7 +24,7 @@ class FBEventoSession {
 
         $event = null;
         foreach ($events as $eventTested) {
-            if (self::compareCreneaux($creneaux, $eventTested['questions'][0]['propositions'])) {
+            if (self::compareCreneaux(creneaux: $creneaux, propositions: $eventTested['questions'][0]['propositions'])) {
                 $event = $eventTested;
                 break;
             }
@@ -48,7 +48,7 @@ class FBEventoSession {
         $this->event = $event;
     }
 
-    private static function usersExistantEvent(array $fbUsers, $event) {
+    private static function usersExistantEvent(array $fbUsers, $event):bool {
         foreach ($fbUsers as $fbUser) {
             foreach ($event['new_guests'] as $mail) {
                 if ($mail == $fbUser->getUidInfos()->mail) {
@@ -59,24 +59,25 @@ class FBEventoSession {
         return false;
     }
 
-    private static function compareCreneaux($creneaux, $propositions) {
+    private static function compareCreneaux($creneaux, $propositions): bool {
+        $test = false;
         foreach ($propositions as $proposition) {
             foreach ($creneaux as $creneau) {
                 $start = $creneau->startDate->getTimestamp();
                 $end = $creneau->endDate->getTimestamp();
 
-                $base_day = $proposition['base_day'];
+                $local_base_day = $proposition['local_base_day'];
                 $base_time = $proposition['base_time'];
                 $end_time = $proposition['end_time'];
 
-                if ($base_day+$base_time-$start == $base_day+$end_time-$end)
-                    continue;
-                else
-                    return false;
+                if ($local_base_day+$base_time == $start && $local_base_day+$end_time == $end) {
+                    $test = true;
+                    break;
+                 } else {
+                    $test = false;
+                 }
             }
         }
-        return true;
+        return $test;
     }
-
-
 }

@@ -1,5 +1,17 @@
 $(function() {
 
+    // test si l'evento en cours n'est pas clos
+    if (isEventoSession == true && typeof idEvento != 'undefined' && typeof urlEvento != 'undefined') {
+        eventoAjaxSurvey(eventoDatasRequest({id: idEvento, path: urlEvento}), 'GET', eventoWsUrl + "survey" + "/" + idEvento, function(response) {
+            if (response[0].is_closed == true) {
+                domEnleverMAJHtml();
+                isEventoSession = false;
+                idEvento = false;
+                urlEvento = false;
+            }
+        });
+    }
+
     $('#modalEvento').on('shown.bs.modal', () => {
         $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
         $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
@@ -32,9 +44,91 @@ $(function() {
         if (id) {
             url = url + "/" + id;
         }
-        eventoAjaxSurvey(dataPost, (id == false) ? 'POST' : 'PUT', url);
+        eventoAjaxSurvey(dataPost, (id == false) ? 'POST' : 'PUT', url, traiteReponseAjax);
     });
 });
+
+function traiteReponseAjax(response, dataPost) {
+    if (typeof(response.path)!= 'undefined') {
+
+        if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
+            let urlEvento = response.data.path.replace('renater', 'univ-paris1');
+
+            // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
+            if (dataPost.notify_new_guests == false) {
+                listDisplayname.forEach((elem) => {
+                    dataPost.new_guests.push(elem.mail);
+                    dataPost.guests.push({email:elem.mail,name:elem.displayName});
+                });
+            }
+
+            // ajout des paramètre de la réponse ajax aux données envoyés à l'enregistrement de la session
+            dataPost.id = response.data.id;
+            dataPost.path = urlEvento;
+
+            // envoie les données, dumb_evento_up.php ne fait que les stocker en variable de session
+            $.get('dumb_evento_up.php', dataPost);
+
+            domMiseajourEventoHTML(urlEvento);
+        }
+    }
+}
+
+function domEnleverMAJHtml() {
+    $("#eventoModalHeader p").text("Création de l'Evento");
+
+    $("#eventoModalHeader a").empty();
+
+    $("#evento + span[type='button'] i").removeClass('bi-clipboard');
+    $("#evento + span[type='button'] i").addClass('bi-check2');
+
+    $("#eventoModalHeader span").addClass('d-none');
+
+    // affichage cohérent html index
+    $("input#evento[name='evento'][type='button']").val("Créer un Evento");
+    $("#evento + span[type='button'] i").removeAttr('data-creneau-url');
+    $("#evento + span[type='button']").addClass('d-none');
+
+    $("#form input[name='eventoTitre']").remove();
+    $("#form input[name='summaryevento']").remove();
+
+    $("#eventoSubmit").text("Créer Evento");
+}
+
+function domMiseajourEventoHTML(urlEvento) {
+    let titre = $("input[name='titrevento']").val();
+    let desc = $("textarea[name='summaryevento']").val();
+
+    $("#eventoModalHeader p").text("Mise à jour de l'evento");
+
+    $("#eventoModalHeader a").attr('href', urlEvento);
+    $("#eventoModalHeader a").text(titre);
+
+    $("#evento + span[type='button'] i").removeClass('bi-check2');
+    $("#evento + span[type='button'] i").addClass('bi-clipboard');
+
+    $("#eventoModalHeader span").removeClass('d-none');
+
+    // affichage cohérent html index
+    $("input#evento[name='evento'][type='button']").val("Mettre à jour l'Evento");
+    $("#evento + span[type='button'] i").attr('data-creneau-url', urlEvento);
+    $("#evento + span[type='button']").removeClass('d-none');
+
+    $("#eventoSubmit").text("Mettre à jour Evento");
+
+    // ajout d'un input hidden pour passer le titre et la description en paramètre (pour assurer l'état des variables sur l'url $_GET )
+    if ($("#form input[name='eventoTitre']").length == 0) {
+        $("#form").append($("<input type='hidden' name='eventoTitre' value='"+ titre +"'>"));
+    } else {
+        $("#form input[name='eventoTitre']").val(titre);
+    }
+
+    if ($("#form input[name='summaryevento']").length == 0) {
+        $("#form").append($("<input type='hidden' name='summaryevento' value='"+ desc +"'>"));
+    } else {
+        $("#form input[name='summaryevento']").val(desc);
+    }
+}
 
 function eventoDatasRequest(args) {
 
@@ -102,10 +196,9 @@ function eventoDatasRequest(args) {
     return jsonData;
 }
 
-function eventoAjaxSurvey(datas, type, url) {
-   let id = false;
-
+function eventoAjaxSurvey(datas, type, url, traiteReponseAjax) {
     $.ajax({
+        async: true,
         url: url, 
         type: type,
         contentType: 'application/json',
@@ -115,67 +208,15 @@ function eventoAjaxSurvey(datas, type, url) {
         done: () => console.log('done'),
         fail: () => console.log('fail'),
         success: (response) => {
+            traiteReponseAjax(response, datas);
             console.log("success");
-            if (typeof(response.path)!= 'undefined') {
-
-                if (response.data.path.indexOf('https://evento') != -1 && response.data.path.indexOf('/survey/') != -1) {
-                    let urlEvento = response.data.path.replace('renater', 'univ-paris1');
-
-                    // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
-                    if (datas.notify_new_guests == false) {
-                        listDisplayname.forEach((elem) => {
-                            datas.new_guests.push(elem.mail);
-                            datas.guests.push({email:elem.mail,name:elem.displayName});
-                        });
-                    }
-
-                    // ajout des paramètre de la réponse ajax aux données envoyés à l'enregistrement de la session
-                    datas.id = response.data.id;
-                    datas.path = urlEvento;
-
-                    // envoie les données, dumb_evento_up.php ne fait que les stocker en variable de session
-                    $.get('dumb_evento_up.php', datas);
-
-                    let titre = $("input[name='titrevento']").val();
-                    let desc = $("textarea[name='summaryevento']").val();
-
-                    $("#eventoModalHeader p").text("Mise à jour de l'evento");
-
-                    $("#eventoModalHeader a").attr('href', urlEvento);
-                    $("#eventoModalHeader a").text(titre);
-
-                    $("#evento + span[type='button'] i").removeClass('bi-check2');
-                    $("#evento + span[type='button'] i").addClass('bi-clipboard');
-
-                    $("#eventoModalHeader span").removeClass('d-none');
-
-                    // affichage cohérent html index
-                    $("input#evento[name='evento'][type='button']").val("Mettre à jour l'Evento");
-                    $("#evento + span[type='button'] i").attr('data-creneau-url', urlEvento);
-                    $("#evento + span[type='button']").removeClass('d-none');
-
-                    // ajout d'un input hidden pour passer le titre et la description en paramètre (pour assurer l'état des variables sur l'url $_GET )
-                    if ($("#form input[name='eventoTitre']").length == 0) {
-                        $("#form").append($("<input type='hidden' name='eventoTitre' value='"+ titre +"'>"));
-                    } else {
-                       $("#form input[name='eventoTitre']").val(titre);
-                    }
-
-                    if ($("#form input[name='summaryevento']").length == 0) {
-                        $("#form").append($("<input type='hidden' name='summaryevento' value='"+ desc +"'>"));
-                    } else {
-                       $("#form input[name='summaryevento']").val(desc);
-                    }
-                }
-            }
         },
-        complete: () => {
-            console.log('complete');
-            $(".modal-backdrop").remove();
+        complete: (function() {
+            $(".modal-backdrop").hide();
             $('#spinnerEvento').hide();
-        }});
-
-    return id;
+            console.log("complete");
+        })
+    });
 }
 
 function eventoFormCheck() {
