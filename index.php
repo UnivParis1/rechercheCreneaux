@@ -56,6 +56,7 @@ if (FBForm::validParams($fbParams)) {
 
 <!DOCTYPE html>
 <head>
+    <title>Recherche de disponibilité</title>
     <?php if ($stdEnv->prolongationBandeau === true): ?>
         <script>
             window.prolongation_ENT_args = {
