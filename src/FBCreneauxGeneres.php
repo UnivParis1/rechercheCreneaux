@@ -6,6 +6,7 @@ namespace RechercheCreneaux;
 use DateTime;
 use DatePeriod;
 use RRule\RRule;
+use RRule\RSet;
 use DateInterval;
 use DateTimeImmutable;
 use RechercheCreneaux\FBUtils;
@@ -13,6 +14,7 @@ use RechercheCreneaux\FBParams;
 use League\Period\Period as Period;
 use League\Period\Duration as Duration;
 use League\Period\Sequence as Sequence;
+use JoursFeries;
 
 
 /**
@@ -73,9 +75,27 @@ class FBCreneauxGeneres {
             'BYMINUTE' => $minutely,
             'BYDAY' => $days];
 
-        $r = new RRule($arrayParams);
+        $rset = new RSet();
+        $rset->addRRule($arrayParams);
 
-        return $r->getOccurrences();
+        $jfYStart = array_values(JoursFeries::forYear(intval(date( 'Y',strtotime($dtstart)))));
+        $jfYEnd   = array_values(JoursFeries::forYear(intval(date( 'Y',strtotime($until)))));
+
+        $joursFeriesDT =  array_unique(array_merge($jfYStart,$jfYEnd), SORT_REGULAR);
+
+        $arraySansJoursFeries = [];
+        foreach($rset as $dateGeneree) {
+            $test = false;
+            foreach($joursFeriesDT as $jourFerie) {
+                if ($jourFerie->format('Y-m-d') == $dateGeneree->format('Y-m-d')) {
+                    $test = true;
+                    break;
+                }
+            }
+            if ($test == false)
+                $arraySansJoursFeries[] = $dateGeneree;
+        }
+        return $arraySansJoursFeries;
     }
 
     private function generateSequence(array $creneaux, $dureeMinutes, array $minTime, array $maxTime) {
