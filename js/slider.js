@@ -77,6 +77,11 @@ $(function() {
 
     var sliderVals = slider.noUiSlider.get();
 
+    if (sliderVals[2] == sliderVals[3]) {
+        // si on a une durée > 4h,  display none pour le 2eme intervale
+        $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').addClass('d-none');
+    }
+
     // lien avec la sélection de la durée si les plages sont > 4h pour n'avoir qu'une "tranche" de séléction
     $("select#duree option").filter((_index, elem) => (elem.value > 240)).on('click', (event) => {
         valTest = slider.noUiSlider.get();
@@ -86,7 +91,14 @@ $(function() {
 
         let intervalVal = parseFloat(valTest[0]) + (parseFloat(event.target.value) / 60);
         slider.noUiSlider.set([valTest[0], intervalVal, '23.00', '23.00']);
+
+        $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').addClass('d-none');
     });
 
-    $("select#duree option").filter((_index, elem) => (elem.value <= 240)).on('click',() => slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17]));
+    $("select#duree option").filter((_index, elem) => (elem.value <= 240)).on('click',() => {
+
+        $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').removeClass('d-none');
+
+        slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17])
+    });
 });
