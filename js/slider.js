@@ -85,7 +85,7 @@ $(function() {
         sliderVals = ((parseFloat(valTest[1]) - parseFloat(valTest[0])) * 60 < 240) ? valTest : sliderVals;
 
         let intervalVal = parseFloat(valTest[0]) + (parseFloat(event.target.value) / 60);
-        slider.noUiSlider.set([valTest[0], intervalVal, intervalVal, intervalVal]);
+        slider.noUiSlider.set([valTest[0], intervalVal, '23.00', '23.00']);
     });
 
     $("select#duree option").filter((_index, elem) => (elem.value <= 240)).on('click',() => slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17]));
