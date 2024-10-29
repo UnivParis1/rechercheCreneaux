@@ -79,7 +79,7 @@ class FBZoom
         $sessionName = $this->sessionName;
 
         if (!isset($_SESSION[$sessionName]))
-            $_SESSION[$sessionName] = array();
+            $_SESSION[$sessionName] = [];
 
         $zoom = $this->zoom;
         $userMailStd = $this->userMailStd;
@@ -99,23 +99,22 @@ class FBZoom
             throw new Exception('Meeting existant');
         }
 
-        $meetingData = array(
-        'topic' => $this->titleEvent,
-        'type' => 2, // 1 pour une réunion instantanée, 2 pour une réunion planifiée
-        'start_time' => (new DateTimeImmutable($this->modalCreneauStart))->setTimeZone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:sp'), // Format ISO 8601 pour l'heure de début
-        'duration' => $this->duree, // Durée de la réunion en minutes
-        'timezone' => 'Europe/Paris', // Fuseau horaire de la réunion
-        'meeting_invitees' => []
-        );
+        $meetingData = ['topic' => $this->titleEvent,
+                        'type' => 2, // 1 pour une réunion instantanée, 2 pour une réunion planifiée
+                        'start_time' => (new DateTimeImmutable($this->modalCreneauStart))->setTimeZone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:sp'), // Format ISO 8601 pour l'heure de début
+                        'duration' => $this->duree, // Durée de la réunion en minutes
+                        'timezone' => 'Europe/Paris', // Fuseau horaire de la réunion
+                        'settings' => ['meeting_invitees' => []]
+                        ];
 
         foreach ($this->users as $invite) {
-            $meetingData['meeting_invitees'][]['email'] = $invite->mail;
+            $meetingData['settings']['meeting_invitees'][] = ['email' => $invite->mail];
         }
 
         $data = $zoom->createMeeting($userMailStd->mail, $meetingData);
 
         if (!isset($_SESSION[$sessionName][$idxSessionDate])) {
-            $_SESSION[$sessionName][$idxSessionDate] = array();
+            $_SESSION[$sessionName][$idxSessionDate] = [];
             $_SESSION[$sessionName][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
             $_SESSION[$sessionName][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'userHost' => $this->userMailStd, 'userParticipants' => $this->users];
 
@@ -129,17 +128,17 @@ class FBZoom
     }
 
     public function listMeetings($mail) {
-        return $this->zoom->listMeeting($mail, array('type' => 'scheduled'));
+        return $this->zoom->listMeeting($mail, ['type' => 'scheduled']);
     }
 
     public function createAttendees($datas) {
         $users = $this->users;
         $zoom = $this->zoom;
 
-        $attendees = ['attendees' => array()];
+        $attendees = ['attendees' => [] ];
 
         foreach ($users as $user)
-        $attendees['attendees'][] = ['name' => $user->displayName];
+            $attendees['attendees'][] = ['name' => $user->displayName];
 
         $dataInviteLink = $zoom->inviteLink($datas['data']['id'], $attendees);
 
