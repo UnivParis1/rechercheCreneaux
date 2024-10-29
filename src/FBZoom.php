@@ -45,13 +45,8 @@ class FBZoom
         $userMailStd = FBUser::_getUidInfos($fbParams->stdEnv->uidCasUser, $fbParams->stdEnv);
 
         $users = [];
-        foreach ($fbParams->uids as $uid) {
-            $infos = FBUser::_getUidInfos($uid, $fbParams->stdEnv);
-
-            if ($infos->mail != $userMailStd->mail) {
-                $users[] = $infos;
-            }
-        }
+        foreach ($fbParams->uids as $uid)
+            $users[] = FBUser::_getUidInfos($uid, $fbParams->stdEnv);
 
         $zoom = new ZoomUP1([
             'client_id' => $stdEnv->zoomClientId,
@@ -107,9 +102,8 @@ class FBZoom
                         'settings' => ['meeting_invitees' => []]
                         ];
 
-        foreach ($this->users as $invite) {
-            $meetingData['settings']['meeting_invitees'][] = ['email' => $invite->mail];
-        }
+        foreach ($this->users as $user)
+            $meetingData['settings']['meeting_invitees'][] = ['email' => $user->mail];
 
         $data = $zoom->createMeeting($userMailStd->mail, $meetingData);
 
