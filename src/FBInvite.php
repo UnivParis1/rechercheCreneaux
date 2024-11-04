@@ -62,7 +62,7 @@ class FBInvite {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
             $this->from = $this->organisateur->mail;
         }
-        $this->stdMails = array();
+        $this->stdMails = [];
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -83,13 +83,13 @@ class FBInvite {
         $to = "To: {$userinfo->mail}";
 
         $header = "$from".PHP_EOL."$to".PHP_EOL;
-        $header = "MIME-Version: 1.0".PHP_EOL;
+        $header .= "MIME-Version: 1.0".PHP_EOL;
         $header .= "Content-Type: multipart/alternative; boundary=\"$boundary\"".PHP_EOL;
 
         $message = "--$boundary".PHP_EOL;
         $message .= "Content-Type: text/plain; charset=utf-8".PHP_EOL;
         $message .= "Content-Transfer-Encoding: 7bit".PHP_EOL.PHP_EOL;
-        $message .= "Merci de participer à la réunion importante.".PHP_EOL.PHP_EOL;
+        $message .= "{$this->organisateur->displayName} vous a invité à {$this->titleEvent}.".PHP_EOL.PHP_EOL;
         $message .= "--$boundary".PHP_EOL;
         $message .= "Content-Type: text/calendar; charset=utf-8; method=REQUEST".PHP_EOL;
         $message .= "Content-Transfer-Encoding: base64".PHP_EOL.PHP_EOL;
@@ -111,7 +111,7 @@ class FBInvite {
     }
 
     private function _getUserinfos($fbUsers) {
-        $arrayReturn = array();
+        $arrayReturn = [];
         foreach ($fbUsers as $fbUser) {
             $stdInfos = $fbUser->getUidInfos();
             $arrayReturn[$stdInfos->uid] = get_object_vars($stdInfos);
@@ -119,9 +119,9 @@ class FBInvite {
         return $arrayReturn;
     }
 
-    public function sendInvite() {
+    public function sendInvite(): void {
         if (!isset($_SESSION['inviteEnregistrement']))
-            $_SESSION['inviteEnregistrement'] = array();
+            $_SESSION['inviteEnregistrement'] = [];
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
             $mailAddr = ($_ENV['ENV'] == strtolower('PROD')) ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : false);
@@ -132,7 +132,7 @@ class FBInvite {
 
             $testInsertMail = false;
             if (!isset($_SESSION['inviteEnregistrement'][$idxSessionDate])) {
-                $_SESSION['inviteEnregistrement'][$idxSessionDate] = array();
+                $_SESSION['inviteEnregistrement'][$idxSessionDate] = [];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'lieuEvent' => $this->lieuEvent];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => array($userinfo['mail'], 'sended' => false, $userinfo) ];
@@ -151,8 +151,8 @@ class FBInvite {
             }
 
             if (!$testInsertMail) {
-                $stdMailInfo = $this->_genereParametresMail($userinfo);
-                $mailSent = mail($mailAddr, "Invitation à un événement", $stdMailInfo->message, $stdMailInfo->header);
+                $stdMailInfo = $this->_genereParametresMail(userinfo: $userinfo);
+                $mailSent = mail(to: $mailAddr, subject: "{$this->organisateur->displayName} vous a invité à {$this->titleEvent}", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
 
                 if (!$mailSent)
                     throw new Exception("erreur envoi mail");
@@ -162,7 +162,7 @@ class FBInvite {
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
                 if (!isset($this->mailEffectivementEnvoyeUids))
-                    $this->mailEffectivementEnvoyeUids = array();
+                    $this->mailEffectivementEnvoyeUids = [];
 
                 $this->mailEffectivementEnvoyeUids[] = $uid;
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] = array($userinfo['mail'], 'sended' => true, $userinfo);
