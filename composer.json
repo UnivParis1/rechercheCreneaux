@@ -14,7 +14,8 @@
         "apereo/phpcas": "^1.6",
         "phpunit/phpunit": "^10.5",
         "aghilanbaskar/zoom-library": "^1.0",
-        "hercule-tech/jours-feries-france": "^1.4"
+        "hercule-tech/jours-feries-france": "^1.4",
+        "phpmailer/phpmailer": "^6.9"
     },
     "config": {
         "allow-plugins": {

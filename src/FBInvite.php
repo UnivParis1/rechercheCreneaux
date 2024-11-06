@@ -6,8 +6,12 @@ namespace RechercheCreneaux;
 use DateTime;
 use stdClass;
 use Exception;
+use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -32,7 +36,6 @@ class FBInvite {
     var $sujet = "Invitation évenement";
 
     var $stdEnv;
-    var array $stdMails;
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
@@ -62,7 +65,6 @@ class FBInvite {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
             $this->from = $this->organisateur->mail;
         }
-        $this->stdMails = [];
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -70,6 +72,46 @@ class FBInvite {
             return true;
         }
         return false;
+    }
+
+    private function phpMailInstance($userinfo): PHPMailer {
+        $userinfo = (object) $userinfo;
+
+        $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
+        $llllds = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
+
+        $mail = new PHPMailer(true);
+
+        $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
+
+        $mail->CharSet = 'UTF-8';
+        $mail->setFrom($this->organisateur->mail, $this->organisateur->displayName);
+        $mail->addAddress($userinfo->mail, $userinfo->displayName);
+
+        $mail->Subject = "Réunion {$this->titleEvent}, le $llllds";
+
+        $body = "
+Bonjour {$userinfo->displayName},
+
+{$this->organisateur->displayName} vous invite à participer à l'événement suivant:
+
+« {$this->titleEvent} », le $llllds
+
+Description de l'événement :
+« {$this->descriptionEvent} »
+
+Lieu :
+« {$this->lieuEvent} »
+
+Cordialement,
+
+{$this->organisateur->displayName}
+";
+        $mail->Body = $body;
+
+        $mail->addStringAttachment($icsData, 'invitation.ics', 'base64', 'text/calendar; charset=UTF-8; method=REQUEST');
+
+        return $mail;
     }
 
     private function _genereParametresMail($userinfo) {
@@ -151,13 +193,9 @@ class FBInvite {
             }
 
             if (!$testInsertMail) {
-                $stdMailInfo = $this->_genereParametresMail(userinfo: $userinfo);
-                $mailSent = mail(to: $mailAddr, subject: "{$this->organisateur->displayName} vous a invité à {$this->titleEvent}", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
-
-                if (!$mailSent)
+                $mail = $this->phpMailInstance($userinfo);
+                if ($mail->send() == false)
                     throw new Exception("erreur envoi mail");
-
-                $this->stdMails[] = $stdMailInfo;
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
