@@ -136,10 +136,13 @@ function addOptionWithUid(uid, displayName, mail) {
     optionnel.on("click", function() {afficherPermutterHide(testOptions(getCurrentOptions()));});
 
     newLi.append(optionnel);
-    // newLi.append('<input name="listUidsOptionnels[]" type="checkbox" class="form-check-input,form-participant-optionnel" />');
-    newLi.append('<label class="col-4 px-0 text-left form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
+
+    const tooltipTitle = "Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités";
+    newLi.append('<label class="col-4 px-0 text-left form-check-label" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="' + tooltipTitle + '" for="form-participant-optionnel">Participant optionnel *</label>');
 
     $(idperson_ul).append(newLi);
+
+    $('[data-bs-toggle="tooltip"]').tooltip({ 'html': false });
 
     button.on("click", function() {
         $(this).parent().remove();
