@@ -80,7 +80,7 @@ class FBInvite {
         $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
         $llllds = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
 
-        $mail = new PHPMailer(true);
+        $mail = new PHPMailer(false);
 
         $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
 
@@ -166,9 +166,6 @@ Cordialement,
             $_SESSION['inviteEnregistrement'] = [];
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
-            $mailAddr = ($_ENV['ENV'] == strtolower('PROD')) ? $userinfo['mail'] : (($this->stdEnv->maildebuginvite) ? $this->stdEnv->maildebuginvite : false);
-            if (! $mailAddr) throw new Exception("mailAddr false, erreur environnement, MAIL_DEV_SEND_DEBUG non renseigné dans .env ?");
-
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
 
@@ -177,7 +174,7 @@ Cordialement,
                 $_SESSION['inviteEnregistrement'][$idxSessionDate] = [];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'lieuEvent' => $this->lieuEvent];
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => array($userinfo['mail'], 'sended' => false, $userinfo) ];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => [$userinfo['mail'], 'sended' => false, $userinfo] ];
             } else {
                 // test de vérification si il y'a eu envoi d'emails, envoi si le mail est ajouté
                 if (array_key_exists($uid, $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'])) {
@@ -193,7 +190,9 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $mail = $this->phpMailInstance($userinfo);
+                $usersend = $this->stdEnv->maildebuginvite ? ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName] : $userinfo;
+                $mail = $this->phpMailInstance(userinfo : $usersend);
+
                 if ($mail->send() == false)
                     throw new Exception("erreur envoi mail");
 

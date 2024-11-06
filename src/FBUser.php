@@ -97,12 +97,7 @@ class FBUser {
 
         $this->content = $content;
 
-        if ($fbParams->stdEnv->wsgroup == true) {
-            $this->uidInfos = self::_getUidInfos($uid, $fbParams->stdEnv);
-        }
-        else {
-            $this->uidInfos = null;
-        }
+        $this->uidInfos = ($fbParams->stdEnv->wsgroup) ? self::_getUidInfos($uid, $fbParams->stdEnv) : null;
     }
 
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, bool $estOptionnel, FBParams $fbParams) : FBUser {
