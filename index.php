@@ -74,39 +74,8 @@ if (FBForm::validParams($fbParams)) {
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
 
     <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript' src="node_modules/requirejs/require.js"></script>
+        <script type='text/javascript' data-main="js/main" src="node_modules/requirejs/require.js"></script>
         <script>
-            requirejs.config({
-                'baseUrl': "js/",
-                'paths': {
-                    'order': '//requirejs.org/docs/release/1.0.5/minified/order',
-                    'jquery' :'../node_modules/jquery/dist/jquery.min',
-                    'bootstrap' : '../node_modules/bootstrap/dist/js/bootstrap.bundle.min',
-                    'nouislider' : '../node_modules/nouislider/dist/nouislider.min',
-                    'moment' : '../node_modules/moment/min/moment-with-locales.min',
-                },
-                'shims' : {
-                    'jquery': {
-                        exports: '$'
-                    },
-                    'bootstrap': {
-                        deps: ['jquery'],
-                        exports: '$'
-                    },
-                    'autocompleteUser': {
-                        exports: '$'
-                    },
-                    'nouislider': {
-                        exports: 'noUiSlider'
-                    },
-                    'slider': {
-                        deps: ['nouislider']
-                    }
-                }
-            });
-
-            requirejs(['order!form', 'order!evento']);
-
             // méthode copie url evento index
             function copyClipboard(event) {
                 let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
