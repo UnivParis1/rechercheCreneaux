@@ -190,6 +190,9 @@ if (FBForm::validParams($fbParams)) {
                     <ul id="person_ul" class="px-0">
                     </ul>
                 </div>
+                <div id="participantExplicatif" class="toast align-items-end ms-auto p-3 d-none">
+                        <span>* Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités</span>
+                </div>
             </div>
             <div class="col-6">
                 <div id="divjours">

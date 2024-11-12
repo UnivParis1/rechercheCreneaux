@@ -133,16 +133,29 @@ function addOptionWithUid(uid, displayName, mail) {
         }
     }
 
-    optionnel.on("click", function() {afficherPermutterHide(testOptions(getCurrentOptions()));});
 
     newLi.append(optionnel);
 
-    const tooltipTitle = "Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités";
-    newLi.append('<label class="col-4 px-0 text-left form-check-label" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="' + tooltipTitle + '" for="form-participant-optionnel">Participant optionnel *</label>');
+    newLi.append('<label id="participant" class="col-4 px-0 text-left form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
 
     $(idperson_ul).append(newLi);
 
-    $('[data-bs-toggle="tooltip"]').tooltip({ 'html': false });
+    optionnel.on("click", function(event) {
+        afficherPermutterHide(testOptions(getCurrentOptions()));
+
+        if (event.target.checked) {
+            event.target.nextElementSibling.textContent = 'Participant optionnel *';
+            $('#participantExplicatif').removeClass('d-none');
+            $('#participantExplicatif').addClass('d-flex');
+        } else {
+            event.target.nextElementSibling.textContent = 'Participant optionnel';
+
+            let panticipantsChecked = $(idperson_ul + " li input:checked[name='listUidsOptionnels[]']");
+            if (panticipantsChecked.length == 0) {
+                $('#participantExplicatif').removeClass('d-flex');
+            }
+        }
+    });
 
     button.on("click", function() {
         $(this).parent().remove();
