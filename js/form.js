@@ -1,4 +1,4 @@
-define('form', ['order!jquery','moment', 'order!bootstrap', 'autocompleteUser', 'nouislider', 'slider'], function($, moment) {
+define('form', ['jquery','moment', 'step!bootstrap', 'autocompleteUser', 'nouislider', 'slider'], function($, moment) {
 
 moment.locale("fr");
 
