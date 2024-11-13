@@ -69,7 +69,7 @@ function traiteReponseAjax(response, dataPost) {
 
             // si la notification des participants est désactivée, ajout des infos participants aux données envoyés pour le stockage session des eventos
             if (dataPost.notify_new_guests == false) {
-                listDisplayname.forEach((elem) => {
+                form.listDisplayname.forEach((elem) => {
                     dataPost.new_guests.push(elem.mail);
                     dataPost.guests.push({email:elem.mail,name:elem.displayName});
                 });
