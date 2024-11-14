@@ -73,8 +73,27 @@ if (FBForm::validParams($fbParams)) {
 
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
 
-    <?php if ($stdEnv->wsgroup): ?>
+    <?php if ($stdEnv->wsgroup && $stdEnv->env != 'prod'): ?>
         <script type='text/javascript' data-main="js/main" src="node_modules/requirejs/require.js"></script>
+        <script>
+            // méthode copie url evento index
+            function copyClipboard(event) {
+                let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
+
+                if ($(event.target).hasClass('bi-clipboard')) {
+                    $(event.target).removeClass('bi-clipboard');
+                    $(event.target).addClass('bi-check2');
+                }
+
+                navigator.clipboard.writeText(url);
+            }
+        </script>
+    <?php elseif ($stdEnv->env == 'prod'): ?>
+        <script type='text/javascript' src="node_modules/requirejs/require.js"></script>
+        <script type='text/javascript' src="js/main-built.js"></script>
+        <script>
+            requirejs(['form', 'evento']);
+        </script>
     <?php else: ?>
         <script type='text/javascript' src='./js/noform.js'></script>
     <?php endif ?>
