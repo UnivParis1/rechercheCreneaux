@@ -5,6 +5,7 @@
     baseUrl: "./",
     paths: {
         'bootstrap': 'empty:'
-    }
+    },
+    include: ['evento']
 })
 
