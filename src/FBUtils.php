@@ -251,13 +251,12 @@ class FBUtils {
         foreach ($listUserinfos as $userinfo) {
             $userinfo = (object) $userinfo;
 
-            $vCalendar->add('ATTENDEE', $userinfo->mail, [
-               'CN' => $userinfo->displayName,
-               'ROLE' => 'REQ-PARTICIPANT',
-               'RSVP' => 'TRUE',
-               'PARTSTAT' => 'NEEDS-ACTION',
-               'CUTYPE' => 'INDIVIDUAL'
-            ]);
+            $vCalendar->VEVENT->add('ATTENDEE',
+                                    "mailto:$userinfo->mail",
+                                    ['CN' => $userinfo->displayName,
+                                    'ROLE' => 'REQ-PARTICIPANT',
+                                    'RSVP' => 'TRUE',
+                                    'PARTSTAT' => 'NEEDS-ACTION']);
         }
 
         return $vCalendar->serialize();
