@@ -10,8 +10,7 @@ use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-
+use RechercheCreneauxLib\EasyPeasyICSUP1;
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -65,6 +64,9 @@ class FBInvite {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
             $this->from = $this->organisateur->mail;
         }
+        if ($stdEnv->env == 'local') {
+            $this->from = 'ebohm@UP1-5CG34308F4.ad.univ-paris1.fr';
+        }
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -114,10 +116,11 @@ Cordialement,
         return $mail;
     }
 
-    private function _genereParametresMail($userinfo) {
+    private function _genereParametresMail($userinfo, $icsData = null) : stdClass {
         $userinfo = (object) $userinfo;
 
-        $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
+        if ($icsData === null)
+            $icsData = FBUtils::icalCreationInvitationSabre($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
 
         $boundary = uniqid('boundary');
 
@@ -190,11 +193,47 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $usersend = $this->stdEnv->maildebuginvite ? ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName] : $userinfo;
+                $usersend = $this->stdEnv->env != 'prod' ? ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName] : $userinfo;
+              
                 $mail = $this->phpMailInstance(userinfo : $usersend);
 
-                if ($mail->send() == false)
-                    throw new Exception("erreur envoi mail");
+                $eICS = new EasyPeasyICSUP1('Invitation');
+        
+                $dataics =['start' => (new DateTime($this->modalCreneauStart))->getTimestamp(), 'end' => (new DateTime($this->modalCreneauEnd))->getTimestamp(), 'summary' => $this->titleEvent, 'description' => $this->descriptionEvent, 'organizer' => $this->organisateur->displayName, 'organizer_email' => $this->organisateur->mail, 'location' => $this->lieuEvent ];
+
+                foreach ($this->listUserInfos as $uid2 => $userinfo2) {
+                    $userinfo2 = (object) $userinfo2;
+                    $dataics['guests'][] = ['name' => $userinfo2->displayName, 'email' => $userinfo2->mail];
+                }
+
+                $eICS->addEvent($dataics);
+                
+                $mail = new PHPMailer(exceptions:false);
+
+                $mail->setFrom('ebohm@UP1-5CG34308F4.ad.univ-paris1.fr');
+                $mail->addAddress(((object) $usersend)->mail);
+
+                $mail->Subject ="{$this->organisateur->displayName} vous a invité à {$this->titleEvent}";
+
+                $invite = $eICS->render(output: false);
+
+                $mail->Ical = $invite; 
+
+                $mail->Body = 'Invitation event';
+
+                $mail->AltBody = 'TEST ALT ALT MSG';
+                $mail->CharSet = 'UTF-8';
+
+                $stdMailInfo = $this->_genereParametresMail(userinfo: $userinfo, icsData: null);
+                $mailSent = mail(to: ((object) $usersend)->mail, subject: "Invitation à un événement", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
+//                $mail->isSendmail();
+//                if ($mail->send() == false)
+//                    throw new Exception("erreur envoi mail");
+                if (!$mailSent)
+                    throw new Exception("erreur envoi mail par fonction php mail");
+
+
+                
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;

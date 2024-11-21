@@ -124,7 +124,7 @@ class FBUser {
 
         $vcal = Vcalendar::factory()->parse($this->content);
 
-        if ($vcal->countComponents() !== 1) {
+                if ($vcal->countComponents() !== 1) {
             throw new Exception("FBUser: component !== 1");
         }
 

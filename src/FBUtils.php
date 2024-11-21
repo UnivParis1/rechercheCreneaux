@@ -12,8 +12,16 @@ use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use Kigkonsult\Icalcreator\Vcalendar;
+use Kigkonsult\Icalcreator\Vcalendar as Vcalendar;
+use Sabre\VObject\Component;
 use stdClass;
+use Sabre\VObject\Component\VCalendar as VsCalendar;
+use Sabre\VObject\Component\VEvent;
+use Sabre\VObject;
+use Sabre\VObject\ITip\Broker;
+use Sabre\VObject\Property;
+
+
 
 /**
  * Classe regroupant les fonctions utils pouvant être utilisés dans plusieurs classes
@@ -252,13 +260,55 @@ class FBUtils {
                     Vcalendar::PARTSTAT => Vcalendar::NEEDS_ACTION,
                     Vcalendar::RSVP     => Vcalendar::TRUE]);
         }
-
+        
         $event1->setStatus(Vcalendar::CONFIRMED);
         $event1 = $event1->setClass('PUBLIC');
         $valarm = $event1->newValarm(\Kigkonsult\Icalcreator\IcalInterface::DISPLAY, '-PT120M');
         $valarm->setDescription($descriptionEvent);
 
         return $vcalendar->vtimezonePopulate()->createCalendar();
+    }
+
+    public static function icalCreationInvitationSabre(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
+    {
+        $vCalendar = new VsCalendar([
+            'METHOD' => 'REQUEST',
+            'X_WR_CALNAME' => 'Recherche créneaux',
+            'X-PROP' => 'Application Recherche créneaux',
+            'X-WR-TIMEZONE' => $dtz,
+        ]);
+
+        $vCalendar->add('VEVENT',[
+            'SUMMARY' => $titleEvent,
+            'DESCRIPTION' => $descriptionEvent,
+            'LOCATION' => $lieuEvent,
+            'STATUS' => 'CONFIRMED',
+            'DTSTART' => new DateTime($start,new DateTimezone($dtz)),
+            'DTEND' => new DateTime($end,new DateTimezone($dtz))
+        ]);
+
+        $vCalendar->VEVENT->add('ORGANIZER', $organisateur->mail, ['CN' => $organisateur->displayName]);
+
+        foreach ($listUserinfos as $userinfo) {
+            $userinfo = (object) $userinfo;
+
+            $vCalendar->add('ATTENDEE', $userinfo->mail, [
+               'CN' => $userinfo->displayName,
+               'ROLE' => 'REQ-PARTICIPANT',
+               'RSVP' => 'TRUE',
+               'PARTSTAT' => 'NEEDS-ACTION',
+               'CUTYPE' => 'INDIVIDUAL'
+            ]);
+        }
+
+        $broker = new Broker();
+
+        $newCalendar = new VsCalendar();
+
+        $broker->parseEvent($newCalendar, $organisateur->mail, $vCalendar);
+
+//        die(var_dump($broker));
+        return $vCalendar->serialize();
     }
 
     public static function getMailsSended(array $aMails) : array {
