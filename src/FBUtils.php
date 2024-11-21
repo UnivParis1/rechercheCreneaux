@@ -12,16 +12,8 @@ use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use Kigkonsult\Icalcreator\Vcalendar as Vcalendar;
-use Sabre\VObject\Component;
+use Sabre\VObject\Component\VCalendar;
 use stdClass;
-use Sabre\VObject\Component\VCalendar as VsCalendar;
-use Sabre\VObject\Component\VEvent;
-use Sabre\VObject;
-use Sabre\VObject\ITip\Broker;
-use Sabre\VObject\Property;
-
-
 
 /**
  * Classe regroupant les fonctions utils pouvant être utilisés dans plusieurs classes
@@ -224,6 +216,7 @@ class FBUtils {
     }
 
     /**
+     * @param stdClass $organisateur
      * @param array $listUserinfos
      * @param string $start
      * @param string $end
@@ -234,44 +227,10 @@ class FBUtils {
      *
      * @return string
      */
+
     public static function icalCreationInvitation(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
     {
-        $vcalendar = Vcalendar::factory()
-            ->setMethod( Vcalendar::REQUEST )
-            ->setXprop( Vcalendar::X_WR_CALNAME, $organisateur->displayName )
-            ->setXprop( Vcalendar::X_PROP, "Application Recherche créneaux" )
-            ->setXprop( Vcalendar::X_WR_TIMEZONE, $dtz );
-
-        $event1 = $vcalendar->newVevent()
-            ->setTransp( Vcalendar::OPAQUE )
-            ->setSummary( $titleEvent )
-            ->setDescription($descriptionEvent)
-            ->setLocation( $lieuEvent)
-            // set the time
-            ->setDtstart(new DateTime($start,new DateTimezone($dtz)))
-            ->setDtend(new DateTime($end,new DateTimezone($dtz)))
-            ->setOrganizer($organisateur->mail,
-                [ Vcalendar::CN =>  $organisateur->displayName]
-            );
-
-        foreach ($listUserinfos as $userinfo) {
-            $event1->setAttendee($userinfo['mail'],
-                [Vcalendar::ROLE     => Vcalendar::REQ_PARTICIPANT,
-                    Vcalendar::PARTSTAT => Vcalendar::NEEDS_ACTION,
-                    Vcalendar::RSVP     => Vcalendar::TRUE]);
-        }
-        
-        $event1->setStatus(Vcalendar::CONFIRMED);
-        $event1 = $event1->setClass('PUBLIC');
-        $valarm = $event1->newValarm(\Kigkonsult\Icalcreator\IcalInterface::DISPLAY, '-PT120M');
-        $valarm->setDescription($descriptionEvent);
-
-        return $vcalendar->vtimezonePopulate()->createCalendar();
-    }
-
-    public static function icalCreationInvitationSabre(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
-    {
-        $vCalendar = new VsCalendar([
+        $vCalendar = new VCalendar([
             'METHOD' => 'REQUEST',
             'X_WR_CALNAME' => 'Recherche créneaux',
             'X-PROP' => 'Application Recherche créneaux',
@@ -301,13 +260,6 @@ class FBUtils {
             ]);
         }
 
-        $broker = new Broker();
-
-        $newCalendar = new VsCalendar();
-
-        $broker->parseEvent($newCalendar, $organisateur->mail, $vCalendar);
-
-//        die(var_dump($broker));
         return $vCalendar->serialize();
     }
 

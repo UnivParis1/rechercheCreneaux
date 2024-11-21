@@ -6,11 +6,8 @@ namespace RechercheCreneaux;
 use DateTime;
 use stdClass;
 use Exception;
-use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
-use PHPMailer\PHPMailer\PHPMailer;
-use RechercheCreneauxLib\EasyPeasyICSUP1;
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -76,51 +73,10 @@ class FBInvite {
         return false;
     }
 
-    private function phpMailInstance($userinfo): PHPMailer {
+    private function _genereParametresMail($userinfo) : stdClass {
         $userinfo = (object) $userinfo;
-
-        $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy HH'h'mm");
-        $llllds = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
-
-        $mail = new PHPMailer(false);
 
         $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
-
-        $mail->CharSet = 'UTF-8';
-        $mail->setFrom($this->organisateur->mail, $this->organisateur->displayName);
-        $mail->addAddress($userinfo->mail, $userinfo->displayName);
-
-        $mail->Subject = "Réunion {$this->titleEvent}, le $llllds";
-
-        $body = "
-Bonjour {$userinfo->displayName},
-
-{$this->organisateur->displayName} vous invite à participer à l'événement suivant:
-
-« {$this->titleEvent} », le $llllds
-
-Description de l'événement :
-« {$this->descriptionEvent} »
-
-Lieu :
-« {$this->lieuEvent} »
-
-Cordialement,
-
-{$this->organisateur->displayName}
-";
-        $mail->Body = $body;
-
-        $mail->addStringAttachment($icsData, 'invitation.ics', 'base64', 'text/calendar; charset=UTF-8; method=REQUEST');
-
-        return $mail;
-    }
-
-    private function _genereParametresMail($userinfo, $icsData = null) : stdClass {
-        $userinfo = (object) $userinfo;
-
-        if ($icsData === null)
-            $icsData = FBUtils::icalCreationInvitationSabre($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
 
         $boundary = uniqid('boundary');
 
@@ -193,47 +149,18 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $usersend = $this->stdEnv->env != 'prod' ? ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName] : $userinfo;
-              
-                $mail = $this->phpMailInstance(userinfo : $usersend);
+                if ($this->stdEnv->env != 'prod') 
+                    $usersend = ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName];
+                else 
+                    $usersend = $userinfo;
 
-                $eICS = new EasyPeasyICSUP1('Invitation');
-        
-                $dataics =['start' => (new DateTime($this->modalCreneauStart))->getTimestamp(), 'end' => (new DateTime($this->modalCreneauEnd))->getTimestamp(), 'summary' => $this->titleEvent, 'description' => $this->descriptionEvent, 'organizer' => $this->organisateur->displayName, 'organizer_email' => $this->organisateur->mail, 'location' => $this->lieuEvent ];
+                $usersend['mail'] = 'Etienne.Bohm@univ-paris1.fr';
 
-                foreach ($this->listUserInfos as $uid2 => $userinfo2) {
-                    $userinfo2 = (object) $userinfo2;
-                    $dataics['guests'][] = ['name' => $userinfo2->displayName, 'email' => $userinfo2->mail];
-                }
+                $stdMailInfo = $this->_genereParametresMail($userinfo);
+                $mailSent = mail(to: $usersend['mail'], subject: "Invitation à un événement", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
 
-                $eICS->addEvent($dataics);
-                
-                $mail = new PHPMailer(exceptions:false);
-
-                $mail->setFrom('ebohm@UP1-5CG34308F4.ad.univ-paris1.fr');
-                $mail->addAddress(((object) $usersend)->mail);
-
-                $mail->Subject ="{$this->organisateur->displayName} vous a invité à {$this->titleEvent}";
-
-                $invite = $eICS->render(output: false);
-
-                $mail->Ical = $invite; 
-
-                $mail->Body = 'Invitation event';
-
-                $mail->AltBody = 'TEST ALT ALT MSG';
-                $mail->CharSet = 'UTF-8';
-
-                $stdMailInfo = $this->_genereParametresMail(userinfo: $userinfo, icsData: null);
-                $mailSent = mail(to: ((object) $usersend)->mail, subject: "Invitation à un événement", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
-//                $mail->isSendmail();
-//                if ($mail->send() == false)
-//                    throw new Exception("erreur envoi mail");
-                if (!$mailSent)
+               if (!$mailSent)
                     throw new Exception("erreur envoi mail par fonction php mail");
-
-
-                
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
@@ -241,7 +168,7 @@ Cordialement,
                     $this->mailEffectivementEnvoyeUids = [];
 
                 $this->mailEffectivementEnvoyeUids[] = $uid;
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] = array($userinfo['mail'], 'sended' => true, $userinfo);
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] =  [$userinfo['mail'], 'sended' => true, $userinfo];
             }
         }
     }
