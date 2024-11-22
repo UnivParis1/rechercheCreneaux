@@ -97,9 +97,8 @@ class FBInvite {
         $boundary = uniqid('boundary');
 
         $from = "From: {$this->from}";
-        $to = "To: {$userinfo->mail}";
 
-        $header = "$from".PHP_EOL."$to".PHP_EOL;
+        $header = $from.PHP_EOL;
         $header .= "MIME-Version: 1.0".PHP_EOL;
         $header .= "Content-Type: multipart/alternative; boundary=\"$boundary\"".PHP_EOL;
         $header .= "Content-Transfer-Encoding: 8bit".PHP_EOL;
