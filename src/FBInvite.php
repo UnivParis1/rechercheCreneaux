@@ -8,6 +8,7 @@ use stdClass;
 use Exception;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
+use RechercheCreneauxLib\EasyPeasyICSUP1;
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -76,7 +77,24 @@ class FBInvite {
     private function _genereParametresMail($userinfo) : stdClass {
         $userinfo = (object) $userinfo;
 
-        $icsData = FBUtils::icalCreationInvitation($this->organisateur, $this->listUserInfos, $this->modalCreneauStart, $this->modalCreneauEnd, $this->titleEvent, $this->descriptionEvent, $this->lieuEvent, $this->dtz);
+        $eICS = new EasyPeasyICSUP1('Invitation');
+
+        $dataics =['start' => (new DateTime($this->modalCreneauStart))->getTimestamp(),
+                    'end' => (new DateTime($this->modalCreneauEnd))->getTimestamp(),
+                    'summary' => $this->titleEvent,
+                    'description' => $this->descriptionEvent,
+                    'organizer' => $this->organisateur->displayName,
+                    'organizer_email' => $this->organisateur->mail,
+                    'location' => $this->lieuEvent ];
+
+        foreach ($this->listUserInfos as $uid2 => $userinfo2) {
+            $userinfo2 = (object) $userinfo2;
+            $dataics['guests'][] = ['name' => $userinfo2->displayName, 'email' => $userinfo2->mail];
+        }
+
+        $eICS->addEvent($dataics);
+
+        $icsData = $eICS->render(false);
 
         $boundary = uniqid('boundary');
 
@@ -86,26 +104,30 @@ class FBInvite {
         $header = "$from".PHP_EOL."$to".PHP_EOL;
         $header .= "MIME-Version: 1.0".PHP_EOL;
         $header .= "Content-Type: multipart/alternative; boundary=\"$boundary\"".PHP_EOL;
+        $header .= "Content-Transfer-Encoding: 8bit".PHP_EOL;
 
         $message = "--$boundary".PHP_EOL;
         $message .= "Content-Type: text/plain; charset=utf-8".PHP_EOL;
-        $message .= "Content-Transfer-Encoding: 7bit".PHP_EOL.PHP_EOL;
+        $header .= "Content-Disposition: inline".PHP_EOL;
+        $message .= "Content-Transfer-Encoding: 8bit".PHP_EOL.PHP_EOL;
+
         $message .= "{$this->organisateur->displayName} vous a invité à {$this->titleEvent}.".PHP_EOL.PHP_EOL;
+
         $message .= "--$boundary".PHP_EOL;
-        $message .= "Content-Type: text/calendar; charset=utf-8; method=REQUEST".PHP_EOL;
+        $message .= "Content-Type: text/calendar; charset=utf-8; name=event-invitation.ics; METHOD=REQUEST".PHP_EOL;
+        $message .= "Content-Disposition: attachment; filename=event-invitation.ics".PHP_EOL.PHP_EOL;
+        $message .= $icsData.PHP_EOL.PHP_EOL;
+
+        $message .= "--$boundary".PHP_EOL;
+        $message .= "Content-Type: application/ics; name=event-invitation.ics; METHOD=REQUEST".PHP_EOL;
         $message .= "Content-Transfer-Encoding: base64".PHP_EOL.PHP_EOL;
         $message .= chunk_split(base64_encode($icsData));
         $message .= "--$boundary--".PHP_EOL;
-
-        // pas pris en compte, si c'est ça qui empêche l'apparition de la bare dans thunderbird ... ben mince alors.
-        $httpHeader = 'Content-type: multipart/alternative; boundary="' . $boundary . '"';
-        $httpHeader .= 'Content-Disposition: inline; filename=invitation.ics';
 
         $stdObj = new stdClass();
         $stdObj->icsData = $icsData;
         $stdObj->boundary = $boundary;
         $stdObj->header = $header;
-        $stdObj->httpHeader = $httpHeader;
         $stdObj->message = $message;
 
         return $stdObj;

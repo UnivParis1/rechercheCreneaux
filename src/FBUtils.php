@@ -12,7 +12,7 @@ use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use Sabre\VObject\Component\VCalendar;
+use RechercheCreneauxLib\EasyPeasyICSUP1;
 use stdClass;
 
 /**
@@ -122,8 +122,7 @@ class FBUtils {
      * @param DateTimeZone $dateTimeZone
      * 
      * @return Sequence
-     */
-    public static function addTimezoneToLeaguePeriods(array $periods, DateTimeZone $dateTimeZone) : Sequence {
+     */    public static function addTimezoneToLeaguePeriods(array $periods, DateTimeZone $dateTimeZone) : Sequence {
         $seq = new Sequence();
 
         foreach ($periods as $period) {
@@ -230,36 +229,8 @@ class FBUtils {
 
     public static function icalCreationInvitation(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
     {
-        $vCalendar = new VCalendar([
-            'METHOD' => 'REQUEST',
-            'X_WR_CALNAME' => 'Recherche créneaux',
-            'X-PROP' => 'Application Recherche créneaux',
-            'X-WR-TIMEZONE' => $dtz,
-        ]);
+        $eICS = new EasyPeasyICSUP1('Invitation');
 
-        $vCalendar->add('VEVENT',[
-            'SUMMARY' => $titleEvent,
-            'DESCRIPTION' => $descriptionEvent,
-            'LOCATION' => $lieuEvent,
-            'STATUS' => 'CONFIRMED',
-            'DTSTART' => new DateTime($start,new DateTimezone($dtz)),
-            'DTEND' => new DateTime($end,new DateTimezone($dtz))
-        ]);
-
-        $vCalendar->VEVENT->add('ORGANIZER', $organisateur->mail, ['CN' => $organisateur->displayName]);
-
-        foreach ($listUserinfos as $userinfo) {
-            $userinfo = (object) $userinfo;
-
-            $vCalendar->VEVENT->add('ATTENDEE',
-                                    "mailto:$userinfo->mail",
-                                    ['CN' => $userinfo->displayName,
-                                    'ROLE' => 'REQ-PARTICIPANT',
-                                    'RSVP' => 'TRUE',
-                                    'PARTSTAT' => 'NEEDS-ACTION']);
-        }
-
-        return $vCalendar->serialize();
     }
 
     public static function getMailsSended(array $aMails) : array {

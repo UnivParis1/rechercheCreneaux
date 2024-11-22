@@ -16,7 +16,8 @@
         "aghilanbaskar/zoom-library": "^1.0",
         "hercule-tech/jours-feries-france": "^1.4",
         "phpmailer/phpmailer": "^6.9.2",
-        "sabre/vobject": "^4.5.6"
+        "sabre/vobject": "^4.5.6",
+        "brunobetioli/easypeasyics": "^1.0"
     },
     "config": {
         "allow-plugins": {
