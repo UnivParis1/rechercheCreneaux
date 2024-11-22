@@ -90,7 +90,7 @@ if ($stdEnv->evento == true) {
     $stdEnv->eventoShibentityid = $_ENV['EVENTO_SHIBENTITYID'];
 }
 
-$stdEnv->mailfrom = $_ENV['MAILFROM'] ?? false;
+$stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
 
 date_default_timezone_set($stdEnv->dtz);
 

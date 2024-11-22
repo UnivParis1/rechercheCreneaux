@@ -36,7 +36,7 @@ class FBInvite {
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
-    var string $from;
+    var ?string $from;
     private stdClass $organisateur;
 
     public function __construct($fbForm, $fbParams, $stdEnv, $listDate) {
