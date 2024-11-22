@@ -62,9 +62,7 @@ class FBInvite {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
             $this->from = $this->organisateur->mail;
         }
-        if ($stdEnv->env == 'local') {
-            $this->from = 'ebohm@UP1-5CG34308F4.ad.univ-paris1.fr';
-        }
+        $this->from = $stdEnv->mailfrom ?? null;
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -77,7 +75,7 @@ class FBInvite {
     private function _genereParametresMail($userinfo) : stdClass {
         $userinfo = (object) $userinfo;
 
-        $eICS = new EasyPeasyICSUP1('Invitation');
+        $eICS = new EasyPeasyICSUP1($this->organisateur->displayName);
 
         $dataics =['start' => (new DateTime($this->modalCreneauStart))->getTimestamp(),
                     'end' => (new DateTime($this->modalCreneauEnd))->getTimestamp(),
@@ -171,12 +169,10 @@ class FBInvite {
             }
 
             if (!$testInsertMail) {
-                if ($this->stdEnv->env != 'prod') 
-                    $usersend = ['mail' => $this->organisateur->mail, 'displayName' => ((object) $userinfo)->displayName];
-                else 
-                    $usersend = $userinfo;
+                $usersend = $userinfo;
 
-                $usersend['mail'] = 'Etienne.Bohm@univ-paris1.fr';
+                if ($this->stdEnv->env != 'prod')
+                    $usersend['mail'] = $this->organisateur->mail;
 
                 $stdMailInfo = $this->_genereParametresMail($userinfo);
                 $mailSent = mail(to: $usersend['mail'], subject: "Invitation à un événement", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);

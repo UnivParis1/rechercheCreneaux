@@ -30,7 +30,7 @@ class EasyPeasyICSUP1 extends EasyPeasyICS
             $ics .= PHP_EOL . 'DTSTART:' . gmdate('Ymd', $event['start']) . 'T' . gmdate('His', $event['start']) . 'Z';
             $ics .= PHP_EOL . 'DTEND:' . gmdate('Ymd', $event['end']) . 'T' . gmdate('His', $event['end']) . 'Z';
             if (!empty($event['organizer']) && !empty($event['organizer_email'])) {
-                $ics .= PHP_EOL . 'ORGANIZER;CN=' . $event['organizer'] . ':mailto:' . $event['organizer_email'];
+                $ics .= PHP_EOL . 'ORGANIZER;CN=' . $event['organizer'] . ':' . $event['organizer_email'];
             }
             
 

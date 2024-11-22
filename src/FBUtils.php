@@ -12,7 +12,6 @@ use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use RechercheCreneauxLib\EasyPeasyICSUP1;
 use stdClass;
 
 /**
@@ -212,25 +211,6 @@ class FBUtils {
                 return $stdObj;
         }
         throw new Exception($exMsg);
-    }
-
-    /**
-     * @param stdClass $organisateur
-     * @param array $listUserinfos
-     * @param string $start
-     * @param string $end
-     * @param string $titleEvent
-     * @param string $descriptionEvent
-     * @param string $lieuEvent
-     * @param string $dtz
-     *
-     * @return string
-     */
-
-    public static function icalCreationInvitation(stdClass $organisateur, array $listUserinfos, string $start, string $end, string $titleEvent, string $descriptionEvent, string $lieuEvent, string $dtz): string
-    {
-        $eICS = new EasyPeasyICSUP1('Invitation');
-
     }
 
     public static function getMailsSended(array $aMails) : array {
