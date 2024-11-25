@@ -58,10 +58,8 @@ class FBInvite {
 
         if (isset($stdEnv->uidCasUser)) {
             $this->organisateur = FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos);
-            $this->from = $this->organisateur->mail;
         } else {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
-            $this->from = $this->organisateur->mail;
         }
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
