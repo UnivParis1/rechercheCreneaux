@@ -6,6 +6,7 @@ namespace RechercheCreneaux;
 use DateTime;
 use stdClass;
 use Exception;
+use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
@@ -94,6 +95,28 @@ class FBInvite {
 
         $icsData = $eICS->render(false);
 
+        $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy à HH'h'mm");
+        $dateFormatLongFR = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
+
+        $subject = "Réunion {$this->titleEvent}, le $dateFormatLongFR";
+
+        $texte = "Bonjour {$userinfo->displayName},
+
+{$this->organisateur->displayName} vous invite à participer à l'événement suivant:
+
+« {$this->titleEvent} », le $dateFormatLongFR
+
+Description de l'événement :
+« {$this->descriptionEvent} »
+
+Lieu :
+« {$this->lieuEvent} »
+
+Cordialement,
+
+{$this->organisateur->displayName}
+";
+
         $boundary = uniqid('boundary');
 
         $from = "From: {$this->from}";
@@ -108,7 +131,7 @@ class FBInvite {
         $header .= "Content-Disposition: inline".PHP_EOL;
         $message .= "Content-Transfer-Encoding: 8bit".PHP_EOL.PHP_EOL;
 
-        $message .= "{$this->organisateur->displayName} vous a invité à {$this->titleEvent}.".PHP_EOL.PHP_EOL;
+        $message .= $texte.PHP_EOL.PHP_EOL;
 
         $message .= "--$boundary".PHP_EOL;
         $message .= "Content-Type: text/calendar; charset=utf-8; name=event-invitation.ics; METHOD=REQUEST".PHP_EOL;
@@ -125,6 +148,7 @@ class FBInvite {
         $stdObj->icsData = $icsData;
         $stdObj->boundary = $boundary;
         $stdObj->header = $header;
+        $stdObj->subject = $subject;
         $stdObj->message = $message;
 
         return $stdObj;
@@ -174,7 +198,7 @@ class FBInvite {
                     $usersend['mail'] = $this->organisateur->mail;
 
                 $stdMailInfo = $this->_genereParametresMail($userinfo);
-                $mailSent = mail(to: $usersend['mail'], subject: "Invitation à un événement", message: $stdMailInfo->message, additional_headers: $stdMailInfo->header);
+                $mailSent = mail($usersend['mail'], $stdMailInfo->subject, $stdMailInfo->message, $stdMailInfo->header);
 
                if (!$mailSent)
                     throw new Exception("erreur envoi mail par fonction php mail");
