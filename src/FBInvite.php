@@ -63,7 +63,9 @@ class FBInvite {
             $this->organisateur = $this->fbUsers[0]->getUidInfos();
             $this->from = $this->organisateur->mail;
         }
-        $this->from = $stdEnv->mailfrom ?? null;
+
+        // ajout du from spécifié dans .env dans les headers si besoin en local
+        ($stdEnv->mailfrom === null) ?: $this->from = $stdEnv->mailfrom;
     }
 
     public static function verifSiInvitation($fbParams) {
