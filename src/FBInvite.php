@@ -63,7 +63,7 @@ class FBInvite {
         }
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
-        ($stdEnv->mailfrom === null) ?: $this->from = $stdEnv->mailfrom;
+        $this->from = $stdEnv->mailfrom ?? null;
     }
 
     public static function verifSiInvitation($fbParams) {
