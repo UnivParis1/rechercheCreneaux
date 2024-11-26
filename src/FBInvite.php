@@ -167,6 +167,10 @@ Cordialement,
         if (!isset($_SESSION['inviteEnregistrement']))
             $_SESSION['inviteEnregistrement'] = [];
 
+        // envoi à l'organisateur
+        if (!$this->sendICSKronolith())
+            throw new Exception("erreur communication ICS serveur");
+
         foreach ($this->listUserInfos as $uid => $userinfo) {
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
@@ -192,17 +196,6 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $usersend = $userinfo;
-
-                if ($this->stdEnv->env != 'prod')
-                    $usersend['mail'] = $this->organisateur->mail;
-
-                $stdMailInfo = $this->_genereParametresMail($userinfo);
-                $mailSent = mail($usersend['mail'], $stdMailInfo->subject, $stdMailInfo->message, $stdMailInfo->header);
-
-               if (!$mailSent)
-                    throw new Exception("erreur envoi mail par fonction php mail");
-
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
                 if (!isset($this->mailEffectivementEnvoyeUids))
@@ -213,6 +206,25 @@ Cordialement,
             }
         }
     }
+
+    private function sendICSKronolith(): bool {
+
+        $ch = curl_init($this->stdEnv->kronolith_import_url_user.$this->organisateur->uid);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereParametresMail($this->organisateur)->icsData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: text/calendar']);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if (strpos($response, 'Imported successfully 1 events') === false)
+            return false;
+
+        return true;
+    }
+
 
     /**
      * invitationDejaEnvoyeSurCreneau

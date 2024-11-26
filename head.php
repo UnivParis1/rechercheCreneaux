@@ -40,6 +40,7 @@ $stdEnv->prolongationBandeau = (boolean) json_decode(strtolower($_ENV['PROLONGAT
 $stdEnv->cas = (boolean) json_decode(strtolower($_ENV['CAS']));
 $stdEnv->zoom = (boolean) json_decode(strtolower($_ENV['ZOOM']));
 $stdEnv->evento = (boolean) json_decode(strtolower($_ENV['EVENTO']));
+$stdEnv->kronolith = (boolean) json_decode(strtolower($_ENV['KRONOLITH']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
@@ -88,6 +89,11 @@ if ($stdEnv->evento == true) {
     $dotenv->required(['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID']);
     $stdEnv->eventoWsUrl = $_ENV['EVENTO_WS_URL'];
     $stdEnv->eventoShibentityid = $_ENV['EVENTO_SHIBENTITYID'];
+}
+
+if ($stdEnv->kronolith == true) {
+    $dotenv->required(['KRONOLITH_IMPORT_URL_USER']);
+    $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
 }
 
 $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
