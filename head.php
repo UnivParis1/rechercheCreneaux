@@ -92,7 +92,8 @@ if ($stdEnv->evento == true) {
 }
 
 if ($stdEnv->kronolith == true) {
-    $dotenv->required(['KRONOLITH_IMPORT_URL_USER']);
+    $dotenv->required(['KRONOLITH_HOST', 'KRONOLITH_IMPORT_URL_USER']);
+    $stdEnv->kronolith_host = $_ENV['KRONOLITH_HOST'];
     $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
 }
 

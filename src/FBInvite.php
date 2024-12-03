@@ -10,6 +10,7 @@ use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
+use PHPMailer\PHPMailer\PHPMailer;
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -73,7 +74,48 @@ class FBInvite {
         return false;
     }
 
-    private function _genereParametresMail($userinfo) : stdClass {
+    private function _genereStdCourriel($userinfo, $stdEventInfos ): stdClass {
+
+        $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy à HH'h'mm");
+        $dateFormatLongFR = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
+
+        $subject = "Réunion {$this->titleEvent}, le $dateFormatLongFR";
+
+        $texte = "Bonjour {$userinfo->displayName},
+
+{$this->organisateur->displayName} vous invite à participer à l'événement suivant:
+
+« {$this->titleEvent} », le $dateFormatLongFR
+
+Description de l'événement :
+« {$this->descriptionEvent} »
+
+Lieu :
+« {$this->lieuEvent} »
+
+Pour accepter l'événement :
+https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=accept
+
+Pour accepter l'événement à titre provisoire :
+https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=tentative
+
+Pour décliner l'événement :
+https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=decline
+
+
+Cordialement,
+
+{$this->organisateur->displayName}
+";
+
+        $stdObj = new stdClass();
+        $stdObj->subject = $subject;
+        $stdObj->corps = $texte;
+
+        return $stdObj;
+    }
+
+    private function _genereICS($userinfo) : string {
         $userinfo = (object) $userinfo;
 
         $eICS = new EasyPeasyICSUP1($this->organisateur->displayName);
@@ -93,65 +135,7 @@ class FBInvite {
 
         $eICS->addEvent($dataics);
 
-        $icsData = $eICS->render(false);
-
-        $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy à HH'h'mm");
-        $dateFormatLongFR = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
-
-        $subject = "Réunion {$this->titleEvent}, le $dateFormatLongFR";
-
-        $texte = "Bonjour {$userinfo->displayName},
-
-{$this->organisateur->displayName} vous invite à participer à l'événement suivant:
-
-« {$this->titleEvent} », le $dateFormatLongFR
-
-Description de l'événement :
-« {$this->descriptionEvent} »
-
-Lieu :
-« {$this->lieuEvent} »
-
-Cordialement,
-
-{$this->organisateur->displayName}
-";
-
-        $boundary = uniqid('boundary');
-
-        $from = "From: {$this->from}";
-
-        $header = $from.PHP_EOL;
-        $header .= "MIME-Version: 1.0".PHP_EOL;
-        $header .= "Content-Type: multipart/alternative; boundary=\"$boundary\"".PHP_EOL;
-        $header .= "Content-Transfer-Encoding: 8bit".PHP_EOL;
-
-        $message = "--$boundary".PHP_EOL;
-        $message .= "Content-Type: text/plain; charset=utf-8".PHP_EOL;
-        $header .= "Content-Disposition: inline".PHP_EOL;
-        $message .= "Content-Transfer-Encoding: 8bit".PHP_EOL.PHP_EOL;
-
-        $message .= $texte.PHP_EOL.PHP_EOL;
-
-        $message .= "--$boundary".PHP_EOL;
-        $message .= "Content-Type: text/calendar; charset=utf-8; name=event-invitation.ics; METHOD=REQUEST".PHP_EOL;
-        $message .= "Content-Disposition: attachment; filename=event-invitation.ics".PHP_EOL.PHP_EOL;
-        $message .= $icsData.PHP_EOL.PHP_EOL;
-
-        $message .= "--$boundary".PHP_EOL;
-        $message .= "Content-Type: application/ics; name=event-invitation.ics; METHOD=REQUEST".PHP_EOL;
-        $message .= "Content-Transfer-Encoding: base64".PHP_EOL.PHP_EOL;
-        $message .= chunk_split(base64_encode($icsData));
-        $message .= "--$boundary--".PHP_EOL;
-
-        $stdObj = new stdClass();
-        $stdObj->icsData = $icsData;
-        $stdObj->boundary = $boundary;
-        $stdObj->header = $header;
-        $stdObj->subject = $subject;
-        $stdObj->message = $message;
-
-        return $stdObj;
+        return $eICS->render(false);
     }
 
     private function _getUserinfos($fbUsers) {
@@ -168,7 +152,7 @@ Cordialement,
             $_SESSION['inviteEnregistrement'] = [];
 
         // envoi à l'organisateur
-        if (!$this->sendICSKronolith())
+        if ( ! $stdEvent = $this->sendICSKronolith())
             throw new Exception("erreur communication ICS serveur");
 
         foreach ($this->listUserInfos as $uid => $userinfo) {
@@ -196,6 +180,25 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
+                $userinfo = (object) $userinfo;
+                $stdDataMail = $this->_genereStdCourriel($userinfo, $stdEvent);
+
+                $phpmailer = new PHPMailer(false);
+                $phpmailer->CharSet = 'UTF-8';
+
+                $phpmailer->isSendmail();
+
+                if ($this->from)
+                    $phpmailer->setFrom($this->from);
+
+                $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $userinfo->mail : $this->organisateur->mail, $userinfo->displayName);
+
+                $phpmailer->Subject = $stdDataMail->subject;
+                $phpmailer->Body = $stdDataMail->corps;
+
+                if ( ! $phpmailer->send())
+                    throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
+
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
                 if (!isset($this->mailEffectivementEnvoyeUids))
@@ -207,22 +210,21 @@ Cordialement,
         }
     }
 
-    private function sendICSKronolith(): bool {
+    private function sendICSKronolith(): bool|stdClass {
 
-        $ch = curl_init($this->stdEnv->kronolith_import_url_user.$this->organisateur->uid);
+        $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->uid);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereParametresMail($this->organisateur)->icsData);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS($this->organisateur));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: text/calendar']);
-
         $response = curl_exec($ch);
         curl_close($ch);
 
-        if (strpos($response, 'Imported successfully 1 events') === false)
+        if ( ! $eventStd = json_decode($response))
             return false;
 
-        return true;
+        return $eventStd;
     }
 
 
