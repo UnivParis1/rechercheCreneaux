@@ -94,13 +94,13 @@ Lieu :
 « {$this->lieuEvent} »
 
 Pour accepter l'événement :
-https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=accept
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=accept
 
 Pour accepter l'événement à titre provisoire :
-https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=tentative
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=tentative
 
 Pour décliner l'événement :
-https://echange.univ-paris1.fr/kronolith/attend.php?c=$stdEventInfos->calendarID&e=$stdEventInfos->eventID&u=$userinfo->mail&a=decline
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=decline
 
 
 Cordialement,
@@ -115,9 +115,7 @@ Cordialement,
         return $stdObj;
     }
 
-    private function _genereICS($userinfo) : string {
-        $userinfo = (object) $userinfo;
-
+    private function _genereICS() : string {
         $eICS = new EasyPeasyICSUP1($this->organisateur->displayName);
 
         $dataics =['start' => (new DateTime($this->modalCreneauStart))->getTimestamp(),
@@ -128,9 +126,9 @@ Cordialement,
                     'organizer_email' => $this->organisateur->mail,
                     'location' => $this->lieuEvent ];
 
-        foreach ($this->listUserInfos as $uid2 => $userinfo2) {
-            $userinfo2 = (object) $userinfo2;
-            $dataics['guests'][] = ['name' => $userinfo2->displayName, 'email' => $userinfo2->mail];
+        foreach ($this->listUserInfos as $uid => $userinfo) {
+            $userinfo = (object) $userinfo;
+            $dataics['guests'][] = ['name' => $userinfo->displayName, 'email' => $userinfo->mail];
         }
 
         $eICS->addEvent($dataics);
@@ -180,8 +178,8 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $userinfo = (object) $userinfo;
-                $stdDataMail = $this->_genereStdCourriel($userinfo, $stdEvent);
+                $stdUser = (object) $userinfo;
+                $stdDataMail = $this->_genereStdCourriel($stdUser, $stdEvent);
 
                 $phpmailer = new PHPMailer(false);
                 $phpmailer->CharSet = 'UTF-8';
@@ -191,13 +189,13 @@ Cordialement,
                 if ($this->from)
                     $phpmailer->setFrom($this->from);
 
-                $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $userinfo->mail : $this->organisateur->mail, $userinfo->displayName);
+                $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $stdUser->mail : $this->organisateur->mail, $stdUser->displayName);
 
                 $phpmailer->Subject = $stdDataMail->subject;
                 $phpmailer->Body = $stdDataMail->corps;
 
                 if ( ! $phpmailer->send())
-                    throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
+                    throw new Exception("Erreur envoi mail FBInvitation pour : $stdUser->mail");
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
@@ -212,11 +210,11 @@ Cordialement,
 
     private function sendICSKronolith(): bool|stdClass {
 
-        $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->uid);
+        $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS($this->organisateur));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS());
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: text/calendar']);
         $response = curl_exec($ch);
         curl_close($ch);
