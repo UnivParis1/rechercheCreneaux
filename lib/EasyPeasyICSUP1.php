@@ -25,7 +25,7 @@ class EasyPeasyICSUP1 extends EasyPeasyICS
         /* Add events */
         foreach ($this->events as $event) {
             $ics .= PHP_EOL . 'BEGIN:VEVENT';
-            $ics .= PHP_EOL . 'UID:' . md5(uniqid(mt_rand(), true)) . '@EasyPeasyICS.php';
+            $ics .= PHP_EOL . 'UID:' . md5(uniqid(mt_rand(), true)) . '-EasyPeasyICS.php@recherche-creneaux-up1';
             $ics .= PHP_EOL . 'DTSTAMP:' . gmdate('Ymd') . 'T' . gmdate('His') . 'Z';
             $ics .= PHP_EOL . 'DTSTART:' . gmdate('Ymd', $event['start']) . 'T' . gmdate('His', $event['start']) . 'Z';
             $ics .= PHP_EOL . 'DTEND:' . gmdate('Ymd', $event['end']) . 'T' . gmdate('His', $event['end']) . 'Z';
