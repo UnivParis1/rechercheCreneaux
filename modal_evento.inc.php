@@ -1,5 +1,18 @@
 <script type='text/javascript' src="js/eventoSurveyBase.js"></script>
 <script>const eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
+<script>
+    // méthode copie url evento index
+    function copyClipboard(event) {
+        let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
+
+        if ($(event.target).hasClass('bi-clipboard')) {
+            $(event.target).removeClass('bi-clipboard');
+            $(event.target).addClass('bi-check2');
+        }
+
+        navigator.clipboard.writeText(url);
+    }
+</script>
 <!-- Modal -->
 <div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
