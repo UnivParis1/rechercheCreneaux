@@ -38,7 +38,23 @@ class FBInvite {
     var $mailEffectivementEnvoye = false;
     var $mailEffectivementEnvoyeKey;
     var $mailEffectivementEnvoyeUids;
-    var ?string $from;
+
+    /**
+     * Summary of from
+     *
+     * <code>
+     * $mailbox - email
+     * $name    - name à afficher ex: <Name> name@mail.com
+     * </code>
+     * @var stdClass
+     *
+     */
+    private stdClass $from;
+
+    /**
+     * organisateur sur modèle FBUtils::requestUidInfo
+     * @var stdClass
+     */
     private stdClass $organisateur;
 
     public function __construct($fbForm, $fbParams, $stdEnv, $listDate) {
@@ -64,7 +80,9 @@ class FBInvite {
         }
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
-        $this->from = $stdEnv->mailfrom ?? null;
+        $this->from = new stdClass();
+        $this->from->mailbox = $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr";
+        $this->from->name = "{$this->organisateur->displayName} via Créneau-facile";
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -186,8 +204,10 @@ Cordialement,
 
                 $phpmailer->isSendmail();
 
-                if ($this->from)
-                    $phpmailer->setFrom($this->from);
+                // reply à l'organisateur
+                $phpmailer->addReplyTo($this->organisateur->mail, $this->organisateur->displayName);
+
+                $phpmailer->setFrom($this->from->mailbox, $this->from->name);
 
                 $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $stdUser->mail : $this->organisateur->mail, $stdUser->displayName);
 
