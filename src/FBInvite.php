@@ -7,8 +7,10 @@ use DateTime;
 use stdClass;
 use Exception;
 use IntlDateFormatter;
+use rfx\Type\Cast;
 use RechercheCreneaux\FBUtils;
 use RechercheCreneaux\Type\Userinfo;
+use RechercheCreneaux\Type\EventICSinfo;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -25,7 +27,7 @@ enum TypeInviteAction : int {
 class FBInvite {
     var FBForm $fbForm;
     var array $fbUsers;
-    var $listUserInfos;
+    protected array $listUserInfos;
     var $listDate;
     var $modalCreneauStart;
     var $modalCreneauEnd;
@@ -72,13 +74,11 @@ class FBInvite {
         $this->lieuEvent = $fbParams->lieuEvent;
 
         // recupere les infos venant des $fbUsers et converti les stdObj en array
-        $this->listUserInfos = $this->_getUserinfos($this->fbUsers);
+        $this->listUserInfos = [];
+        foreach ($this->fbUsers as $fbUser)
+            $this->listUserInfos[] = $fbUser->getUidInfos();
 
-        if (isset($stdEnv->uidCasUser)) {
-            $this->organisateur = FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos);
-        } else {
-            $this->organisateur = $this->fbUsers[0]->getUidInfos();
-        }
+        $this->organisateur = FBUtils::requestUidInfo($stdEnv->uidCasUser, $stdEnv->urlwsgroupUserInfos);
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
         $from = ['mailbox' =>  $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr",
@@ -97,11 +97,16 @@ class FBInvite {
     /**
      * _genereStdCourriel
      *
-     * @param  stdClass $userinfo
-     * @param  mixed $stdEventInfos
+     * @param  Userinfo $userinfo
+     * @param  EventICSinfo $eventInfos
+     *
+     * <code>
+     * $subject sujet du courriel genéré
+     * $corps body du courriel genéré
+     * </code>
      * @return stdClass
      */
-    private function _genereStdCourriel($userinfo, $stdEventInfos ): stdClass {
+    private function _genereStdCourriel(Userinfo $userinfo, EventICSinfo $eventInfos): stdClass {
 
         $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy à HH'h'mm");
         $dateFormatLongFR = $formatter_day->format((new DateTime($this->modalCreneauStart))->getTimestamp());
@@ -121,13 +126,13 @@ Lieu :
 « {$this->lieuEvent} »
 
 Pour accepter l'événement :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=accept
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept
 
 Pour accepter l'événement à titre provisoire :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=tentative
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative
 
 Pour décliner l'événement :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$stdEventInfos->calendarID}&e={$stdEventInfos->eventID}&u={$userinfo->mail}&a=decline
+https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline
 
 
 Cordialement,
@@ -153,23 +158,12 @@ Cordialement,
                     'organizer_email' => $this->organisateur->mail,
                     'location' => $this->lieuEvent ];
 
-        foreach ($this->listUserInfos as $uid => $userinfo) {
-            $userinfo = (object) $userinfo;
+        foreach ($this->listUserInfos as $userinfo)
             $dataics['guests'][] = ['name' => $userinfo->displayName, 'email' => $userinfo->mail];
-        }
 
         $eICS->addEvent($dataics);
 
         return $eICS->render(false);
-    }
-
-    private function _getUserinfos($fbUsers) {
-        $arrayReturn = [];
-        foreach ($fbUsers as $fbUser) {
-            $stdInfos = $fbUser->getUidInfos();
-            $arrayReturn[$stdInfos->uid] = get_object_vars($stdInfos);
-        }
-        return $arrayReturn;
     }
 
     public function sendInvite(): void {
@@ -177,10 +171,13 @@ Cordialement,
             $_SESSION['inviteEnregistrement'] = [];
 
         // envoi à l'organisateur
-        if ( ! $stdEvent = $this->sendICSKronolith())
+        if ( ! $eventICSinfo = $this->sendICSKronolith())
             throw new Exception("erreur communication ICS serveur");
 
-        foreach ($this->listUserInfos as $uid => $userinfo) {
+        foreach ($this->listUserInfos as $userinfo) {
+            $uid = $userinfo->uid;
+            $userarray = get_object_vars($userinfo);
+
             $idxSessionDate = FBUtils::getIdxCreneauxWithStartEnd($_SESSION['inviteEnregistrement'], new DateTime($this->modalCreneauStart), new DateTime($this->modalCreneauEnd));
             $idxSessionDate = ($idxSessionDate !== -1) ? $idxSessionDate: count($_SESSION['inviteEnregistrement']);
 
@@ -189,14 +186,14 @@ Cordialement,
                 $_SESSION['inviteEnregistrement'][$idxSessionDate] = [];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['modalCreneau'] = ['modalCreneauStart' => $this->modalCreneauStart, 'modalCreneauEnd' => $this->modalCreneauEnd];
                 $_SESSION['inviteEnregistrement'][$idxSessionDate]['infos'] = ['titleEvent' => $this->titleEvent, 'descriptionEvent' => $this->descriptionEvent, 'lieuEvent' => $this->lieuEvent];
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => [$userinfo['mail'], 'sended' => false, $userinfo] ];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] = [$uid => [$userarray['mail'], 'sended' => false, $userinfo] ];
             } else {
                 // test de vérification si il y'a eu envoi d'emails, envoi si le mail est ajouté
                 if (array_key_exists($uid, $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'])) {
                     foreach ($_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'] as $uid => $aMails) {
                         $mail = $aMails[0];
                         $estEnvoye = $aMails['sended'];
-                        if ($mail == $userinfo['mail'] && $estEnvoye) {
+                        if ($mail == $userarray['mail'] && $estEnvoye) {
                             $testInsertMail = true;
                             break;
                         }
@@ -205,8 +202,7 @@ Cordialement,
             }
 
             if (!$testInsertMail) {
-                $stdUser = (object) $userinfo;
-                $stdDataMail = $this->_genereStdCourriel($stdUser, $stdEvent);
+                $stdDataMail = $this->_genereStdCourriel($userinfo, $eventICSinfo);
 
                 $phpmailer = new PHPMailer(false);
                 $phpmailer->CharSet = 'UTF-8';
@@ -218,13 +214,13 @@ Cordialement,
 
                 $phpmailer->setFrom($this->from->mailbox, $this->from->name);
 
-                $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $stdUser->mail : $this->organisateur->mail, $stdUser->displayName);
+                $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $userinfo->mail : $this->organisateur->mail, $userinfo->displayName);
 
                 $phpmailer->Subject = $stdDataMail->subject;
                 $phpmailer->Body = $stdDataMail->corps;
 
                 if ( ! $phpmailer->send())
-                    throw new Exception("Erreur envoi mail FBInvitation pour : $stdUser->mail");
+                    throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
 
                 $this->mailEffectivementEnvoye = true;
                 $this->mailEffectivementEnvoyeKey = $idxSessionDate;
@@ -232,7 +228,7 @@ Cordialement,
                     $this->mailEffectivementEnvoyeUids = [];
 
                 $this->mailEffectivementEnvoyeUids[] = $uid;
-                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] =  [$userinfo['mail'], 'sended' => true, $userinfo];
+                $_SESSION['inviteEnregistrement'][$idxSessionDate]['mails'][$uid] =  [$userarray['mail'], 'sended' => true, $userarray];
             }
         }
     }
@@ -247,9 +243,9 @@ Cordialement,
      * $eventID
      * $eventUID
      * </code>
-     * @return stdClass
+     * @return EventICSinfo
      */
-    private function sendICSKronolith(): ?stdClass {
+    private function sendICSKronolith(): ?EventICSinfo{
         $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -262,7 +258,8 @@ Cordialement,
         if ( ! $eventStd = json_decode($response))
             return null;
 
-        return $eventStd;
+        $eventIcsInfo = Cast::as($eventStd, EventICSinfo::class);
+        return $eventIcsInfo;
     }
 
 
