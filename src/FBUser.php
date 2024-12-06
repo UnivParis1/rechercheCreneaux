@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
+use RechercheCreneaux\Type\Userinfo;
 use stdClass;
 use Exception;
 use DateInterval;
@@ -54,7 +55,7 @@ class FBUser {
      */
     private static Duration $duration;
 
-    private ?stdClass $uidInfos;
+    private ?Userinfo $uidInfos;
 
     private DateTimeZone $dateTimeZone;
 
@@ -389,20 +390,7 @@ class FBUser {
         return $this->estOptionnel;
     }
 
-    /**
-     * récupère les informations détaillée relatives à l'utilisateur
-     *
-     * Return stdClass object has following structure
-     * <code>
-     * $uid - uid de l'utilisateur
-     * $displayName - nom affiché de l'utilisateur
-     * $mail - mail de l'utilisateur
-     * </code>
-     *
-     * return stdObj->uid, stdObj->displayName, stdObj->mail
-     * @return stdClass
-     */
-    public function getUidInfos() : stdClass {
+    public function getUidInfos() : Userinfo {
         // ajout requête pour avoir mail et name sur api
         return $this->uidInfos;
     }
@@ -412,9 +400,9 @@ class FBUser {
      *
      * @param  string $uid
      * @param  stdClass $stdEnv
-     * @return stdClass
+     * @return Userinfo
      */
-    public static function _getUidInfos(string $uid, $stdEnv)  {
+    public static function _getUidInfos(string $uid, $stdEnv): Userinfo  {
         $urlwsgroupUserInfos = $stdEnv->urlwsgroupUserInfos;
         $env = $stdEnv->env;
         $urlwsgroup = $urlwsgroupUserInfos . ((strtolower($env) === 'prod') ? 'Trusted':'');

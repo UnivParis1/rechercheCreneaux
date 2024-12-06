@@ -18,7 +18,8 @@
         "phpmailer/phpmailer": "^6.9",
         "sabre/vobject": "^4.5.6",
         "brunobetioli/easypeasyics": "^1.0",
-        "sabre/dav": "^4.7"
+        "sabre/dav": "^4.7",
+        "rfx/cast": "^1.1"
     },
     "config": {
         "allow-plugins": {
@@ -28,6 +29,7 @@
     },
     "autoload": {
         "psr-4": {"RechercheCreneaux\\": "src/",
+          "RechercheCreneaux\\Type\\": "src/type",
 		  "RechercheCreneauxLib\\": "lib/"
 	}
     },

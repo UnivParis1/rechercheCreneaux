@@ -8,6 +8,7 @@ use stdClass;
 use Exception;
 use IntlDateFormatter;
 use RechercheCreneaux\FBUtils;
+use RechercheCreneaux\Type\Userinfo;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -53,9 +54,9 @@ class FBInvite {
 
     /**
      * organisateur sur modèle FBUtils::requestUidInfo
-     * @var stdClass
+     * @var Userinfo
      */
-    private stdClass $organisateur;
+    private Userinfo $organisateur;
 
     public function __construct($fbForm, $fbParams, $stdEnv, $listDate) {
         $this->fbForm = $fbForm;
@@ -80,9 +81,10 @@ class FBInvite {
         }
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
-        $this->from = new stdClass();
-        $this->from->mailbox = $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr";
-        $this->from->name = "{$this->organisateur->displayName} via Créneau-facile";
+        $from = ['mailbox' =>  $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr",
+                 'name'    => "{$this->organisateur->displayName} via Créneau-facile"];
+
+        $this->from = (object) $from;
     }
 
     public static function verifSiInvitation($fbParams) {
@@ -92,6 +94,13 @@ class FBInvite {
         return false;
     }
 
+    /**
+     * _genereStdCourriel
+     *
+     * @param  stdClass $userinfo
+     * @param  mixed $stdEventInfos
+     * @return stdClass
+     */
     private function _genereStdCourriel($userinfo, $stdEventInfos ): stdClass {
 
         $formatter_day = IntlDateFormatter::create('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::FULL, date_default_timezone_get(), IntlDateFormatter::GREGORIAN, "EEEE dd/MM/yyyy à HH'h'mm");
@@ -228,8 +237,19 @@ Cordialement,
         }
     }
 
-    private function sendICSKronolith(): bool|stdClass {
-
+    /**
+     * sendICSKronolith
+     *
+     * Envoi l'ics à horde et récupère les infos kronolith de l'évenement generé
+     * 
+     * <code>
+     * $calendarID
+     * $eventID
+     * $eventUID
+     * </code>
+     * @return stdClass
+     */
+    private function sendICSKronolith(): ?stdClass {
         $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -240,7 +260,7 @@ Cordialement,
         curl_close($ch);
 
         if ( ! $eventStd = json_decode($response))
-            return false;
+            return null;
 
         return $eventStd;
     }

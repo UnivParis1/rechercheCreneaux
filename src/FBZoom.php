@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use RechercheCreneauxLib\ZoomUP1;
+use RechercheCreneaux\Type\Userinfo;
 use League\Period\Period;
 use stdClass;
 use DateInterval;
@@ -16,7 +17,7 @@ class FBZoom
 {
     private FBParams $fbParams;
     private stdClass $stdEnv;
-    private stdClass $userMailStd;
+    private Userinfo $userMailStd;
     private ZoomUP1 $zoom;
     private array $users;
     private string $titleEvent;

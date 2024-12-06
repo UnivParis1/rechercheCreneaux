@@ -12,7 +12,9 @@ use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use stdClass;
+use RechercheCreneaux\Type\Userinfo as Userinfo;
+use rfx\Type\Cast;
+
 
 /**
  * Classe regroupant les fonctions utils pouvant être utilisés dans plusieurs classes
@@ -184,18 +186,11 @@ class FBUtils {
     /**
      * Appel au webservice pour obtenir des informations supplémentaires sur un utilisateur
      *
-     * Return stdClass object has following structure
-     * <code>
-     * $uid - uid de l'utilisateur
-     * $displayName - nom affiché de l'utilisateur
-     * $mail - mail de l'utilisateur
-     * </code>
-     *
      * @param  string $uid
      * @param  string $urlwsgroup
-     * @return stdClass
+     * @return Userinfo;
      */
-    public static function requestUidInfo(string $uid, string $urlwsgroup) : stdClass {
+    public static function requestUidInfo(string $uid, string $urlwsgroup) : Userinfo {
         $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail', 'r');
         $ajaxReturn = stream_get_contents($fd);
         fclose($fd);
@@ -207,8 +202,9 @@ class FBUtils {
             throw new Exception($exMsg . "uid: $uid");
 
         foreach ($arrayReturn as $stdObj) {
-            if ($stdObj->uid == $uid)
-                return $stdObj;
+            if ($stdObj->uid == $uid) {
+                return Cast::as($stdObj, Userinfo::class);
+            }
         }
         throw new Exception($exMsg);
     }
