@@ -140,9 +140,36 @@ Cordialement,
 {$this->organisateur->displayName}
 ";
 
+        $html = "<p>Bonjour {$userinfo->displayName},</p>
+
+<p>{$this->organisateur->displayName} vous invite à participer à l'événement suivant:</p>
+
+<p>« {$this->titleEvent} », le $dateFormatLongFR</p>
+
+<p>Description de l'événement :<br />
+« {$this->descriptionEvent} »</p>
+
+<p>Lieu :<br />
+« {$this->lieuEvent} »</p>
+
+<p>Pour accepter l'événement :<br />
+<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept</a></p>
+
+<p>Pour accepter l'événement à titre provisoire :<br />
+<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative</a></p>
+
+<p>Pour décliner l'événement :<br />
+<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline</a></p>
+
+<p>
+Cordialement,</p>
+
+<p>{$this->organisateur->displayName}</p>";
+
         $stdObj = new stdClass();
         $stdObj->subject = $subject;
-        $stdObj->corps = $texte;
+        $stdObj->corpsTXT = $texte;
+        $stdObj->corpsHTML = $html;
 
         return $stdObj;
     }
@@ -208,6 +235,7 @@ Cordialement,
                 $phpmailer->CharSet = 'UTF-8';
 
                 $phpmailer->isSendmail();
+                $phpmailer->isHTML(true);
 
                 // reply à l'organisateur
                 $phpmailer->addReplyTo($this->organisateur->mail, $this->organisateur->displayName);
@@ -217,7 +245,8 @@ Cordialement,
                 $phpmailer->addAddress($this->stdEnv->env == 'prod' ? $userinfo->mail : $this->organisateur->mail, $userinfo->displayName);
 
                 $phpmailer->Subject = $stdDataMail->subject;
-                $phpmailer->Body = $stdDataMail->corps;
+                $phpmailer->AltBody = $stdDataMail->corpsTXT;
+                $phpmailer->Body = $stdDataMail->corpsHTML;
 
                 if ( ! $phpmailer->send())
                     throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
