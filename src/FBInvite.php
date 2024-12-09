@@ -247,6 +247,7 @@ Cordialement,</p>
                 $phpmailer->Subject = $stdDataMail->subject;
                 $phpmailer->AltBody = $stdDataMail->corpsTXT;
                 $phpmailer->Body = $stdDataMail->corpsHTML;
+                $phpmailer->ContentType = 'text/html';
 
                 if ( ! $phpmailer->send())
                     throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
