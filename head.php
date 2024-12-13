@@ -97,7 +97,12 @@ if ($stdEnv->kronolith == true) {
     $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
 }
 
+
 $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
+
+if ($stdEnv->rjsfile = 'js/' . $_ENV['RJSFILE'] ?? null) {
+    $dotenv->required(['RJSFILE'])->allowedRegexValues("/^.*\.(js)$/i");
+}
 
 date_default_timezone_set($stdEnv->dtz);
 

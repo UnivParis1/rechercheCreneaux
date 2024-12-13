@@ -73,8 +73,13 @@ if (FBForm::validParams($fbParams)) {
 
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
     <?php if ($stdEnv->wsgroup): ?>
-        <?php if (isset($_ENV['RJSFILE']) && file_exists('js/' . $_ENV['RJSFILE'])): ?>
-            <script data-main="js/main-built" src="node_modules/requirejs/require.js"></script>
+
+        <?php if (isset($stdEnv->rjsfile) && file_exists("{$stdEnv->rjsfile}")): ?>
+            <?php if (file_exists(str_replace('.js', '.min.js', $stdEnv->rjsfile))): ?>
+                <script data-main="<?= str_replace('.js', '.min', $stdEnv->rjsfile) ?>" src="node_modules/requirejs/require.js"></script>
+            <?php else : ?>
+                <script data-main="<?= str_replace('.js', '', $stdEnv->rjsfile) ?>" src="node_modules/requirejs/require.js"></script>
+            <?php endif ?>
         <?php else: ?>
             <script type='text/javascript' data-main="js/main" src="node_modules/requirejs/require.js"></script>
         <?php endif ?>
