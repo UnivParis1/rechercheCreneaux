@@ -100,7 +100,9 @@ if ($stdEnv->kronolith == true) {
 
 $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
 
-if ($stdEnv->rjsfile = 'js/' . $_ENV['RJSFILE'] ?? null) {
+$stdEnv->rjsfile = isset($_ENV['RJSFILE']) ? 'js/'. $_ENV['RJSFILE'] : null;
+
+if ($stdEnv->rjsfile !== null) {
     $dotenv->required(['RJSFILE'])->allowedRegexValues("/^.*\.(js)$/i");
 }
 
