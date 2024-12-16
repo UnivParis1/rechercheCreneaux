@@ -25,6 +25,8 @@ $(function() {
         });
     }
 
+    $('input[name="idxCreneauxChecked[]"]').on("click", eventoCheck);
+
     $('#modalEvento').on('shown.bs.modal', () => {
         $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
         $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
