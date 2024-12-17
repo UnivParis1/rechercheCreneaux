@@ -20,6 +20,7 @@ let start=null;
 let end=null;
 
 let lieuCreneauElem=null;
+let colLieu=null;
 let zoomElem=null;
 
 $(function() {
@@ -39,11 +40,11 @@ $(function() {
     colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
 
-    requirejs(['bootstrap!tooltip'], function($) {
+    require(['bootstrap!tooltip'], function($) {
         $('[data-toggle="tooltip"]').tooltip({ 'html': true });
     });
 
-    requirejs(['bootstrap!modal'], function($) {
+    require(['bootstrap!modal'], function($) {
         $('[data-toggle="tooltip"]').modal({'show': false });
     });
 
@@ -103,7 +104,7 @@ function afficherPermutterHide(testFormInput) {
 }
 
 function setOptionsUid(jsuids) {
-    for (uid of jsuids) {
+    for (let uid of jsuids) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
@@ -139,7 +140,7 @@ function addOptionWithUid(uid, displayName, mail) {
     optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'col-1 checkbox-inline').val(uid);
 
     if (typeof jsListUidsOptionnels != 'undefined') {
-        for (uidBlock of jsListUidsOptionnels) {
+        for (let uidBlock of jsListUidsOptionnels) {
             if (uidBlock == uid) {
                 optionnel.attr('checked', true);
             }
@@ -264,7 +265,7 @@ function wsCallbackUid(event, ui) {
             dataType: 'jsonp',
             success: function (response) {
                 let arrayUids = new Array();
-                for (obj of response) {
+                for (let obj of response) {
                     arrayUids.push(obj.uid);
                 }
                 setOptionsUid(arrayUids);
@@ -278,7 +279,7 @@ function wsCallbackUid(event, ui) {
 }
 
 function creneauSessionIdx(start, end, jsSessionInfos) {
-    for (key in jsSessionInfos) {
+    for (let key in jsSessionInfos) {
         let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
         let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
         let mstart = moment(modalCreneauStart);

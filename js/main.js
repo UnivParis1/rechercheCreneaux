@@ -1,4 +1,4 @@
-requirejs.config({
+require.config({
     baseUrl: "js/",
     'paths': {
         'bootstrap': 'lib/jbmoelker/requirejs-bootstrap-plugin',
@@ -23,5 +23,5 @@ requirejs.config({
     }
 });
 
-requirejs(['form', 'evento']);
+require(['form', 'evento']);
 

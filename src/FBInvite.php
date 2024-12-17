@@ -281,7 +281,7 @@ Cordialement,</p>
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS());
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: text/calendar']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer '. rand(10000,99999), 'Content-Type: text/calendar']);
         $response = curl_exec($ch);
         curl_close($ch);
 

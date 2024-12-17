@@ -23,7 +23,7 @@ $(function() {
     let plagesStrings = p1a.concat(p2a);
 
     let arrayStart = Array();
-    for (plage of plagesStrings) {
+    for (let plage of plagesStrings) {
         arrayStart.push(formatter(plage));
     }
 
@@ -54,8 +54,8 @@ $(function() {
         if (arrayValues[0] == "NaN")
             return;
 
-        inputFirst = $(selectorPlagesHoraires).first();
-        inputSecond = $(selectorPlagesHoraires).last();
+        let inputFirst = $(selectorPlagesHoraires).first();
+        let inputSecond = $(selectorPlagesHoraires).last();
 
         idx = 0;
         for (value of arrayValues) {
@@ -85,7 +85,7 @@ $(function() {
 
     // lien avec la sélection de la durée si les plages sont > 4h pour n'avoir qu'une "tranche" de séléction
     $("select#duree option").filter((_index, elem) => (elem.value > 240)).on('click', (event) => {
-        valTest = slider.noUiSlider.get();
+        let valTest = slider.noUiSlider.get();
 
         // enregistre la valeure uniquement si on était sur une durée < 240 précedement
         sliderVals = ((parseFloat(valTest[1]) - parseFloat(valTest[0])) * 60 < 240) ? valTest : sliderVals;
