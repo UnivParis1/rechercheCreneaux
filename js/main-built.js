@@ -1067,7 +1067,7 @@ $(function() {
     let plagesStrings = p1a.concat(p2a);
 
     let arrayStart = Array();
-    for (plage of plagesStrings) {
+    for (let plage of plagesStrings) {
         arrayStart.push(formatter(plage));
     }
 
@@ -1098,8 +1098,8 @@ $(function() {
         if (arrayValues[0] == "NaN")
             return;
 
-        inputFirst = $(selectorPlagesHoraires).first();
-        inputSecond = $(selectorPlagesHoraires).last();
+        let inputFirst = $(selectorPlagesHoraires).first();
+        let inputSecond = $(selectorPlagesHoraires).last();
 
         idx = 0;
         for (value of arrayValues) {
@@ -1129,7 +1129,7 @@ $(function() {
 
     // lien avec la sélection de la durée si les plages sont > 4h pour n'avoir qu'une "tranche" de séléction
     $("select#duree option").filter((_index, elem) => (elem.value > 240)).on('click', (event) => {
-        valTest = slider.noUiSlider.get();
+        let valTest = slider.noUiSlider.get();
 
         // enregistre la valeure uniquement si on était sur une durée < 240 précedement
         sliderVals = ((parseFloat(valTest[1]) - parseFloat(valTest[0])) * 60 < 240) ? valTest : sliderVals;
@@ -1171,6 +1171,7 @@ let start=null;
 let end=null;
 
 let lieuCreneauElem=null;
+let colLieu=null;
 let zoomElem=null;
 
 $(function() {
@@ -1190,11 +1191,11 @@ $(function() {
     colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
 
-    requirejs(['bootstrap!tooltip'], function($) {
+    require(['bootstrap!tooltip'], function($) {
         $('[data-toggle="tooltip"]').tooltip({ 'html': true });
     });
 
-    requirejs(['bootstrap!modal'], function($) {
+    require(['bootstrap!modal'], function($) {
         $('[data-toggle="tooltip"]').modal({'show': false });
     });
 
@@ -1254,7 +1255,7 @@ function afficherPermutterHide(testFormInput) {
 }
 
 function setOptionsUid(jsuids) {
-    for (uid of jsuids) {
+    for (let uid of jsuids) {
         $.ajax({
             url: urlwsgroupUserInfos,
             jsonp: "callback",
@@ -1290,7 +1291,7 @@ function addOptionWithUid(uid, displayName, mail) {
     optionnel.attr('name', 'listUidsOptionnels[]').attr('type', 'checkbox').attr('class', 'col-1 checkbox-inline').val(uid);
 
     if (typeof jsListUidsOptionnels != 'undefined') {
-        for (uidBlock of jsListUidsOptionnels) {
+        for (let uidBlock of jsListUidsOptionnels) {
             if (uidBlock == uid) {
                 optionnel.attr('checked', true);
             }
@@ -1415,7 +1416,7 @@ function wsCallbackUid(event, ui) {
             dataType: 'jsonp',
             success: function (response) {
                 let arrayUids = new Array();
-                for (obj of response) {
+                for (let obj of response) {
                     arrayUids.push(obj.uid);
                 }
                 setOptionsUid(arrayUids);
@@ -1429,7 +1430,7 @@ function wsCallbackUid(event, ui) {
 }
 
 function creneauSessionIdx(start, end, jsSessionInfos) {
-    for (key in jsSessionInfos) {
+    for (let key in jsSessionInfos) {
         let modalCreneauStart = jsSessionInfos[key].modalCreneau.modalCreneauStart;
         let modalCreneauEnd = jsSessionInfos[key].modalCreneau.modalCreneauEnd;
         let mstart = moment(modalCreneauStart);
@@ -1715,6 +1716,8 @@ $(function() {
         });
     }
 
+    $('input[name="idxCreneauxChecked[]"]').on("click", eventoCheck);
+
     $('#modalEvento').on('shown.bs.modal', () => {
         $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
         $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
@@ -1968,7 +1971,7 @@ function eventoCheck() {
 
 
 });
-requirejs.config({
+require.config({
     baseUrl: "js/",
     'paths': {
         'bootstrap': 'lib/jbmoelker/requirejs-bootstrap-plugin',
@@ -1993,7 +1996,7 @@ requirejs.config({
     }
 });
 
-requirejs(['form', 'evento']);
+require(['form', 'evento']);
 
 
 define("main", function(){});
