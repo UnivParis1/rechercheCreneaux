@@ -1127,24 +1127,24 @@ $(function() {
         $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').addClass('d-none');
     }
 
-    // lien avec la sélection de la durée si les plages sont > 4h pour n'avoir qu'une "tranche" de séléction
-    $("select#duree option").filter((_index, elem) => (elem.value > 240)).on('click', (event) => {
+    $("select#duree").on('change', function(event) {
         let valTest = slider.noUiSlider.get();
 
-        // enregistre la valeure uniquement si on était sur une durée < 240 précedement
-        sliderVals = ((parseFloat(valTest[1]) - parseFloat(valTest[0])) * 60 < 240) ? valTest : sliderVals;
+        // lien avec la sélection de la durée si les plages sont > 4h pour n'avoir qu'une "tranche" de séléction
+        if (event.target.value > 240) {
+            sliderVals = ((parseFloat(valTest[1]) - parseFloat(valTest[0])) * 60 < 240) ? valTest : sliderVals;
 
-        let intervalVal = parseFloat(valTest[0]) + (parseFloat(event.target.value) / 60);
-        slider.noUiSlider.set([valTest[0], intervalVal, '23.00', '23.00']);
+            let intervalVal = parseFloat(valTest[0]) + (parseFloat(event.target.value) / 60);
+            slider.noUiSlider.set([valTest[0], intervalVal, '23.00', '23.00']);
 
-        $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').addClass('d-none');
-    });
+            $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').addClass('d-none');
 
-    $("select#duree option").filter((_index, elem) => (elem.value <= 240)).on('click',() => {
+        }
+        else if(event.target.value <= 240) {
+            $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').removeClass('d-none');
 
-        $('.noUi-origin:nth-last-child(1),.noUi-origin:nth-last-child(2)').removeClass('d-none');
-
-        slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17])
+            slider.noUiSlider.set((new Set(sliderVals).size === sliderVals.length) ? sliderVals: [sliderVals[0],12,14,17]);
+        }
     });
 });
 
