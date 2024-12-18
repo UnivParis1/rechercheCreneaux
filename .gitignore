@@ -5,6 +5,7 @@
 /.env
 /composer.lock
 /yarn.lock
+/node_modules/
 /node_modules/.yarn-integrity
 /node_modules/.yarn-state.yml
 /node_modules/.yarn-integrity
