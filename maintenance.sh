@@ -11,7 +11,7 @@ case $1 in
 
 		if [ -z "$2" ]
 		then
-			echo "clear all / composer / yarn";
+			echo "clear all / composer / yarn / jsmin";
 			exit 2;
 		fi
 
@@ -30,18 +30,17 @@ case $1 in
 				rm -rf vendor/ && rm composer.lock
 			;;
 
+			"jsmin")
+				echo rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
+				rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
+			;;
+
 			*)
-				echo "clear all / composer / yarn";
+				echo "clear all / composer / yarn / jsmin";
 				exit 2;
 			;;
 
 		esac;
-	;;
-
-	"clearminjs")
-		# shellcheck disable=SC2046
-		echo rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
-		rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
 	;;
 	
 	"composerup")
