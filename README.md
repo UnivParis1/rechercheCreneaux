@@ -35,10 +35,30 @@ librairie composer : rlanvin/php-rrule
 
 # Technologies utilisées
 
-+ PHP/Composer
-+ JS
+## PHP/Composer
 
-# Librairies / Dépendance
++ composer.json : configuration projet pour PHP
+
+## JS
+
+### Yarn
+
+yarn est utilisé pour gérer le projet (rôle similaire à composer pour le js)
+
++ package.json: configuration projet pour JS
+
+### Requirejs
+
+
+#### r.js: exception bootstrap
+
+es scripts bootstrap sont chargés par un plugin:
++ js/lib/jbmoelker/requirejs-bootstrap-plugin.js : plugin de chargement des js bootstrap
+
+!!! bootstrap n'est pas compilé dans le fichier RJSFILE
+
+
+# Librairies / Dépendance métier
 
 ## iCalendar Free/Busy Component
 
@@ -72,10 +92,16 @@ La configuration se fait en créant un fichier .env sur la base du fichier .env.
 ## Fichier .env
 
 + Fichier .env : mis à la racine du projet, variables de configuration
++ Fichier .env.example : recense les variables de configurations avec les valeures possibles
 
 ### Variables indispensables
 
 + URL_FREEBUSY : url api récupération du calendrier.
+
+### Variables optionnelles
+
++ RJSFILE: nom du fichier compilant tous les fichiers js (excepté bootstrap,
+qui ne peut pas être compilé)
 
 ### Répertoires hors git
 
@@ -84,7 +110,57 @@ Les répertoires vendor et node_modules sont hors git il faut les synchroniser s
 + vendor/
 + node_modules/
 
-# Tests Phpunit
+## Script maintenance.sh
+
+Script regroupant les principales tâches d'administrations
+
+Regroupe les tâches de maintenance du projet: à appeler à la racine du projet
+
+### ./maintenance.sh build
+
+Pour generer les répertoires vendor/ et node_modules/ depuis composer.json et package.json
+
++ ./maintenance.sh build all : construit les répertoire vendor/ et node_modules/
++./maintenance.sh build composer: build vendor/
++./maintenance.sh build node: build node_modules/
+
+### ./maintenance.sh sync
+
+rsync les répertoires vendor/ et node_modules.
+nécessite de préciser le host (nom du serveur sur lequel rsync les fichiers)
+
++ ./maintenance.sh sync all HOST : syncronise vendor/ et node_modules/
++ ./maintenance.sh sync vendor HOST : sync vendor/
++ ./maintenance.sh sync node HOST : sync node_modules/
+
+### ./maintenance.sh clear
+
++ ./maintenance.sh clear all / composer / node : supprime tous les fichiers générés avec les .lock ou seulement vendor/ ou node_modules/
+
+### ./maintenance.sh optijs
+
++ ./maintenance.sh optijs build / clear: génere les fichiers .min.js (compilation des fichiers js en un seul et minifie (uglifie) ou les supprime
+
+
+### Requirejs: configuration
+
+Les scripts js sont chargés de manière "asynchrone" via requirejs
+
++ Tous les js sont dans le répertoire js/
+
+
+#### Configuration js
+
++ js/main.js : Ce fichier regroupe la configuration js, les librairies utilisées ainsi que leurs dépendances
++ js/build.js: Directive pour la compilation js: regrouper tous les js dans un seul fichier (à l'exception de bootstrap)
+
+
+#### Optimisation r.js:
+
++ Dans bin/, le script optimize.sh genere le fichier compilé .env: RJSFILE
+
+
+# Tests Phpunit (non fonctionnel)
 
 Des tests phpunit pour éviter des régréssions sont faits.
 

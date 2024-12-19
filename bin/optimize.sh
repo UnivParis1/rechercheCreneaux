@@ -20,7 +20,7 @@ case $2 in
 
     "google-closure-compiler")
 	# pour le compilateur google-clojure-compiler :
-	yarn dlx google-closure-compiler --js=js/main-built.js --js_output_file=js/main-built.min.js
+	yarn dlx google-closure-compiler --js=js/$RJSFILE --js_output_file=js/${RJSFILE%.*}.min.js
     ;;
 
     *)
