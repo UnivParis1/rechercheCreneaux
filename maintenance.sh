@@ -56,7 +56,7 @@ case $1 in
 		case $2 in
 
 			"all")
-				echo "rm -rf vdor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock";
+				echo "rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock";
 				rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
 			;;
 
