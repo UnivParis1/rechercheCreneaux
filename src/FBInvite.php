@@ -193,12 +193,18 @@ Cordialement,</p>
         return $eICS->render(false);
     }
 
-    public function sendInvite(): void {
+    /**
+     * sendInvite
+     *
+     * @param  bool $sendMessage envoi de mail aux utilisateurs
+     * @return void
+     */
+    public function sendInvite(bool $sendMessage = false): void {
         if (!isset($_SESSION['inviteEnregistrement']))
             $_SESSION['inviteEnregistrement'] = [];
 
         // envoi à l'organisateur
-        if ( ! $eventICSinfo = $this->sendICSKronolith())
+        if ( ! $eventICSinfo = $this->sendICSKronolith(sendITipMail: ( ($sendMessage == false) ? true : false)) )
             throw new Exception("erreur communication ICS serveur");
 
         foreach ($this->listUserInfos as $userinfo) {
@@ -249,7 +255,7 @@ Cordialement,</p>
                 $phpmailer->Body = $stdDataMail->corpsHTML;
                 $phpmailer->ContentType = 'text/html';
 
-                if ( ! $phpmailer->send())
+                if ($sendMessage == true && $phpmailer->send() == false)
                     throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
 
                 $this->mailEffectivementEnvoye = true;
@@ -273,11 +279,14 @@ Cordialement,</p>
      * $eventID
      * $eventUID
      * </code>
+     *
+     * @param  bool $sendITipMail envoi des mails par Horde
      * @return EventICSinfo
      */
-    private function sendICSKronolith(): ?EventICSinfo{
-        $ch = curl_init($this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail);
+    private function sendICSKronolith($sendITipMail = false): ?EventICSinfo{
+        $url = $this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail . ( ($sendITipMail == true) ? '&sendITipMail=true' : '' );
 
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS());
