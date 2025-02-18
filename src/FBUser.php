@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
-use RechercheCreneaux\Type\Userinfo;
 use stdClass;
 use Exception;
 use DateInterval;
@@ -14,6 +13,8 @@ use League\Period\Period;
 use League\Period\Duration;
 use League\Period\Sequence;
 use Kigkonsult\Icalcreator\Vcalendar;
+use RechercheCreneaux\Type\Userinfo;
+use rfx\Type\Cast;
 
 /**
  * Classe regroupant la gestion des users, fait l'appel au webservice agenda et normalise les créneaux busy
@@ -407,11 +408,42 @@ class FBUser {
         $env = $stdEnv->env;
         $urlwsgroup = $urlwsgroupUserInfos . ((strtolower($env) === 'prod') ? 'Trusted':'');
 
-        $infos = FBUtils::requestUidInfo($uid, $urlwsgroup);
+        $infos = self::requestUidInfo($uid, $urlwsgroup);
 
-        if (is_null($infos))
+        if ($infos === null)
             throw new Exception("_gellFullnameWithUid erreur récupération uid: $uid");
 
         return $infos;
+    }
+
+    /**
+     * Appel au webservice pour obtenir des informations supplémentaires sur un utilisateur
+     *
+     * @param  string $uid
+     * @param  string $urlwsgroup
+     * @return Userinfo;
+     */
+    private static function requestUidInfo(string $uid, string $urlwsgroup) : Userinfo {
+        $url = "$urlwsgroup?token=$uid&maxRows=1&attrs=uid,displayName,mail";
+
+        $fd = fopen($url, 'r');
+        $ajaxReturn = stream_get_contents($fd);
+        fclose($fd);
+
+        $arrayReturn = json_decode($ajaxReturn);
+
+        $exMsg = "Erreur fonction requestUidInfo";
+        if ($ajaxReturn[0]) {
+            foreach ($arrayReturn as $stdObj) {
+                if ($stdObj->uid == $uid) {
+                    return Cast::as($stdObj, Userinfo::class);
+                }
+            }
+        }
+
+        error_log("requestUidInfo url : " . var_export($url, true));
+        error_log("requestUidInfo ajaxReturn : " . var_export($ajaxReturn, true));
+
+        throw new Exception($exMsg);
     }
 }

@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use DateTime;
-use Exception;
 use DateInterval;
 use DateTimeZone;
 use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBUser;
-use RechercheCreneaux\Type\Userinfo as Userinfo;
-use rfx\Type\Cast;
 
 
 /**
@@ -181,37 +178,6 @@ class FBUtils {
         }
 
         return -1;
-    }
-
-    /**
-     * Appel au webservice pour obtenir des informations supplémentaires sur un utilisateur
-     *
-     * @param  string $uid
-     * @param  string $urlwsgroup
-     * @return Userinfo;
-     */
-    public static function requestUidInfo(string $uid, string $urlwsgroup) : Userinfo {
-        $url = $urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail';
-
-        $fd = fopen($url, 'r');
-        $ajaxReturn = stream_get_contents($fd);
-        fclose($fd);
-
-        $arrayReturn = json_decode($ajaxReturn);
-
-        $exMsg = "Erreur fonction requestUidInfo";
-        if ($ajaxReturn[0]) {
-            foreach ($arrayReturn as $stdObj) {
-                if ($stdObj->uid == $uid) {
-                    return Cast::as($stdObj, Userinfo::class);
-                }
-            }
-        }
-
-        error_log("requestUidInfo url : " . var_export($url, true));
-        error_log("requestUidInfo ajaxReturn : " . var_export($ajaxReturn, true));
-
-        throw new Exception($exMsg);
     }
 
     public static function getMailsSended(array $aMails) : array {
