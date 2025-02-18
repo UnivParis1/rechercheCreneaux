@@ -404,11 +404,7 @@ class FBUser {
      * @return Userinfo
      */
     public static function _getUidInfos(string $uid, $stdEnv): Userinfo  {
-        $urlwsgroupUserInfos = $stdEnv->urlwsgroupUserInfos;
-        $env = $stdEnv->env;
-        $urlwsgroup = $urlwsgroupUserInfos . ((strtolower($env) === 'prod') ? 'Trusted':'');
-
-        $infos = self::requestUidInfo($uid, $urlwsgroup);
+        $infos = self::requestUidInfo($uid, $stdEnv->urlwsgroupUserInfos);
 
         if ($infos === null)
             throw new Exception("_gellFullnameWithUid erreur récupération uid: $uid");
