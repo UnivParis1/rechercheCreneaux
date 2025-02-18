@@ -191,21 +191,26 @@ class FBUtils {
      * @return Userinfo;
      */
     public static function requestUidInfo(string $uid, string $urlwsgroup) : Userinfo {
-        $fd = fopen($urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail', 'r');
+        $url = $urlwsgroup . '?token='. $uid . '&maxRows=1&attrs=uid,displayName,mail';
+
+        $fd = fopen($url, 'r');
         $ajaxReturn = stream_get_contents($fd);
         fclose($fd);
 
         $arrayReturn = json_decode($ajaxReturn);
 
         $exMsg = "Erreur fonction requestUidInfo";
-        if (!$ajaxReturn[0])
-            throw new Exception($exMsg . "uid: $uid");
-
-        foreach ($arrayReturn as $stdObj) {
-            if ($stdObj->uid == $uid) {
-                return Cast::as($stdObj, Userinfo::class);
+        if ($ajaxReturn[0]) {
+            foreach ($arrayReturn as $stdObj) {
+                if ($stdObj->uid == $uid) {
+                    return Cast::as($stdObj, Userinfo::class);
+                }
             }
         }
+
+        error_log("requestUidInfo url : " . var_export($url, true));
+        error_log("requestUidInfo ajaxReturn : " . var_export($ajaxReturn, true));
+
         throw new Exception($exMsg);
     }
 
