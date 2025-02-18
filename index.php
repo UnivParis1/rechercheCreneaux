@@ -101,7 +101,7 @@ if (FBForm::validParams($fbParams)) {
         var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
         let slider = document.getElementById('slider');
         <?php if ($stdEnv->wsgroup): ?>
-            var urlwsgroupUserInfos = '<?= $stdEnv->urlwsgroupUserInfos; ?>';
+            var urlwsgroupUserInfos = '<?= str_replace('Trusted', '', $stdEnv->urlwsgroupUserInfos); ?>';
             var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
             <?php if ($fbParams->uids && isset($js_uids)): ?>
