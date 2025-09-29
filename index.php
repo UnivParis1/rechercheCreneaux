@@ -89,13 +89,6 @@ if (FBForm::validParams($fbParams)) {
 </head>
 
     <body>
-    <form id="form" class="container" action="">
-        <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
-        <div class="row">
-            <div class="col">
-                <p>Séléction des utilisateurs</p>
-                <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
-
     <script>
         var jstimezone = "<?= $stdEnv->dtz ?>";
         var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
@@ -127,82 +120,89 @@ if (FBForm::validParams($fbParams)) {
             var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
         <?php endif ?>
     </script>
-            </div>
-            <div class="col">
-                <p>Nombre de créneaux</p>
-                <input id="creneaux" name="creneaux" type="number"
-                    value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
-            </div>
-            <div class="col">
-                <p>Durée des créneaux</p>
 
-                <select id="duree" name="duree" required=true>
-                    <option value="30" <?= ($fbParams->duree == 30) ? ' selected' : '' ?>>30 minutes</option>
-                    <option value="60" <?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected' : '' ?>>1h</option>
-                    <option value="90" <?= ($fbParams->duree == 90) ? ' selected' : '' ?>>1h30</option>
-                    <option value="120" <?= ($fbParams->duree == 120) ? ' selected' : '' ?>>2h</option>
-                    <option value="150" <?= ($fbParams->duree == 150) ? ' selected' : '' ?>>2h30</option>
-                    <option value="180" <?= ($fbParams->duree == 180) ? ' selected' : '' ?>>3h</option>
-                    <option value="210" <?= ($fbParams->duree == 210) ? ' selected' : '' ?>>3h30</option>
-                    <option value="240" <?= ($fbParams->duree == 240) ? ' selected' : '' ?>>4h</option>
-                    <option value="480" <?= ($fbParams->duree == 480) ? ' selected' : '' ?>>8h</option>
-                    <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
-                </select>
-            </div>
-            <div class="col-2 overflow-scroll">
-                <p>Envoyer requête</p>
-                <input class="btn btn-sm btn-primary rounded" type="submit" name="submitRequete" value="Recherche de disponibilité" />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-4">
-                <div id="divpersonselect">
-                    <br />
-                    <p>Utilisateurs sélectionnés</p>
-                    <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
-                    <ul id="person_ul" class="px-0">
-                    </ul>
+    <form action="">
+        <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
+        <div id="form" class="container">
+            <div class="row">
+                <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">
+                    <p>Séléction des utilisateurs</p>
+                    <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
+
                 </div>
-                <div id="participantExplicatif" class="toast align-items-end ms-auto p-3 d-none">
-                        <span>* Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités</span>
+                <div class="col-3 border border-gray-500 border-dotted p-3">
+                    <p>Nombre de créneaux</p>
+                    <input id="creneaux" class="col-8" name="creneaux" type="number"
+                        value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
                 </div>
-            </div>
-            <div class="col-6">
-                <div id="divjours">
-                    <p>Jours séléctionnés</p>
-                    <fieldset>
-                        <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?>>Lundi</input>
-                        <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mardi</input>
-                        <input type="checkbox" name="joursCreneaux[]" value="WE" <?= in_array('WE', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mercredi</input>
-                        <input type="checkbox" name="joursCreneaux[]" value="TH" <?= in_array('TH', $fbParams->joursDemandes) ? 'checked' : '' ?>>Jeudi</input>
-                        <input type="checkbox" name="joursCreneaux[]" value="FR" <?= in_array('FR', $fbParams->joursDemandes) ? 'checked' : '' ?>>Vendredi</input>
-                        <input type="checkbox" name="joursCreneaux[]" value="SA" <?= in_array('SA', $fbParams->joursDemandes) ? 'checked' : '' ?>>Samedi</input>
-                    </fieldset>
-                    <br />
+                <div class="col col-md-3 col-lg-3 border-start border-top border-bottom border-gray-500 border-dotted p-3">
+                    <p>Durée des créneaux</p>
+
+                    <select id="duree" name="duree" required=true>
+                        <option value="30" <?= ($fbParams->duree == 30) ? ' selected' : '' ?>>30 minutes</option>
+                        <option value="60" <?= ($fbParams->duree == 60 || is_null($fbParams->duree)) ? ' selected' : '' ?>>1h</option>
+                        <option value="90" <?= ($fbParams->duree == 90) ? ' selected' : '' ?>>1h30</option>
+                        <option value="120" <?= ($fbParams->duree == 120) ? ' selected' : '' ?>>2h</option>
+                        <option value="150" <?= ($fbParams->duree == 150) ? ' selected' : '' ?>>2h30</option>
+                        <option value="180" <?= ($fbParams->duree == 180) ? ' selected' : '' ?>>3h</option>
+                        <option value="210" <?= ($fbParams->duree == 210) ? ' selected' : '' ?>>3h30</option>
+                        <option value="240" <?= ($fbParams->duree == 240) ? ' selected' : '' ?>>4h</option>
+                        <option value="480" <?= ($fbParams->duree == 480) ? ' selected' : '' ?>>8h</option>
+                        <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
+                    </select>
+                </div>
+                <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-gray-500 border-dotted p-3">
+                    <div id="divpersonselect">
+                        <br />
+                        <p>Utilisateurs sélectionnés</p>
+                        <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
+                        <ul id="person_ul" class="px-0">
+                        </ul>
                     </div>
-                <div id="divplagehoraire">
-                    <p>Plage horaire</p>
-                    <div id="slider"></div>
-                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
-                    <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                    <div id="participantExplicatif" class="toast align-items-end ms-auto p-3 d-none">
+                            <span>* Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités</span>
+                    </div>
+                </div>
+                <div class="col-4 col-lg-2 order-lg-4 p-3 border border-gray-500 border-dotted">
+                    <p>A partir du</p>
+                    <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
+                        max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
+                        value="<?= $fbParams->fromDate; ?>" />
+                    <p class="mt-4">Période de recherche</p>
+                    <select class="col-7" name="rechercheSurXJours" required>
+                        <option value="7" <?= ($fbParams->rechercheSurXJours == 7) ? ' selected' : '' ?>>7 jours</option>
+                        <option value="15" <?= ($fbParams->rechercheSurXJours == 15) ? ' selected' : '' ?>> 15 jours</option>
+                        <option value="30" <?= ($fbParams->rechercheSurXJours == 30|| is_null($fbParams->rechercheSurXJours)) ? ' selected' : '' ?>>30 jours</option>
+                        <option value="60" <?= ($fbParams->rechercheSurXJours == 60) ? ' selected' : '' ?>>60 jours</option>
+                        <option value="120" <?= ($fbParams->rechercheSurXJours == 120) ? ' selected' : '' ?>>120 jours</option>
+                    </select>
+                </div>
+                <div class="col-7 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
+                    <div id="divjours">
+                        <p>Jours séléctionnés</p>
+                        <fieldset>
+                            <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?>>Lundi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mardi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="WE" <?= in_array('WE', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mercredi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="TH" <?= in_array('TH', $fbParams->joursDemandes) ? 'checked' : '' ?>>Jeudi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="FR" <?= in_array('FR', $fbParams->joursDemandes) ? 'checked' : '' ?>>Vendredi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="SA" <?= in_array('SA', $fbParams->joursDemandes) ? 'checked' : '' ?>>Samedi</input>
+                        </fieldset>
+                        <br />
+                        </div>
+                    <div id="divplagehoraire">
+                        <p>Plage horaire</p>
+                        <div id="slider"></div>
+                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
+                        <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
+                    </div>
+                </div>
+               <div class="col col-lg-3 offset-6 offset-md-0 order-lg-1 border border-gray-500 border-dotted">
+                    <p>Envoyer requête</p>
+                    <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
                 </div>
             </div>
-            <div class="col-2 d-inline-flex flex-column justify-content-center align-items-start fw-bold">
-                <p>A partir du</p>
-                <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
-                    max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
-                    value="<?= $fbParams->fromDate; ?>" />
-                <p class="mt-4">Période de recherche</p>
-                <select class="col-7" name="rechercheSurXJours" required>
-                    <option value="7" <?= ($fbParams->rechercheSurXJours == 7) ? ' selected' : '' ?>>7 jours</option>
-                    <option value="15" <?= ($fbParams->rechercheSurXJours == 15) ? ' selected' : '' ?>> 15 jours</option>
-                    <option value="30" <?= ($fbParams->rechercheSurXJours == 30|| is_null($fbParams->rechercheSurXJours)) ? ' selected' : '' ?>>30 jours</option>
-                    <option value="60" <?= ($fbParams->rechercheSurXJours == 60) ? ' selected' : '' ?>>60 jours</option>
-                    <option value="120" <?= ($fbParams->rechercheSurXJours == 120) ? ' selected' : '' ?>>120 jours</option>
-                </select>
-            </div>
         </div>
-
         <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
         <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once('modal_evento.inc.php'); endif?>
 

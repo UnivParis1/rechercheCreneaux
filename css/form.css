@@ -13,23 +13,8 @@ p {
     color: #707070;  
 }
 
-#form.container {
-    border-right: 1px #707070 dotted;
-}
-
 #form.container > .row { 
     background: #eeeff0; 
-}
-
-#form.container > .row:nth-child(even) 
-{
-    border-top: 1px #707070 dotted;
-}
-
-#form.container > .row:nth-child(odd) 
-{
-    border-top: 1px #707070 dotted;
-    border-bottom: 1px #707070 dotted;
 }
 
 #form.container > .row p {
@@ -39,7 +24,6 @@ p {
 }
 
 #form.container > .row > :is(.col,.col-1,.col-2,.col-3,.col-4,.col-5,.col-6) { 
-    border-left: 1px #707070 dotted; 
     font-size : 14px;
     padding :9px; 
 } 
