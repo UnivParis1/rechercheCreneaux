@@ -131,9 +131,9 @@ function addOptionWithUid(uid, displayName, mail) {
 
     newLi.append('<img class="col-2 rounded-circle" alt="' + uid + '" src="' + urlwsphoto + '?uid='+ uid + '" />');
 
-    newLi.append($('<label>').attr('class', 'col-3 px-0').text(displayName));
+    newLi.append($('<label>').attr('class', 'col-3 px-0 col-lg-2 pe-md-1 pe-lg-0 pe-xl-1 me-lg-3 col-xl-3 me-xl-0').text(displayName));
 
-    let button = $('<button>').text('supprimer').attr('class', 'col-2 px-0');
+    let button = $('<button>').text('enlever').attr('class', 'col-2 px-0 col-lg-3 col-xl-2');
     newLi.append(button);
 
     let optionnel = $('<input>');
@@ -147,10 +147,9 @@ function addOptionWithUid(uid, displayName, mail) {
         }
     }
 
-
     newLi.append(optionnel);
 
-    newLi.append('<label id="participant" class="col-4 px-0 text-left form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
+    newLi.append('<label id="participant" class="col-4 px-0 col-lg-3 col-xl-4 text-left form-check-label" for="form-participant-optionnel">Participant optionnel</label>');
 
     $(idperson_ul).append(newLi);
 

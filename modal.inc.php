@@ -8,7 +8,7 @@
             <div class="row mt-2">
                 <div class="col-6 ms-3" id="creneauBoxDesc">
                     <p>Créneau</p>
-                    <span id="creneauInfo" class="text-nowrap"></span>
+                    <span id="creneauInfo"></span>
                     <hr>
                     <p>Participants</p>
                     <ul id="creneauMailParticipant_ul" />

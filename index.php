@@ -165,7 +165,7 @@ if (FBForm::validParams($fbParams)) {
                 </div>
                 <div class="col-4 col-lg-2 order-lg-4 p-3 border border-gray-500 border-dotted">
                     <p>A partir du</p>
-                    <input class="col-7" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
+                    <input class="col-xs-11 col-sm-10 col-md-7 col-lg-11 col-xl-9 col-xxl-8" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
                         max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
                         value="<?= $fbParams->fromDate; ?>" />
                     <p class="mt-4">Période de recherche</p>
@@ -192,7 +192,7 @@ if (FBForm::validParams($fbParams)) {
                         </div>
                     <div id="divplagehoraire">
                         <p>Plage horaire</p>
-                        <div id="slider"></div>
+                        <div id="slider" class="col-12 mt-5"></div>
                         <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
                         <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                     </div>
