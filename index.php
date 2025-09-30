@@ -121,9 +121,8 @@ if (FBForm::validParams($fbParams)) {
         <?php endif ?>
     </script>
 
-    <form action="">
+    <form id="form" class="container" action="">
         <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
-        <div id="form" class="container">
             <div class="row">
                 <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">
                     <p>Séléction des utilisateurs</p>
