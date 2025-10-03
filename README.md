@@ -47,34 +47,6 @@ yarn est utilisé pour gérer le projet (rôle similaire à composer pour le js)
 
 >+ **package.json**: configuration projet pour JS
 
-### Requirejs
-
-requirejs est utilisé pour charger les scripts js
-
-- **index.php** : ``<script data-main="js/main" src="node_modules/requirejs/require.js">``
-
-    - **js/main.js** :  configuration du projet js: dépendances, shim... ``require.config({ ...``
-
-#### Chargement du js pour **bootstrap** : 
-
-Les scripts bootstrap sont chargés par un plugin: bootstrap ayant des erreur esprima et ne pouvant être minifié avec le reste des js,
-
->+ **js/lib/jbmoelker/requirejs-bootstrap-plugin.js** : permet de charger bootstrap indépendament du reste
-
->+ le code suivant est appelé pour le chargement asynchrone (ex pour tooltip): bootstrap!tooltip:
-``require(['bootstrap!tooltip'], function($) {... //ex : tooltipbootstrap }``
-
-#### Optimisation / Compilation / Optimisation js : outils **r.js**
-
-l'optimiseur r.js est utilisé pour compilé les fichiers js dans un fichier js 
-
->+ **.env** : variable : *RJSFILE* : fichier js compilé dans le répertoire js/ (ex **main-built.js** : compilera le js dans **js/main-built.js**)
->+ **!!! bootstrap** n'est pas compilé dans le fichier *RJSFILE*
-
->+ **js/build.js** : directives de compilation
->+ **bin/optimize.sh** : script bash faisant appel à r.js
-
-
 # Librairies / Dépendance métier
 
 ## iCalendar Free/Busy Component
@@ -144,41 +116,14 @@ Pour generer les répertoires vendor/ et node_modules/ depuis **composer.json** 
 >+ **.bin/maintenance.sh build composer**: build **vendor/**
 >+ **.bin/maintenance.sh build node**: build **node_modules/**
 
-### .bin/maintenance.sh sync
-
-rsync les répertoires vendor/ et node_modules.
-nécessite de préciser le host (nom du serveur sur lequel rsync les fichiers)
-
->+ **.bin/maintenance.sh sync all** *HOST* : syncronise vendor/ et node_modules/
->+ **.bin/maintenance.sh sync vendor** *HOST* : sync vendor/
->+ **.bin/maintenance.sh sync node** *HOST* : sync node_modules/
-
 ### .bin/maintenance.sh clear
 
 >+ **.bin/maintenance.sh clear** *all / composer / node* : supprime tous les fichiers générés avec les .lock ou seulement vendor/ ou node_modules/
 
-### .bin/maintenance.sh optijs
-
->+ **.bin/maintenance.sh optijs** build / clear: génere les fichiers .min.js (compilation des fichiers js en un seul et minifie (uglifie) ou les supprime
-
-
-### Requirejs: configuration
-
-Les scripts js sont chargés de manière "asynchrone" via requirejs
-
->+ Tous les js sont dans le répertoire **js/**
-
 
 #### Configuration js
 
->+ **js/main.js** : Ce fichier regroupe la configuration js, les librairies utilisées ainsi que leurs dépendances
->+ **js/build.js**: Directive pour la compilation js: regrouper tous les js dans un seul fichier (à l'exception de bootstrap)
-
-
-#### Optimisation r.js:
-
->+ Dans **bin/**, le script **optimize.sh** genere le fichier compilé **.env**: **RJSFILE**
-
+Utilisation de webpack (configuration en cours)
 
 # Tests Phpunit (non fonctionnel)
 

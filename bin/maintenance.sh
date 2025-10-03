@@ -80,24 +80,7 @@ case $1 in
 		esac;
 	;;
 
-	"optijs")
-		test -z "$2" && echo "optijs build / clear" && exit 2;
-
-		case $2 in
-			"build")
-				bin/maintenance.sh optijs clear
-				echo bin/optimize.sh src/js/build.js terser;
-				bin/optimize.sh src/js/build.js terser;
-			;;
-			"clear")
-				echo rm src/js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
-				rm src/js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
-			;;
-		esac;
-	;;
-
-
 	*)
-		echo "build / sync / clear / optijs" 1>&2 && exit 1;
+		echo "build / clear" 1>&2 && exit 1;
 	;;
 esac

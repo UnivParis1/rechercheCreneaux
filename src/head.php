@@ -100,12 +100,6 @@ if ($stdEnv->kronolith == true) {
 
 $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
 
-$stdEnv->rjsfile = isset($_ENV['RJSFILE']) ? 'js/'. $_ENV['RJSFILE'] : null;
-
-if ($stdEnv->rjsfile !== null) {
-    $dotenv->required(['RJSFILE'])->allowedRegexValues("/^.*\.(js)$/i");
-}
-
 date_default_timezone_set($stdEnv->dtz);
 
 $stdEnv->varsHTTPGet = filter_var_array($_GET);
