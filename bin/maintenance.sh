@@ -1,11 +1,15 @@
 #!/bin/bash
 
+yarnbin="yarnpkg"
+
+test ! -d bin/ && test ! -d src/ && test ! -d vendor/ && echo "pas de repertoire bin/ ou src/ ou vendor/ ce script doit être appelé à la racine du projet" && exit 1;
+
 case $1 in
 	"build")
 		test -z "$2" && echo "build all / composer / node" && exit 2;
 		case $2 in
 			"all")
-				./maintenance.sh build composer && ./maintenance.sh build node
+				bin/maintenance.sh build composer && bin/maintenance.sh build node
 			;;
 
 			"composer")
@@ -20,7 +24,8 @@ case $1 in
 				rm -Rif .yarn;
 				rm -Rif node_modules/;
 				touch yarn.lock;
-				yarn install;
+				$yarnbin install;
+				ln -s ../node_modules src/
 			;;
 		esac
 	;;
@@ -32,7 +37,7 @@ case $1 in
 
 		case $2 in
 			"all")
-				./maintenance.sh sync vendor $3 && ./maintenance.sh sync node $3
+				bin/maintenance.sh sync vendor $3 && bin/maintenance.sh sync node $3
 			;;
 			"node")
 				echo rsync -av -e 'ssh -K ' node_modules/ creneau@"$hostsync":~/www/node_modules;
@@ -56,16 +61,16 @@ case $1 in
 		case $2 in
 
 			"all")
-				echo "rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock";
-				rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
+				echo "rm -rf vendor/ ; rm src/node_modules ; rm -rf node_modules ; rm -f yarn.lock ; rm -f composer.lock";
+				rm -rf vendor/ ; rm src/node_modules ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
 			;;
 
 			"node")
-				rm -rf node_modules/ && rm -f yarn.lock;
+				rm src/node_modules ; rm -rf node_modules/ && rm -f yarn.lock;
 			;;
 
 			"composer")
-				rm -rf vendor/ && rm composer.lock
+				rm -rf src/vendor/ && rm composer.lock
 			;;
 			*)
 				echo "clear all / composer / node";
@@ -80,13 +85,13 @@ case $1 in
 
 		case $2 in
 			"build")
-				./maintenance.sh optijs clear
-				echo bin/optimize.sh js/build.js terser;
-				bin/optimize.sh js/build.js terser;
+				bin/maintenance.sh optijs clear
+				echo bin/optimize.sh src/js/build.js terser;
+				bin/optimize.sh src/js/build.js terser;
 			;;
 			"clear")
-				echo rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
-				rm js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
+				echo rm src/js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
+				rm src/js/$(grep RJSFILE .env | cut -d= -f2 | sed s/\.js/\.\*/);
 			;;
 		esac;
 	;;

@@ -64,10 +64,10 @@ function errorShow(toShow) {
         if ($(divpersonselect).is(":hidden")) {
             $(divpersonselect).show();
         }
-        $(".alertrequire").show();
+        $("#alertrequire").show();
     }
     if (toShow === false) {
-        $(".alertrequire").hide();
+        $("#alertrequire").hide();
     }
 }
 

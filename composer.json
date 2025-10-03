@@ -27,8 +27,8 @@
         }
     },
     "autoload": {
-        "psr-4": {"RechercheCreneaux\\": "src/",
-          "RechercheCreneaux\\Type\\": "src/type",
+        "psr-4": {"RechercheCreneaux\\": "src/classes",
+          "RechercheCreneaux\\Type\\": "src/classes/type",
 		  "RechercheCreneauxLib\\": "lib/"
 	}
     },

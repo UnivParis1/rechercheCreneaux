@@ -131,32 +131,35 @@ Les répertoires vendor et node_modules sont hors git il faut les synchroniser s
 
 Script regroupant les principales tâches d'administrations
 
+> Toujours appeler ce script depuis la racine du projet: bin/maintenance.sh
+> les scripts dans bin/ doivent être executables
+
 Regroupe les tâches de maintenance du projet: à appeler à la racine du projet
 
-### ./maintenance.sh build
+### .bin/maintenance.sh build
 
 Pour generer les répertoires vendor/ et node_modules/ depuis **composer.json** et **package.json**
 
->+ **./maintenance.sh build all** : construit les répertoire **vendor/** et **node_modules/**
->+ **./maintenance.sh build composer**: build **vendor/**
->+ **./maintenance.sh build node**: build **node_modules/**
+>+ **.bin/maintenance.sh build all** : construit les répertoire **vendor/** et **node_modules/**
+>+ **.bin/maintenance.sh build composer**: build **vendor/**
+>+ **.bin/maintenance.sh build node**: build **node_modules/**
 
-### ./maintenance.sh sync
+### .bin/maintenance.sh sync
 
 rsync les répertoires vendor/ et node_modules.
 nécessite de préciser le host (nom du serveur sur lequel rsync les fichiers)
 
->+ **./maintenance.sh sync all** *HOST* : syncronise vendor/ et node_modules/
->+ **./maintenance.sh sync vendor** *HOST* : sync vendor/
->+ **./maintenance.sh sync node** *HOST* : sync node_modules/
+>+ **.bin/maintenance.sh sync all** *HOST* : syncronise vendor/ et node_modules/
+>+ **.bin/maintenance.sh sync vendor** *HOST* : sync vendor/
+>+ **.bin/maintenance.sh sync node** *HOST* : sync node_modules/
 
-### ./maintenance.sh clear
+### .bin/maintenance.sh clear
 
->+ **./maintenance.sh clear** *all / composer / node* : supprime tous les fichiers générés avec les .lock ou seulement vendor/ ou node_modules/
+>+ **.bin/maintenance.sh clear** *all / composer / node* : supprime tous les fichiers générés avec les .lock ou seulement vendor/ ou node_modules/
 
-### ./maintenance.sh optijs
+### .bin/maintenance.sh optijs
 
->+ **./maintenance.sh optijs** build / clear: génere les fichiers .min.js (compilation des fichiers js en un seul et minifie (uglifie) ou les supprime
+>+ **.bin/maintenance.sh optijs** build / clear: génere les fichiers .min.js (compilation des fichiers js en un seul et minifie (uglifie) ou les supprime
 
 
 ### Requirejs: configuration

@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: "js/",
+    baseUrl: "src/js/",
     'paths': {
         'bootstrap': 'lib/jbmoelker/requirejs-bootstrap-plugin',
         'jquery' :'../node_modules/jquery/dist/jquery.min',

@@ -69,7 +69,7 @@ if (FBForm::validParams($fbParams)) {
 
     <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="node_modules/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
-    <link href="./css/form.css" rel="stylesheet" />
+    <link href="src/css/form.css" rel="stylesheet" />
 
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
     <?php if ($stdEnv->wsgroup): ?>
@@ -81,10 +81,10 @@ if (FBForm::validParams($fbParams)) {
                 <script data-main="<?= str_replace('.js', '', $stdEnv->rjsfile) ?>" src="node_modules/requirejs/require.js"></script>
             <?php endif ?>
         <?php else: ?>
-            <script type='text/javascript' data-main="js/main" src="node_modules/requirejs/require.js"></script>
+            <script type='text/javascript' data-main="src/js/main" src="node_modules/requirejs/require.js"></script>
         <?php endif ?>
    <?php else: ?>
-        <script type='text/javascript' src='./js/noform.js'></script>
+        <script type='text/javascript' src='src/js/noform.js'></script>
     <?php endif ?>
 </head>
 
@@ -150,11 +150,11 @@ if (FBForm::validParams($fbParams)) {
                         <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
                     </select>
                 </div>
-                <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-gray-500 border-dotted p-3">
+                <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
                     <div id="divpersonselect">
                         <br />
                         <p>Utilisateurs sélectionnés</p>
-                        <p class="alertrequire">Séléction minimum de 2 utilisateurs non optionnels</p>
+                        <p id="alertrequire" class="d-hide text-danger" >Séléction minimum de 2 utilisateurs non optionnels</p>
                         <ul id="person_ul" class="px-0">
                         </ul>
                     </div>

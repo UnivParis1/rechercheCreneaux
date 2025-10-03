@@ -5,11 +5,11 @@
 /.env
 /composer.lock
 /yarn.lock
-/node_modules/
-/node_modules/.yarn-integrity
-/node_modules/.yarn-state.yml
-/node_modules/.yarn-integrity
-/node_modules/.bin/
+src/node_modules/
+src/node_modules/.yarn-integrity
+src/node_modules/.yarn-state.yml
+src/node_modules/.yarn-integrity
+src/node_modules/.bin/
 /js/main-built.*
 /yarn-error.log
 /package-lock.json
