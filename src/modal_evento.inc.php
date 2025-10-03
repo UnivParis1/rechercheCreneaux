@@ -1,4 +1,4 @@
-<script type='text/javascript' src="js/eventoSurveyBase.js"></script>
+<script type='text/javascript' src="src/js/eventoSurveyBase.js"></script>
 <script>const eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
 <script>
     // méthode copie url evento index

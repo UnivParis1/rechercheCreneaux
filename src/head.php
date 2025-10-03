@@ -15,7 +15,7 @@ require 'vendor/autoload.php';
 session_start();
 
 // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
-$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv::createImmutable('./');
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas

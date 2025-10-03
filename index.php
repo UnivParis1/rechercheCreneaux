@@ -13,7 +13,7 @@ use RechercheCreneaux\FBInvite;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
-require_once("head.php");
+require_once("src/head.php");
 
 if (FBForm::validParams($fbParams)) {
     $js_uids = json_encode($fbParams->uids);
@@ -81,7 +81,7 @@ if (FBForm::validParams($fbParams)) {
                 <script data-main="<?= str_replace('.js', '', $stdEnv->rjsfile) ?>" src="node_modules/requirejs/require.js"></script>
             <?php endif ?>
         <?php else: ?>
-            <script type='text/javascript' data-main="src/js/main" src="node_modules/requirejs/require.js"></script>
+            <script type='text/javascript' data-main="src/js/app" src="node_modules/requirejs/require.js"></script>
         <?php endif ?>
    <?php else: ?>
         <script type='text/javascript' src='src/js/noform.js'></script>
@@ -154,7 +154,7 @@ if (FBForm::validParams($fbParams)) {
                     <div id="divpersonselect">
                         <br />
                         <p>Utilisateurs sélectionnés</p>
-                        <p id="alertrequire" class="d-hide text-danger" >Séléction minimum de 2 utilisateurs non optionnels</p>
+                        <p id="alertrequire" class="d-none text-danger" >Séléction minimum de 2 utilisateurs non optionnels</p>
                         <ul id="person_ul" class="px-0">
                         </ul>
                     </div>
@@ -202,8 +202,8 @@ if (FBForm::validParams($fbParams)) {
                 </div>
             </div>
         </div>
-        <?php if ($stdEnv->wsgroup): require_once('modal.inc.php'); endif?>
-        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once('modal_evento.inc.php'); endif?>
+        <?php if ($stdEnv->wsgroup): require_once('src/modal.inc.php'); endif?>
+        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once('src/modal_evento.inc.php'); endif?>
 
     <?php
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {

@@ -61,13 +61,18 @@ $(function() {
 
 function errorShow(toShow) {
     if (toShow === true) {
-        if ($(divpersonselect).is(":hidden")) {
-            $(divpersonselect).show();
+        if ($(divpersonselect).hasClass('d-none')) {
+            $(divpersonselect).removeClass('d-none');
         }
-        $("#alertrequire").show();
+
+        if ($("#alertrequire").hasClass('d-none')) {
+            $("#alertrequire").removeClass('d-none');
+        }
     }
     if (toShow === false) {
-        $("#alertrequire").hide();
+        if ( ! $("#alertrequire").hasClass('d-none')) {
+            $("#alertrequire").addClass('d-none');
+        }
     }
 }
 
