@@ -1,15 +1,23 @@
 'use strict'
 
+var node_dir = __dirname + '/node_modules';
+
 const path = require('path')
+const webpack = require('webpack')
 const autoprefixer = require('autoprefixer')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/js/main.js',
-  output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'dist'),
+  context: path.join(__dirname, '.'),
+  resolve: {
+    alias: {
+      jquery: node_dir + '/jquery/dist/jquery',
+      noUiSlider: node_dir + '/nouislider/dist/nouislider'
+    }
+  },
+  entry: {
+    main: './src/js/main.js'
   },
   devServer:{
     static: path.resolve(__dirname, 'dist'),
@@ -17,10 +25,58 @@ module.exports = {
     hot: true
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './src/index.html' })
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery"
+    })
   ],
   module: {
     rules: [
+      {
+        test: /jquery/,
+        use: [
+          {
+            loader: "imports-loader",
+            options: {
+              imports: {
+                moduleName: "jquery",
+                name: "$",
+              },
+              additionalCode:
+                "var define = false; /* Disable AMD for misbehaving libraries */",
+            }
+          }
+        ]
+      },
+      {
+        test: /nouislider/,
+        use: [
+          {
+            loader: "imports-loader",
+            options: {
+              imports: {
+                moduleName: "noUiSlider",
+                name: "noUiSlider"
+              }
+            },
+          }
+        ]
+      },
+      {
+        test: /slider/,
+        use: [
+          {
+            loader: 'imports-loader',
+            options: {
+              imports: {
+                moduleName: 'nouislider',
+                name: 'nouislider'
+              }
+            },
+          }
+        ]
+      },
       {
         test: /\.(scss)$/,
         use: [
@@ -58,15 +114,16 @@ module.exports = {
               }
             }
           }
-        ]
+        ],
+
       }
     ]
   },
   ignoreWarnings: [
-      {
-        file: /\styles\.scss$/,
-        message: /your warning message that need to be suppressed/,
-      },
-      (warning, compilation) => true
-    ]
+    {
+      file: /\styles\.scss$/,
+      message: /your warning message that need to be suppressed/,
+    },
+    (warning, compilation) => true
+  ]
 }

@@ -1,4 +1,4 @@
-define('form', ['jquery','moment', 'autocompleteUser', 'nouislider', 'slider'], function($, moment) {
+define('form', ['jquery','moment', './autocompleteUser.js', 'nouislider', './slider.js'], function($, moment) {
 
 moment.locale("fr");
 
@@ -40,13 +40,9 @@ $(function() {
     colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
 
-    require(['bootstrap!tooltip'], function($) {
-        $('[data-toggle="tooltip"]').tooltip({ 'html': true });
-    });
+    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
 
-    require(['bootstrap!modal'], function($) {
-        $('[data-toggle="tooltip"]').modal({'show': false });
-    });
+    $('[data-toggle="tooltip"]').modal({'show': false });
 
     $("#form").on("submit", onSubmit);
     $("#reponse li a").on("click", onTimeClick);
