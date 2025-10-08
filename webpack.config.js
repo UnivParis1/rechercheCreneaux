@@ -5,7 +5,6 @@ var node_dir = __dirname + '/node_modules';
 const path = require('path')
 const webpack = require('webpack')
 const autoprefixer = require('autoprefixer')
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -13,67 +12,39 @@ module.exports = {
   resolve: {
     alias: {
       jquery: node_dir + '/jquery/dist/jquery',
-      noUiSlider: node_dir + '/nouislider/dist/nouislider'
+      noUiSlider: node_dir + '/nouislider/dist/nouislider',
+      autocompleteUser: 'src/js/autocompleteUser',
+      form: 'src/js/form.js'
     }
   },
   entry: {
     main: './src/js/main.js'
   },
-  devServer:{
-    static: path.resolve(__dirname, 'dist'),
-    port: 8080,
-    hot: true
+  output: {
+    filename: "bundle.js",
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './src/index.html' }),
     new webpack.ProvidePlugin({
       $: "jquery",
       jQuery: "jquery"
     })
   ],
   module: {
+//    noParse: /src[\\/]js[\\/]/,
     rules: [
       {
-        test: /jquery/,
+        test: /.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+      },
+      {
+        test: require.resolve('jquery'),
         use: [
           {
-            loader: "imports-loader",
+            loader: 'expose-loader',
             options: {
-              imports: {
-                moduleName: "jquery",
-                name: "$",
-              },
-              additionalCode:
-                "var define = false; /* Disable AMD for misbehaving libraries */",
+              exposes: ["$", "jQuery"],
             }
-          }
-        ]
-      },
-      {
-        test: /nouislider/,
-        use: [
-          {
-            loader: "imports-loader",
-            options: {
-              imports: {
-                moduleName: "noUiSlider",
-                name: "noUiSlider"
-              }
-            },
-          }
-        ]
-      },
-      {
-        test: /slider/,
-        use: [
-          {
-            loader: 'imports-loader',
-            options: {
-              imports: {
-                moduleName: 'nouislider',
-                name: 'nouislider'
-              }
-            },
           }
         ]
       },

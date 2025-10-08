@@ -73,7 +73,7 @@ if (FBForm::validParams($fbParams)) {
 
     <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
     <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript' data-main="src/js/app" src="node_modules/requirejs/require.js"></script>
+        <script type='text/javascript' src="dist/bundle.js"></script>
    <?php else: ?>
         <script type='text/javascript' src='src/js/noform.js'></script>
     <?php endif ?>

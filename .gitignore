@@ -1,10 +1,12 @@
 /nbproject/
 /vendor/
+/dist/
 /.vscode/
 /.idea/
 /.env
 /composer.lock
 /yarn.lock
+/node_modules/
 src/node_modules/
 src/node_modules/.yarn-integrity
 src/node_modules/.yarn-state.yml
