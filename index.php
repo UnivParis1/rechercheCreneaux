@@ -132,7 +132,7 @@ if (FBForm::validParams($fbParams)) {
                 <div class="col-3 border border-gray-500 border-dotted p-3">
                     <p>Nombre de créneaux</p>
                     <input id="creneaux" class="col-8" name="creneaux" type="number"
-                        value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 3) ?>" />
+                        value="<?php print($fbParams->nbcreneaux ? $fbParams->nbcreneaux : 10) ?>" />
                 </div>
                 <div class="col col-md-3 col-lg-3 border-start border-top border-bottom border-gray-500 border-dotted p-3">
                     <p>Durée des créneaux</p>
