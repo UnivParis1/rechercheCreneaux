@@ -35,12 +35,12 @@ case $1 in
 				./maintenance.sh sync vendor $3 && ./maintenance.sh sync node $3
 			;;
 			"node")
-				echo rsync -av -e 'ssh -K ' node_modules/ creneaux@"$hostsync":~/www/node_modules;
-				rsync -av -e 'ssh -K ' node_modules/ creneaux@"$hostsync":~/www/node_modules;
+				echo rsync -av -e 'ssh -K ' node_modules/ creneau@"$hostsync":~/www/node_modules;
+				rsync -av -e 'ssh -K ' node_modules/ creneau@"$hostsync":~/www/node_modules;
 			;;
 			"vendor")
-				echo rsync -av -e 'ssh -K ' vendor/ creneaux@"$hostsync":~/www/vendor/;
-				rsync -av -e 'ssh -K ' vendor/ creneaux@"$hostsync":~/www/vendor/;
+				echo rsync -av -e 'ssh -K ' vendor/ creneau@"$hostsync":~/www/vendor/;
+				rsync -av -e 'ssh -K ' vendor/ creneau@"$hostsync":~/www/vendor/;
 			;;
 		esac
 	;;
