@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 use RechercheCreneaux\FBZoom;
 
-require 'vendor/autoload.php';
+require_once dirname(__DIR__).'/vendor/autoload.php';
 
-require_once("src/head.php");
+session_start();
+
+require_once dirname(__DIR__)."/src/includes/head_inc.php";
 
 $data = [];
 try {

@@ -13,8 +13,6 @@ use RechercheCreneaux\FBInvite;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
-require_once("src/head.php");
-
 if (FBForm::validParams($fbParams)) {
     $js_uids = json_encode($fbParams->uids);
 
@@ -67,16 +65,7 @@ if (FBForm::validParams($fbParams)) {
         <script src="<?= $stdEnv->prolongationEntJs ?>"></script>
     <?php endif ?>
 
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="node_modules/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
-    <link href="src/css/form.css" rel="stylesheet" />
-
-    <link href="node_modules/nouislider/dist/nouislider.min.css" rel="stylesheet" />
-    <?php if ($stdEnv->wsgroup): ?>
-        <script type='text/javascript' src="dist/bundle.js"></script>
-   <?php else: ?>
-        <script type='text/javascript' src='src/js/noform.js'></script>
-    <?php endif ?>
+    <script type='text/javascript' src="build/bundle.js"></script>
 </head>
 
     <body>
@@ -193,8 +182,8 @@ if (FBForm::validParams($fbParams)) {
                 </div>
             </div>
         </div>
-        <?php if ($stdEnv->wsgroup): require_once('src/modal.inc.php'); endif?>
-        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once('src/modal_evento.inc.php'); endif?>
+        <?php if ($stdEnv->wsgroup): require_once 'modal.inc.php'; endif?>
+        <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once 'modal_evento.inc.php'; endif?>
 
     <?php
     if (isset($fbParams->listUidsOptionnels) && sizeof($fbParams->listUidsOptionnels) > 0) {

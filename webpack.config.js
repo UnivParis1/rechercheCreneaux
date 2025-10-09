@@ -21,7 +21,9 @@ module.exports = {
     main: './src/js/main.js'
   },
   output: {
+    path: path.resolve(__dirname + '/public/build'),
     filename: "bundle.js",
+    clean: true
   },
   plugins: [
     new webpack.ProvidePlugin({
@@ -30,7 +32,7 @@ module.exports = {
     })
   ],
   module: {
-//    noParse: /src[\\/]js[\\/]/,
+//    noParse: /src[\\/]css[\\/]/,
     rules: [
       {
         test: /.js$/,

@@ -62,7 +62,7 @@ avec le paramètre du fichier **.env** : *URL_FREEBUSY*
 >
 >+ l'api qui renvoie les identifiants des utilisateurs de type uid/displayname
 >
->+ Cette api est centrale à l'application mais elle peut être configurée en option dans **.env** -> *WSGROUP : false*
+>+ Cette api est centrale à l'application (TODO: faire une demo hors UP1 lorsque l'option WSGROUP==false dans le fichier .env )
 >
 >+ Si il n'y a pas d'appel à wsgroup, l'application est limitée fonctionnellement
 
@@ -87,45 +87,11 @@ Possibilité de créer un sondage sur plusieurs créneaux
 
 >+ **URL_FREEBUSY** : url api récupération du calendrier.
 
-### Variables optionnelles
+### Configuration js
 
->+ **RJSFILE**: nom du fichier compilant tous les fichiers js (excepté bootstrap,
->qui ne peut pas être compilé)
+Utilisation de webpack (documentation à faire)
 
-### Répertoires hors git
-
-Les répertoires vendor et node_modules sont hors git il faut les synchroniser sur les instances de *test/prod* :
-
->+ **vendor/**
->+ **node_modules/**
-
-## Script maintenance.sh
-
-Script regroupant les principales tâches d'administrations
-
-> Toujours appeler ce script depuis la racine du projet: bin/maintenance.sh
-> les scripts dans bin/ doivent être executables
-
-Regroupe les tâches de maintenance du projet: à appeler à la racine du projet
-
-### .bin/maintenance.sh build
-
-Pour generer les répertoires vendor/ et node_modules/ depuis **composer.json** et **package.json**
-
->+ **.bin/maintenance.sh build all** : construit les répertoire **vendor/** et **node_modules/**
->+ **.bin/maintenance.sh build composer**: build **vendor/**
->+ **.bin/maintenance.sh build node**: build **node_modules/**
-
-### .bin/maintenance.sh clear
-
->+ **.bin/maintenance.sh clear** *all / composer / node* : supprime tous les fichiers générés avec les .lock ou seulement vendor/ ou node_modules/
-
-
-#### Configuration js
-
-Utilisation de webpack (configuration en cours)
-
-# Tests Phpunit (non fonctionnel)
+##### Tests Phpunit (non fonctionnel)
 
 Des tests phpunit pour éviter des régréssions sont faits.
 

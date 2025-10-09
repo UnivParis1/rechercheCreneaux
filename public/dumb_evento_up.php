@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
-require 'vendor/autoload.php';
+require_once dirname(__DIR__).'/vendor/autoload.php';
 
-require_once("head.php");
+session_start();
+
+require_once dirname(__DIR__)."/src/includes/head_inc.php";
 
 if ((isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 1) == false) {
     http_response_code(404);
