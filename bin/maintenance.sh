@@ -25,7 +25,6 @@ case $1 in
 				rm -Rif node_modules/;
 				touch yarn.lock;
 				$yarnbin install;
-				ln -s ../node_modules src/
 			;;
 		esac
 	;;
@@ -61,16 +60,16 @@ case $1 in
 		case $2 in
 
 			"all")
-				echo "rm -rf vendor/ ; rm src/node_modules ; rm -rf node_modules ; rm -f yarn.lock ; rm -f composer.lock";
-				rm -rf vendor/ ; rm src/node_modules ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
+				echo "rm -rf vendor/ ; rm -rf node_modules ; rm -f yarn.lock ; rm -f composer.lock";
+				rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
 			;;
 
 			"node")
-				rm src/node_modules ; rm -rf node_modules/ && rm -f yarn.lock;
+				rm -rf node_modules/ && rm -f yarn.lock;
 			;;
 
 			"composer")
-				rm -rf src/vendor/ && rm composer.lock
+				rm composer.lock
 			;;
 			*)
 				echo "clear all / composer / node";
