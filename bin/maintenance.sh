@@ -71,11 +71,11 @@ case $1 in
 
 			"all")
 				echo "rm -rf vendor/ ; rm -rf node_modules ; rm -f yarn.lock ; rm -f composer.lock";
-				rm -rf vendor/ ; rm -rf node_modules/ ; rm -f yarn.lock ; rm -f composer.lock;
+				rm -rf vendor/ ; rm -rf node_modules/ ; rm -rf public/build ; rm -f yarn.lock ; rm -f composer.lock;
 			;;
 
 			"node")
-				rm -rf node_modules/ && rm -f yarn.lock;
+				rm -rf node_modules/ && rm -rf public/build && rm -f yarn.lock;
 			;;
 
 			"composer")
