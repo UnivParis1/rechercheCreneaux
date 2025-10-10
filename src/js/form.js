@@ -171,14 +171,17 @@ function addOptionWithUid(uid, displayName, mail) {
         }
     });
 
-    button.on("click", function() {
-        $(this).parent().remove();
-        let opts = getCurrentOptions();
-        let testFormInput = testOptions(opts);
-        afficherPermutterHide(testFormInput);
+    button.on("click", function(event) {
+        // hack utilisé pour ne plus avoir le bug suppression des utilisateurs
+        if (event.originalEvent.explicitOriginalTarget == event.target) {
+            $(this).parent().remove();
+            let opts = getCurrentOptions();
+            let testFormInput = testOptions(opts);
+            afficherPermutterHide(testFormInput);
 
-        if (testFormInput == false && opts.size == 0) {
-            $(divpersonselect).hide();
+            if (testFormInput == false && opts.size == 0) {
+                $(divpersonselect).hide();
+            }
         }
     });
 }
