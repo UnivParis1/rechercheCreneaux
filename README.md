@@ -89,7 +89,19 @@ Possibilité de créer un sondage sur plusieurs créneaux
 
 ### Configuration js
 
-Utilisation de webpack (documentation à faire)
+Le projet utilise webpack pour la configuration js
+
+>+ fichier de configuration: webpack.config.js
+>+ les js sont compilés dans le fichier ** public/build/bundle.js **
+
+historiquement, le projet utilisait requirejs pour charger les fichiers js en Asynchronous Module Definition (AMD)
+
+>+ babel est configuré avec le plugin ** babel-plugin-transform-amd-to-commonjs ** pour transformer les fichiers js AMD en commonjs
+
+#### Build et debug js
+
+>+ ** yarn run build ** permet de compiler les fichiers js
+>+ ** yarn run watch ** permet de rendre lisible le js par l'extension web developper dees navigateurs web
 
 ##### Tests Phpunit (non fonctionnel)
 
