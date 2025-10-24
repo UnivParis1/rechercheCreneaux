@@ -101,7 +101,7 @@ if (FBForm::validParams($fbParams)) {
         <?php endif ?>
     </script>
 
-    <form id="form" class="container-fluid container-lg" action="">
+    <form id="form" class="container-lg" action="">
         <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
             <div class="row">
                 <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">
@@ -190,7 +190,7 @@ if (FBForm::validParams($fbParams)) {
         echo '<script>var jsListUidsOptionnels=' . json_encode($fbParams->listUidsOptionnels) . ';</script>';
     }
     ?>
-    <div id="reponse" class="container-fluid container-lg my-4">
+    <div id="reponse" class="container-lg my-4">
         <?php if (isset($fbForm)): ?>
             <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
                 <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
