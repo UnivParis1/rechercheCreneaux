@@ -8,17 +8,20 @@ p {
     color: #707070;  
 }
 
-#form.container > .row { 
+/* ce selecteur remplace
+#form.container
+pour avoir les classes bootstrap container-lg ... */
+#form[class*='container'] > .row {
     background: #eeeff0; 
 }
 
-#form.container > .row p {
+#form[class*='container'] > .row p {
     font-weight: bold; 
     font-size : 14px; 
     color: #444;
 }
 
-#form.container > .row > :is(.col,.col-1,.col-2,.col-3,.col-4,.col-5,.col-6) { 
+#form[class*='container'] > .row > :is(.col,.col-1,.col-2,.col-3,.col-4,.col-5,.col-6) {
     font-size : 14px;
     padding :9px; 
 } 
