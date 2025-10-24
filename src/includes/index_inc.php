@@ -54,6 +54,7 @@ if (FBForm::validParams($fbParams)) {
 
 <!DOCTYPE html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Recherche de disponibilité</title>
     <?php if ($stdEnv->prolongationBandeau === true): ?>
         <script>
@@ -106,7 +107,7 @@ if (FBForm::validParams($fbParams)) {
             <div class="row">
                 <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">
                     <p>Séléction des utilisateurs</p>
-                    <input id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
+                    <input class="col-11" id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
 
                 </div>
                 <div class="col-3 border border-gray-500 border-dotted p-3">
@@ -144,11 +145,11 @@ if (FBForm::validParams($fbParams)) {
                 </div>
                 <div class="col-4 col-lg-2 order-lg-4 p-3 border border-gray-500 border-dotted">
                     <p>A partir du</p>
-                    <input class="col-xs-11 col-sm-10 col-md-7 col-lg-11 col-xl-9 col-xxl-8" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
+                    <input class="col-11 col-xs-11 col-sm-10 col-md-7 col-lg-11 col-xl-9 col-xxl-8" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
                         max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
                         value="<?= $fbParams->fromDate; ?>" />
                     <p class="mt-4">Période de recherche</p>
-                    <select class="col-7" name="rechercheSurXJours" required>
+                    <select class="col-12 col-sm-10 col-md-8" name="rechercheSurXJours" required>
                         <option value="7" <?= ($fbParams->rechercheSurXJours == 7) ? ' selected' : '' ?>>7 jours</option>
                         <option value="15" <?= ($fbParams->rechercheSurXJours == 15) ? ' selected' : '' ?>> 15 jours</option>
                         <option value="30" <?= ($fbParams->rechercheSurXJours == 30|| is_null($fbParams->rechercheSurXJours)) ? ' selected' : '' ?>>30 jours</option>
@@ -156,7 +157,7 @@ if (FBForm::validParams($fbParams)) {
                         <option value="120" <?= ($fbParams->rechercheSurXJours == 120) ? ' selected' : '' ?>>120 jours</option>
                     </select>
                 </div>
-                <div class="col-7 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
+                <div class="col-8 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
                     <div id="divjours">
                         <p>Jours séléctionnés</p>
                         <fieldset>
