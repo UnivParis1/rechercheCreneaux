@@ -1,4 +1,4 @@
-define('form', ['jquery','moment', './autocompleteUser.js', 'nouislider', './slider.js'], function($, moment) {
+define('form', ['jquery','moment', 'bootstrap','./autocompleteUser.js', 'nouislider', './slider.js'], function($, moment, bootstrap) {
 
 moment.locale("fr");
 
@@ -24,6 +24,9 @@ let colLieu=null;
 let zoomElem=null;
 
 $(function() {
+
+    tooltipShow(bootstrap);
+
     $("input#person").autocompleteUserAndGroup(
         urlwsgroupUsersAndGroups, {
         select: wsCallbackUid,
@@ -40,10 +43,6 @@ $(function() {
     colLieu = $("#colLieu").clone(true).detach();
     zoomElem = $("#zoom").clone(true).detach();
 
-    $('[data-toggle="tooltip"]').tooltip({ 'html': true });
-
-    $('[data-toggle="tooltip"]').modal({'show': false });
-
     $("#form").on("submit", onSubmit);
     $("#reponse li a").on("click", onTimeClick);
     $(zoomButtonSelector).on("click", zoomClick);
@@ -54,6 +53,13 @@ $(function() {
 
     $('#duree option[value='+ jsduree +']').prop('selected', true);
 });
+
+function tooltipShow(bootstrap) {
+    let tooltipelements = document.querySelectorAll("[data-bs-toggle='tooltip']");
+    tooltipelements.forEach((el) => {
+        new bootstrap.Tooltip(el);
+    });
+}
 
 function errorShow(toShow) {
     if (toShow === true) {

@@ -196,7 +196,7 @@ Cordialement,</p>
     /**
      * sendInvite
      *
-     * @param  bool $sendMessage envoi de mail aux utilisateurs
+     * @param  bool $sendMessage envoi des mails par cette méthode (sinon envoi par horde et kronolith)
      * @return void
      */
     public function sendInvite(bool $sendMessage = false): void {
@@ -204,7 +204,7 @@ Cordialement,</p>
             $_SESSION['inviteEnregistrement'] = [];
 
         // envoi à l'organisateur
-        if ( ! $eventICSinfo = $this->sendICSKronolith(sendITipMail: ( ($sendMessage == false) ? true : false)) )
+        if ( ! $eventICSinfo = $this->sendICSKronolith(sendITipMail: ! $sendMessage) )
             throw new Exception("erreur communication ICS serveur");
 
         foreach ($this->listUserInfos as $userinfo) {
@@ -255,6 +255,7 @@ Cordialement,</p>
                 $phpmailer->Body = $stdDataMail->corpsHTML;
                 $phpmailer->ContentType = 'text/html';
 
+                // ne sert plus, les mails sont envoyés par horde
                 if ($sendMessage == true && $phpmailer->send() == false)
                     throw new Exception("Erreur envoi mail FBInvitation pour : $userinfo->mail");
 

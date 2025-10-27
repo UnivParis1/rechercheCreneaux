@@ -191,7 +191,7 @@ if (FBForm::validParams($fbParams)) {
         echo '<script>var jsListUidsOptionnels=' . json_encode($fbParams->listUidsOptionnels) . ';</script>';
     }
     ?>
-    <div id="reponse" class="container-lg my-4">
+    <div id="reponse" class="container-lg mt-4 px-0">
         <?php if (isset($fbForm)): ?>
             <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
                 <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
@@ -220,10 +220,11 @@ if (FBForm::validParams($fbParams)) {
             $idx=0; ?>
 
             <p>Créneaux disponibles</p>
-            <ul id="listReponse" class="col-11 mb-1">
+            <ul id="listReponse" class="col-12 mb-1 px-0 ps-sm-4">
                 <?php for ($idx = 0; $idx < count($listDate) && $date=$listDate[$idx]; $idx++): ?>
-                    <li class="row d-flex">
-                        <time class="col-5"><span class="col-2">
+                    <li class="row">
+                        <time class="col-5">
+                            <span class="col-2">
                                 <?= $formatter_day->format($date->startDate->getTimestamp()) ?>
                             </span>
                             <?= $formatter_start->format($date->startDate->getTimestamp()) . ' - ' . $formatter_end->format($date->endDate->getTimestamp()) ?>
@@ -232,16 +233,15 @@ if (FBForm::validParams($fbParams)) {
                             <?php if (($invitationFlag = FBInvite::invitationDejaEnvoyeSurCreneau($date, $fbForm->getFbUsers()))->typeInvationAction != TypeInviteAction::New ): ?>
                                 <!-- balise a pour fonctionner avec evento  (hack, trouver une methode plus élégante ...) -->
                                 <a href="#" class="d-none" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>" ></a>
-                                <div class='col-1 px-0 invitationEnvoyée' data-toggle="tooltip" data-html="true"
+                                <div class='col-7 px-0 invitationEnvoyée d-flex align-items-center justify-content-center' data-bs-toggle="tooltip" data-bs-html="true"
                                     data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationFlag->mails) ?>">
-                                    <span class="text-success">Envoyé</span>
-                                    <span class="bi bi-check2-circle d-inline-block"></span>
+                                    <span class="text-success mb-3 me-5">Envoyé</span>
                                 </div>
                             <?php endif ?>
                             <?php if ($invitationFlag->typeInvationAction == TypeInviteAction::New ): ?>
-                                <a href="#" class="col-4 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
+                                <a href="#" class="col-7 px-0 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="false" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux participants</a>
                             <?php elseif ($invitationFlag->typeInvationAction == TypeInviteAction::NewParticipants): ?>
-                                <a href="#" class="col-4 px-0" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
+                                <a href="#" class="col-7 px-0 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="true" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>">Envoyer une invitation aux nouveaux participants</a>
                             <?php endif ?>
                         <?php endif ?>
                     </li>
