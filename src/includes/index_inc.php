@@ -236,27 +236,30 @@ if (FBForm::validParams($fbParams)) {
                                 <!-- balise a pour fonctionner avec evento  (hack, trouver une methode plus élégante ...) -->
                                 <a href="#" class="d-none" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>" ></a>
 
-                                <div class="<?= $invitationFlag == TypeInviteAction::NewParticipants ? 'col-1 offset-1': 'col-4' ?> d-flex align-items-center justify-content-center">
+                                <div class="<?= $invitationFlag == TypeInviteAction::NewParticipants ? 'col-1 offset-1 offset-md-0 justify-content-md-start px-md-0 ms-lg-4 col-xl-1 offset-xl-0 ms-xl-5 ps-xxl-4': 'col-4' ?> d-flex align-items-center justify-content-center">
                                     <div class='invitationEnvoyée'  data-bs-toggle="tooltip" data-bs-html="true"
                                         data-bs-placement="right" title="<?= FBUtils::formTooltipEnvoyéHTML($invitationObj->mails) ?>">
-                                        <span class="text-success mb-3 me-5">Envoyé</span>
+                                        <span class="text-success mb-3 me-5<?= $invitationFlag == TypeInviteAction::NewParticipants ? ' ms-xxl-1':''?>">Envoyé</span>
                                     </div>
                                 </div>
                             <?php endif ?>
 
                             <?php
-                                if ($invitationFlag !== TypeInviteAction::Exist) {
-                                    if ($invitationFlag == TypeInviteAction::NewParticipants) {
-                                        $newParticipant = 'false';
+                                switch ($invitationFlag) {
+                                    case TypeInviteAction::Exist:
+                                        break;
+                                    case TypeInviteAction::NewParticipants:
+                                        $newParticipant = false;
                                         $labelParticipant = "Envoyer une invitation aux nouveaux participants";
-                                    } elseif ($invitationFlag == TypeInviteAction::New) {
-                                        $newParticipant = 'true';
+                                    break;
+                                    case TypeInviteAction::New:
+                                        $newParticipant = true;
                                         $labelParticipant = "Envoyer une invitation aux participants";
-                                    }
+                                    break;
                                 }
                             ?>
                             <?php if ($invitationFlag !== TypeInviteAction::Exist) : ?>
-                                <a href="#" class="col-5 col-lg-4 px-0 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="<?= $newParticipant ?>" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>"><?= $labelParticipant ?></a>
+                                <a href="#" class="<?= $newParticipant ? 'col-6':'col-5' ?> col-md-4 px-0 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#creneauMailInput" newParticipant="<?= $newParticipant ? 'true' : 'false' ?>" timeStart="<?= $date->startDate->getTimestamp() ?>" timeEnd="<?= $date->endDate->getTimestamp() ?>"><?= $labelParticipant ?></a>
                             <?php endif ?>
                         <?php endif ?>
                     </li>
