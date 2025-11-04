@@ -106,7 +106,7 @@ if (FBForm::validParams($fbParams)) {
         <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
             <div class="row">
                 <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">
-                    <p>Séléction des utilisateurs</p>
+                    <p>Sélection des utilisateurs</p>
                     <input class="col-11" id="person" name="person" placeholder="<?php if ($stdEnv->wsgroup): ?>Nom et/ou prenom<?php else: ?>Uid utilisateur(ex: ebohm)<?php endif ?>" />
 
                 </div>
@@ -159,7 +159,7 @@ if (FBForm::validParams($fbParams)) {
                 </div>
                 <div class="col-8 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
                     <div id="divjours">
-                        <p>Jours séléctionnés</p>
+                        <p>Jours sélectionnés</p>
                         <fieldset>
                             <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?>>Lundi</input>
                             <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mardi</input>
