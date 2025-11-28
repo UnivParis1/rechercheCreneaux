@@ -268,16 +268,14 @@ if (FBForm::validParams($fbParams)) {
             <?php if ($stdEnv->evento && $stdEnv->eventoShibentityid): ?>
             <iframe src="https://evento.univ-paris1.fr/Shibboleth.sso/Login?entityID=<?= $stdEnv->eventoShibentityid ?>&target=/Shibboleth.sso/Session" name="evento-iframe" style="width:0;height:0;border:0; border:none;"></iframe>
             <div id="eventoDiv" class="col-8 d-flex justify-content-start pe-4">
-            <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="<?= $isEventoSession ? "Mettre à jour l'Evento" : "Créer un Evento" ?>" />
-            <span type="button" class="btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien">
-                <i class="bi bi-clipboard h4 d-inline-flex pt-2 ps-2"  <?= $isEventoSession ? 'data-creneau-url="' . $fbEventoSession->event['path'] . '"' : ''?> aria-hidden="true" onclick="copyClipboard(event)"></i>
-            </span>
-            </div>
+                <input id="evento" name="evento" type="button" class="btn btn-success" data-mdb-ripple-init="" data-bs-toggle="modal" data-bs-target="#modalEvento" value="<?= $isEventoSession ? "Mettre à jour l'Evento" : "Créer un Evento" ?>" />
+                <span type="button" class="col-2 btn-clipboard <?= $isEventoSession ? '' : 'd-none' ?>" title="Copier le lien">
+                    <i class="bi bi-clipboard h4 d-inline-flex pt-2 ps-2"  <?= $isEventoSession ? 'data-creneau-url="' . $fbEventoSession->event['path'] . '"' : ''?> aria-hidden="true" onclick="copyClipboard(event)"></i>
+                </span>
             </div>
             <?php endif ?>
         <?php endif ?>
     </div>
     </form>
 </body>
-
 </html>

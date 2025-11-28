@@ -35,6 +35,10 @@ module.exports = {
 //    noParse: /src[\\/]css[\\/]/,
     rules: [
       {
+        test: /\.woff2?$/,
+        type: "asset/resource",
+      },
+      {
         test: /.js$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
