@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use stdClass;
-use Exception;
+use \Exception;
 use Dotenv\Dotenv;
 use phpCAS;
 use RechercheCreneaux\FBParams;
@@ -65,7 +65,9 @@ if ($stdEnv->cas === true) {
     phpCAS::forceAuthentication();
 
     if (!phpCAS::isAuthenticated()) {
-        throw new Exception("Recherche_de_creneaux CAS Error authentificated");
+        header('HTTP/1.1 401 Unauthorized');
+        echo "Recherche_de_creneaux CAS Error authentificated";
+        exit;
     }
     $stdEnv->uidCasUser = phpCAS::getUser();
 }
