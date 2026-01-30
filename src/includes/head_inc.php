@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use stdClass;
-use \Exception;
 use Dotenv\Dotenv;
 use phpCAS;
 use RechercheCreneaux\FBParams;
 
+global $relativeRoot;
+
 // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
-$dotenv = Dotenv::createImmutable('../');
+$dotenv = Dotenv::createImmutable($relativeRoot);
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
@@ -30,13 +31,13 @@ $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 $dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO'])->isBoolean();
 
 $stdEnv->appUrl = $_ENV['APP_URL'];
-$stdEnv->wsgroup = (boolean) json_decode(strtolower($_ENV['WSGROUP']));
-$stdEnv->photoShow = (boolean) json_decode(strtolower($_ENV['PHOTO_SHOW']));
-$stdEnv->prolongationBandeau = (boolean) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
-$stdEnv->cas = (boolean) json_decode(strtolower($_ENV['CAS']));
-$stdEnv->zoom = (boolean) json_decode(strtolower($_ENV['ZOOM']));
-$stdEnv->evento = (boolean) json_decode(strtolower($_ENV['EVENTO']));
-$stdEnv->kronolith = (boolean) json_decode(strtolower($_ENV['KRONOLITH']));
+$stdEnv->wsgroup = (bool) json_decode(strtolower($_ENV['WSGROUP']));
+$stdEnv->photoShow = (bool) json_decode(strtolower($_ENV['PHOTO_SHOW']));
+$stdEnv->prolongationBandeau = (bool) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
+$stdEnv->cas = (bool) json_decode(strtolower($_ENV['CAS']));
+$stdEnv->zoom = (bool) json_decode(strtolower($_ENV['ZOOM']));
+$stdEnv->evento = (bool) json_decode(strtolower($_ENV['EVENTO']));
+$stdEnv->kronolith = (bool) json_decode(strtolower($_ENV['KRONOLITH']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
@@ -79,8 +80,9 @@ if ($stdEnv->zoom === true) {
     $stdEnv->zoomClientSecret = $_ENV['ZOOM_CLIENT_SECRET'];
     $stdEnv->zoomLibCredentialPath = $_ENV['ZOOM_LIB_CREDENTIAL_PATH'];
 
-    if (!file_exists($stdEnv->zoomLibCredentialPath))
+    if (!file_exists($stdEnv->zoomLibCredentialPath)) {
         file_put_contents($stdEnv->zoomLibCredentialPath, '');
+    }
 }
 
 if ($stdEnv->evento == true) {
