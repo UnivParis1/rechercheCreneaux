@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use DateTime;
+use Exception;
 use stdClass;
 
 /**
@@ -18,6 +19,8 @@ class FBParams {
     var $actionFormulaireValider;
 
     var ?array $uids;
+
+    var ?array $extUids;
 
     var ?int $nbcreneaux;
 
@@ -81,6 +84,35 @@ class FBParams {
         if ((new DateTime($this->fromDate)) < (new DateTime())) {
             $this->fromDate = (new DateTime())->format('Y-m-d');
         }
+
+        $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
+
+        if ($externaluris && sizeof($externaluris) > 0) {
+            $this->extUids = [];
+            $i = 0;
+            foreach ($externaluris as $uri) {
+                try {
+                    $content = null;
+                    if ($fd = @fopen($uri, "r")) {
+                        $content = @stream_get_contents($fd);
+                        fclose($fd);
+                    }
+
+                    $data = false;
+                    if ($content)
+                        $data = $content;
+
+                    $this->extUids['ext-' . $i] = ['uri' => $uri, 'data' => $data];
+                } catch (Exception $e) {
+                    $this->extUids['ext-' . $i] = ['uri' => $uri, 'data' => false];
+                }
+
+                $i++;
+            }
+        } else {
+            $this->extUids = null;
+        }
+
     }
 
 }

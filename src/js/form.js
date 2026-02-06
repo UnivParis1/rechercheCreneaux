@@ -52,7 +52,103 @@ $(function() {
     setOptionsUid(jsuids);
 
     $('#duree option[value='+ jsduree +']').prop('selected', true);
+
+    let isExts = (typeof jsExtUids != 'undefined' && jsExtUids != null );
+    let entriesExts = isExts ? Object.entries(jsExtUids) : null;
+    let lenExts = (entriesExts && entriesExts.length > 0) ? entriesExts.length : 0;
+
+    let i = 0;
+    do {
+      let extUri = $("#refexturi").clone(true);
+      let showError = false;
+
+      if (lenExts > 0) {
+        const extInfo = entriesExts[i];
+        const uriInfo = extInfo[1];
+        extUri.find('input').val(uriInfo.uri);
+
+        if (uriInfo.data == false) {
+          showError = true;
+          extUri.prepend('<span class="text-danger text-align-center">False datas</span>');
+        }
+      }
+
+      extUri.removeAttr('id');
+      extUri.removeClass('d-none');
+
+      $("#externalFBs").append(extUri);
+
+      let buttonAdd = extUri.find('button.addExternalFB');
+      buttonAdd.on("click", addExternalUri);
+
+      buttonAdd.trigger('click', [showError, true]);
+
+      i++;
+    } while (i < lenExts);
+
+    // rajoute un champ url externe si aucun vide
+
+    testVide = false;
+    $("#externalFBs .exturi:not(#refexturi) input[type=text]").each( (index, elem) => {
+      if (test == false) {
+        test = elem.value.length == 0 ? true : false;
+      }
+    });
+
+    if ( ! testVide ) {
+      addChampsInputExt();
+    }
+
 });
+
+function addChampsInputExt() {
+    let extUri = $("#refexturi").clone(true).removeAttr('id').removeClass('d-none');
+    extUri.on("click", addExternalUri);
+    extUri.insertAfter($("#externalFBs .exturi:not(#refexturi)").last());
+}
+
+function addExternalUri(event, error = false, notInsertNew = false) {
+    event.preventDefault();
+
+    // correspond à #externalFBs
+    let divElem = $(event.target).parent().parent();
+
+    let extUrl = divElem.find("input[type='text']");
+    if (extUrl.val().length == 0) {
+      return false;
+    }
+
+    if (!error && extUrl.val().startsWith("https://") == false) {
+      let elemDanger = divElem.find('.text-danger');
+      if (elemDanger.length == 0) {
+        let spanDanger = '<span class="text-danger text-align-center">Url mal formattée</span>';
+        divElem.prepend(spanDanger);
+      }
+      return false;
+    }
+
+    if (error) {
+      return false;
+    }
+
+    if (notInsertNew == false) {
+      $("#externalFBs .exturi:not(#refexturi) input[type=text]").each( (index, elem) => {
+        notInsertNew = (notInsertNew == false && elem.value.length == 0) ? true: false;
+      });
+    }
+
+    divElem.find("span.text-danger").remove();
+    extUrl.attr('type', 'hidden');
+
+    extUrl.after($('<pre class="pb-3 pt-1">' + extUrl.val() + '</pre>'));
+    divElem.find('.addExternalFB').removeClass('addExternalFB').html('supprimer').addClass('rmExternalFB').off('click').on('click', (elem) => elem.target.parentElement.parentElement.remove());
+
+    if (notInsertNew) {
+      return false;
+    }
+
+    addChampsInputExt();
+}
 
 function tooltipShow(bootstrap) {
     let tooltipelements = document.querySelectorAll("[data-bs-toggle='tooltip']");

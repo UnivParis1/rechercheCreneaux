@@ -16,6 +16,8 @@ use RechercheCreneaux\TypeInviteAction;
 if (FBForm::validParams($fbParams)) {
     $js_uids = json_encode($fbParams->uids);
 
+    $jsExtUids = $fbParams->extUids ? json_encode($fbParams->extUids) : null;
+
     $fbForm = new FBForm($fbParams, $stdEnv);
 
     $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
@@ -100,6 +102,10 @@ if (FBForm::validParams($fbParams)) {
             var idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
             var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
         <?php endif ?>
+
+        <?php if (isset($jsExtUids) && $jsExtUids): ?>
+            var jsExtUids = JSON.parse('<?= addslashes($jsExtUids) ?>');
+        <?php endif ?>
     </script>
 
     <form id="form" class="container-lg" action="">
@@ -132,6 +138,17 @@ if (FBForm::validParams($fbParams)) {
                     </select>
                 </div>
                 <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
+                    <div id="externalFBs">
+                        <div id="refexturi" class="exturi row d-flex align-item-center d-none">
+                            <label class="col-3 pe-0">Url externe</label>
+                            <div class="col-5 px-0 overflow-hidden">
+                                <input class="" type="text" name="externaluris[]" />
+                            </div>
+                            <div class="col-3">
+                                <button class="addExternalFB">ajouter</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="divpersonselect">
                         <br />
                         <p>Utilisateurs sélectionnés</p>
