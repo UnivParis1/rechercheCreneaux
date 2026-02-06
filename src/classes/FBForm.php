@@ -5,7 +5,7 @@ namespace RechercheCreneaux;
 use stdClass;
 use Exception;
 use League\Period\Sequence;
-use RechercheCreneaux\FBUser;
+use RechercheCreneaux\FBRessourceUser;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
@@ -40,7 +40,7 @@ class FBForm {
                 $estOptionnel = true;
             }
 
-            $fbUsers[] = FBUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $estOptionnel, $fbParams);
+            $fbUsers[] = FBRessourceUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $estOptionnel, $fbParams);
         }
         $this->fbUsers = $fbUsers;
         $this->creneauxGenerated = $creneauxGenerated;
@@ -81,7 +81,7 @@ class FBForm {
         return false;
     }
 
-    public function getFBUsersDisqualifierOrBloquer() : ?array {
+    public function getFBRessourceUsersDisqualifierOrBloquer() : ?array {
 
         $fbUsers = array();
         foreach ($this->fbUsers as $fbUser) {

@@ -1,0 +1,303 @@
+<?php
+
+declare(strict_types=1);
+
+namespace RechercheCreneaux;
+
+use DateTimeZone;
+use DateInterval;
+use DateTime;
+use RechercheCreneaux\FBParams;
+use League\Period\Period;
+use League\Period\Duration;
+use League\Period\Sequence;
+use Kigkonsult\Icalcreator\Vcalendar;
+
+class FBRessource
+{
+    public FBParams $fbParams;
+
+    /**
+     * @var string url
+     */
+    protected String $url;
+
+    /**
+     * @var string content
+     */
+    protected String $content;
+
+    /**
+     * @var Duration duration
+     */
+    protected static Duration $duration;
+
+    protected DateTimeZone $dateTimeZone;
+
+    protected Sequence $creneauxGenerated;
+    /**
+     *
+     * @var array fbusys
+     */
+    public Array $fbusys;
+    
+    /**
+     * @var Sequence|null
+     */
+    protected ?Sequence $sequence;
+
+    protected bool $isChanged;
+
+    /** @var bool $estFullBloquer
+     * sert à déterminer si l'agenda d'une personne est bloquée
+    */
+    public bool $estFullBloquer = false;
+
+    public function __construct(String $url, String $dtz, FBParams $fbParams) {
+        $this->fbParams = $fbParams;
+        $this->isChanged = false;
+        $this->url = $url;
+
+        $this->setDateTimeZone($dtz);
+
+        $fd = fopen($this->url, "r");
+        $content = stream_get_contents($fd);
+        fclose($fd);
+
+        $this->content = $content;
+    }
+
+   /**
+     * Get creneauMinute
+     *
+     * @return  Duration
+     */
+    public static function getDuration() : Duration {
+        return self::$duration;
+    }
+
+    /**
+     * setDuration
+     *
+     * @param int dureeMinutes
+     *
+     * @return void
+     */
+    public static function setDuration(int $dureeMinutes) : void {
+        $dateInterval = new DateInterval("PT".$dureeMinutes."M");
+        self::$duration = Duration::fromDateInterval($dateInterval);
+    }
+
+    public function getDateTimeZone()
+    {
+        return $this->dateTimeZone;
+    }
+
+    public function setDateTimeZone(String $dtz)
+    {
+        $this->dateTimeZone = new DateTimeZone($dtz);
+    }
+
+    /**
+     * Get the value of creneauxGenerated
+     */
+    public function getCreneauxGenerated() : Sequence
+    {
+        return $this->creneauxGenerated;
+    }
+
+    /**
+     * Set the value of creneauxGenerated
+     *
+     * @return  \League\Period\Sequence
+     */
+    public function setCreneauxGenerated(&$creneauxGenerated)
+    {
+        $this->creneauxGenerated =& $creneauxGenerated;
+
+        return $creneauxGenerated;
+    }
+
+    public function _selectFreebusy() {
+
+        $vcal = Vcalendar::factory()->parse($this->content);
+
+        if ($vcal->countComponents() !== 1) {
+            throw new Exception("FBUser: component !== 1");
+        }
+
+        $component = $vcal->getComponent();
+        $fbusys = $component->getAllFreebusy();
+
+        $this->fbusys = $fbusys;
+    }
+
+    protected function _initSequence() : Sequence {
+        // crée la séquence puis trie par date de début
+        $sequence = FBUtils::createSequenceFromArrayFbusy($this->fbusys, $this->getDateTimeZone());
+        $sequence = FBUtils::sortSequence($sequence);
+
+        $periodBefore = Period::after(new DateTime($this->fbParams->fromDate), "{$this->fbParams->rechercheSurXJours} DAYS");
+
+        return $sequence->filter(function (Period $interval) use ($periodBefore)  {
+            if ($interval->endDate->getTimestamp() <= $periodBefore->endDate->getTimestamp()) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    protected function _instanceCreneaux(Sequence &$busySeq) : Sequence {
+        $creneaugenSeq = $this->getCreneauxGenerated();
+
+        foreach ($busySeq as $busyPeriod) {
+
+            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $busySeq);
+
+            if ($busySeq->indexOf($busyPeriod) !== false) {
+                $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $busySeq);
+            }
+            else {
+                $busyOverlap = false;
+            }
+
+            // Suppression des busys lorsqu'ils sont hors des periodes générées
+            if ($busyInclus === false && $busyOverlap === false) {
+                $busySeq = $this->_removePeriod($busyPeriod, $busySeq);
+                continue;
+            }
+        }
+        if ($this->isChanged) {
+            $busySeq = FBUtils::sortSequence($busySeq);
+        }
+        return $busySeq;
+    }
+
+    /**
+     * _instanceCreneauxBusysOverlap
+     *
+     * Méthode servant à tester les cas où un des créneaux généré enchevêtre une période d'un busy et réciproquement
+     *
+     * @param  Sequence $creneaugenSeq
+     * @param  Period $busyPeriod
+     * @param  Sequence $busySeq
+     * @return bool
+     */
+    private function _instanceCreneauxBusysOverlap(Sequence $creneaugenSeq, Period $busyPeriod, Sequence &$busySeq) : bool {
+        $cmpOverlapCreneau = FBUtils::_cmpSeqOverlapPeriod($creneaugenSeq, $busyPeriod);
+
+        if ($cmpOverlapCreneau) {
+            $arrayIdxGen = FBUtils::_cmpGetIdxOverlapCreneauBusy($creneaugenSeq, $busyPeriod);
+            $busySeq = $this->_replaceWithArrayCreneauxGeneratedIdx($busyPeriod, $arrayIdxGen, $busySeq);
+            return true;
+        }
+        return false;
+    }
+
+    private function _replaceWithArrayCreneauxGeneratedIdx(Period $busyPeriod, array $arrayIdxGen, Sequence &$busySeq) : Sequence {
+        $creneauxGenerated = $this->getCreneauxGenerated();
+
+        $offset = $busySeq->indexOf($busyPeriod);
+        $busySeq->remove($offset);
+
+        $indexNew = $offset;
+        foreach ($arrayIdxGen as $idxCreneauxGen) {
+            $newPeriod = clone ($creneauxGenerated->get($idxCreneauxGen));
+            $busySeq->insert($indexNew, $newPeriod);
+            $indexNew++;
+        }
+
+        return $busySeq;
+    }
+
+    /**
+     * _instanceCreneauxBusysInclus
+     *
+     * Méthode servant à tester les cas où un des créneaux généré inclus une période d'un busy et réciproquement
+     *
+     * @param  Sequence $creneaugenSeq
+     * @param  Period $busyPeriod
+     * @return bool
+     */
+    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod, Sequence &$busySeq) : bool {
+        $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
+
+        if ($cmpBusyCreneau == 0) {
+            return false;
+        }
+
+        switch ($cmpBusyCreneau) {
+            case 1:
+                // creneau < busy
+                $busySeq = $this->_normCreneauxInferieurDuree($busyPeriod, $busySeq);
+                break;
+            case -1:
+                // creneau > busy
+                $busySeq = $this->_normCreneauxSuperieurDuree($busyPeriod, $busySeq);
+                break;
+            default:
+                throw new Exception("Erreur comparaison creneau _normCreneaux");
+        }
+
+        return true;
+    }
+    private function _normCreneauxInferieurDuree(Period $periodToSplit, &$sequence) : Sequence {
+        $offset = $sequence->indexOf($periodToSplit);
+        $duration = self::getDuration();
+
+        $arrayNewPeriods = array();
+        foreach ($periodToSplit->dateRangeForward($duration) as $datetime) {
+            $endDate = $datetime->add($duration->dateInterval);
+            $p = Period::fromDate($datetime, $endDate);
+            $arrayNewPeriods[] = $p;
+        }
+
+        $sequence->remove($offset);
+
+        $indexNew = $offset;
+        foreach ($arrayNewPeriods as $newPeriod) {
+            $sequence->insert($indexNew, $newPeriod);
+            $indexNew++;
+        }
+        $this->isChanged = true;
+        return $sequence;
+    }
+
+    private function _normCreneauxSuperieurDuree(Period $period, Sequence &$busySeq) : Sequence {
+        $idx = $busySeq->indexOf($period);
+        $duration = $this->getDuration();
+        $busySeq->remove($idx);
+        $newPeriod = $period->withDurationAfterStart($duration);
+        $busySeq->insert($idx, $newPeriod);
+        $this->isChanged = true;
+        return $busySeq;
+    }
+
+    private function _removePeriod(Period $period, Sequence &$busySeq) : Sequence {
+        $idx = $busySeq->indexOf($period);
+        $busySeq->remove($idx);
+        $this->isChanged = true;
+        return $busySeq;
+    }
+
+    /**
+     * Get sequence
+     *
+     * @return  Sequence
+     */ 
+    public function getSequence() : Sequence
+    {
+        return $this->sequence;
+    }
+
+    protected function setSequence(Sequence &$busySeq) {
+        $this->sequence = $busySeq;
+    }
+
+
+    public function getEstFullBloquer() {
+        return $this->estFullBloquer;
+    }
+
+
+}
