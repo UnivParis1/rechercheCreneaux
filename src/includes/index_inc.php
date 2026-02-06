@@ -215,7 +215,7 @@ if (FBForm::validParams($fbParams)) {
     ?>
     <div id="reponse" class="container-lg mt-4 px-0">
         <?php if (isset($fbForm)): ?>
-            <?php if ($fbUsersUnsetted = $fbForm->getFBUsersDisqualifierOrBloquer()): ?>
+            <?php if ($fbUsersUnsetted = $fbForm->getFBRessourceUsersDisqualifierOrBloquer()): ?>
                 <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
                 <div class='shadow p-3 mb-5 bg-body rounded lead'>
                     <p>
