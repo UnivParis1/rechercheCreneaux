@@ -1,6 +1,5 @@
 <?php
 
-
 declare(strict_types=1);
 
 namespace RechercheCreneaux;
@@ -8,7 +7,6 @@ namespace RechercheCreneaux;
 use DateTime;
 use DateInterval;
 use IntlDateFormatter;
-use Exception;
 use RechercheCreneaux\FBForm;
 use RechercheCreneaux\FBUtils;
 use RechercheCreneaux\FBInvite;
@@ -16,28 +14,11 @@ use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
 if (FBForm::validParams($fbParams)) {
+    $js_uids = json_encode($fbParams->uids);
+
+    $jsExtUids = $fbParams->extUids ? json_encode($fbParams->extUids) : null;
+
     $fbForm = new FBForm($fbParams, $stdEnv);
-
-    foreach ($fbForm->getFbUsers() as $fbUser) {
-        $validx = false;
-        foreach ($fbParams->uids as $idx => $valuid) {
-            if ($valuid['uid'] == $fbUser->uid) {
-                $validx = $idx;
-            }
-        }
-        
-        if ($validx === false) {
-            throw new Exception("Erreur: impossible de trouver l'uid : {$fbUser->uid} dans les paramètres");
-        }
-
-        if ($fbUser->httpError || $fbUser->valid == false) {
-            $fbParams->uids[$validx]['data'] = false;
-        } else {
-            $fbParams->uids[$validx]['data'] =  true;
-        }
-    }
-
-    $jsuids = json_encode($fbParams->uids);
 
     $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
 
@@ -99,10 +80,10 @@ if (FBForm::validParams($fbParams)) {
             var urlwsgroupUserInfos = '<?= str_replace('Trusted', '', $stdEnv->urlwsgroupUserInfos); ?>';
             var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
-            <?php if ($fbParams->uids && isset($jsuids)): ?>
-                var jsuids = <?= "$jsuids" ?>;
+            <?php if ($fbParams->uids && isset($js_uids)): ?>
+                var jsuids = <?= "$js_uids" ?>;
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-                var jsuids = [ {type: 'up1', uid: '<?= $stdEnv->uidCasUser ?>'} ];
+                var jsuids = ['<?= $stdEnv->uidCasUser ?>'];
             <?php endif ?>
             <?php if (isset($jsonSessionInviteInfos)): ?>
                 var jsSessionInviteInfos = JSON.parse('<?= addslashes($jsonSessionInviteInfos) ?>');
@@ -120,6 +101,12 @@ if (FBForm::validParams($fbParams)) {
         <?php if (isset($isEventoSession) && $isEventoSession): ?>
             var idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
             var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
+        <?php endif ?>
+
+        <?php if ($stdEnv->externalfbs): ?>
+            <?php if (isset($jsExtUids) && $jsExtUids): ?>
+                var jsExtUids = JSON.parse('<?= addslashes($jsExtUids) ?>');
+            <?php endif ?>
         <?php endif ?>
     </script>
 
@@ -228,7 +215,7 @@ if (FBForm::validParams($fbParams)) {
     ?>
     <div id="reponse" class="container-lg mt-4 px-0">
         <?php if (isset($fbForm)): ?>
-            <?php if ($fbUsersUnsetted = $fbForm->getFBRessourcesDisqualifierOuBloquer()): ?>
+            <?php if ($fbUsersUnsetted = $fbForm->getFBRessourceUsersDisqualifierOrBloquer()): ?>
                 <?php $txtFailParticipants = "La recherche de créneaux sur tous les participants ayant échouée, les participants suivants sont exclus de la recherche dans le but de vous présenter un résultat"; ?>
                 <div class='shadow p-3 mb-5 bg-body rounded lead'>
                     <p>
@@ -237,7 +224,7 @@ if (FBForm::validParams($fbParams)) {
                     <ul>
                         <?php foreach ($fbUsersUnsetted as $fbUser): ?>
                             <li>
-                                <?= $fbUser->getDisplayName() ?>
+                                <?= $fbUser->getUidInfos()->displayName ?>
                             </li>
                         <?php endforeach ?>
                     </ul>
