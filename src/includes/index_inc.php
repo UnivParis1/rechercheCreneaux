@@ -71,7 +71,7 @@ if (FBForm::validParams($fbParams)) {
     <script type='text/javascript' src="build/bundle.js"></script>
 </head>
 
-    <body>
+<body>
     <script>
         var jstimezone = "<?= $stdEnv->dtz ?>";
         var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
@@ -103,8 +103,10 @@ if (FBForm::validParams($fbParams)) {
             var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
         <?php endif ?>
 
-        <?php if (isset($jsExtUids) && $jsExtUids): ?>
-            var jsExtUids = JSON.parse('<?= addslashes($jsExtUids) ?>');
+        <?php if ($stdEnv->externalfbs): ?>
+            <?php if (isset($jsExtUids) && $jsExtUids): ?>
+                var jsExtUids = JSON.parse('<?= addslashes($jsExtUids) ?>');
+            <?php endif ?>
         <?php endif ?>
     </script>
 
@@ -138,6 +140,8 @@ if (FBForm::validParams($fbParams)) {
                     </select>
                 </div>
                 <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
+
+                <?php if ($stdEnv->externalfbs): ?>
                     <div id="externalFBs">
                         <div id="refexturi" class="exturi row d-flex align-item-center d-none">
                             <label class="col-3 pe-0">Url externe</label>
@@ -149,6 +153,8 @@ if (FBForm::validParams($fbParams)) {
                             </div>
                         </div>
                     </div>
+                <?php endif ?>
+
                     <div id="divpersonselect">
                         <br />
                         <p>Utilisateurs sélectionnés</p>

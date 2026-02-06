@@ -28,7 +28,7 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
-$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO'])->isBoolean();
+$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO', 'EXTERNALFBS'])->isBoolean();
 
 $stdEnv->appUrl = $_ENV['APP_URL'];
 $stdEnv->wsgroup = (bool) json_decode(strtolower($_ENV['WSGROUP']));
@@ -38,6 +38,7 @@ $stdEnv->cas = (bool) json_decode(strtolower($_ENV['CAS']));
 $stdEnv->zoom = (bool) json_decode(strtolower($_ENV['ZOOM']));
 $stdEnv->evento = (bool) json_decode(strtolower($_ENV['EVENTO']));
 $stdEnv->kronolith = (bool) json_decode(strtolower($_ENV['KRONOLITH']));
+$stdEnv->externalfbs = (bool) json_decode(strtolower($_ENV['EXTERNALFBS']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);

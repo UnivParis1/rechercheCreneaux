@@ -85,6 +85,12 @@ class FBParams {
             $this->fromDate = (new DateTime())->format('Y-m-d');
         }
 
+
+        // si externalfbs est vrai dans la configuration .env , on continue l'execution du constructeur sinon on s'arrête
+        if ( ! $stdEnv->externalfbs) {
+            return;
+        }
+
         $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
 
         if ($externaluris && sizeof($externaluris) > 0) {
