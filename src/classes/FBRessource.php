@@ -4,26 +4,18 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
+use DateTimeZone;
 use DateInterval;
 use DateTime;
-use DateTimeZone;
-use Kigkonsult\Icalcreator\Vcalendar;
-use League\Period\Duration;
-use League\Period\Period;
-use League\Period\Sequence;
 use RechercheCreneaux\FBParams;
-use RechercheCreneaux\Type\Userinfo;
+use League\Period\Period;
+use League\Period\Duration;
+use League\Period\Sequence;
+use Kigkonsult\Icalcreator\Vcalendar;
 
 class FBRessource
 {
-    public ?Userinfo $uidInfos;
-
     public FBParams $fbParams;
-
-    /**
-     * @var string uid
-     */
-    public string $uid;
 
     /**
      * @var string url
@@ -33,9 +25,7 @@ class FBRessource
     /**
      * @var string content
      */
-    protected ?String $content;
-
-    public bool $estOptionnel;
+    protected String $content;
 
     /**
      * @var Duration duration
@@ -63,53 +53,18 @@ class FBRessource
     */
     public bool $estFullBloquer = false;
 
-   /** @var bool $estDisqualifier
-     * si son agenda n'est pas pris en compte dans les résultats
-     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
-     * plus chargés
-    */
-    public bool $estDisqualifier = false;
-
-    public bool $httpError = true;
-
-    public bool $valid = false;
-
-    public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel)
-    {
-        if (!isset(self::$duration)) {
-            self::setDuration($dureeEnMinutes);
-        }
-
+    public function __construct(String $url, String $dtz, FBParams $fbParams) {
         $this->fbParams = $fbParams;
-
-        $this->estOptionnel = $estOptionnel;
-
-        $this->uid = $uid;
         $this->isChanged = false;
         $this->url = $url;
-        $this->creneauxGenerated = $creneaux;
+
         $this->setDateTimeZone($dtz);
 
-        $curl_handle=curl_init();
+        $fd = fopen($this->url, "r");
+        $content = stream_get_contents($fd);
+        fclose($fd);
 
-        curl_setopt($curl_handle, CURLOPT_URL, $this->url);
-        curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Université Paris 1 Pantheon-Sorbonne rechercheCreneaux');
-
-        $content = curl_exec($curl_handle);
-
-        $httpcode = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
-
-        curl_close($curl_handle);
-
-        $this->httpError = $httpcode == 200 ? false : true;
-
-        $this->content = $this->httpError ? null: $content;
-    }
-
-    public function getDisplayName(): string {
-        return $this->uid;
+        $this->content = $content;
     }
 
    /**
@@ -133,12 +88,12 @@ class FBRessource
         self::$duration = Duration::fromDateInterval($dateInterval);
     }
 
-    public function getDateTimeZone(): DateTimeZone
+    public function getDateTimeZone()
     {
         return $this->dateTimeZone;
     }
 
-    public function setDateTimeZone(String $dtz): void
+    public function setDateTimeZone(String $dtz)
     {
         $this->dateTimeZone = new DateTimeZone($dtz);
     }
@@ -156,15 +111,25 @@ class FBRessource
      *
      * @return  \League\Period\Sequence
      */
-    public function setCreneauxGenerated(&$creneauxGenerated): \League\Period\Sequence
+    public function setCreneauxGenerated(&$creneauxGenerated)
     {
         $this->creneauxGenerated =& $creneauxGenerated;
 
         return $creneauxGenerated;
     }
 
-    public function getEstOptionnel(): bool {
-        return $this->estOptionnel;
+    public function _selectFreebusy() {
+
+        $vcal = Vcalendar::factory()->parse($this->content);
+
+        if ($vcal->countComponents() !== 1) {
+            throw new Exception("FBUser: component !== 1");
+        }
+
+        $component = $vcal->getComponent();
+        $fbusys = $component->getAllFreebusy();
+
+        $this->fbusys = $fbusys;
     }
 
     protected function _initSequence() : Sequence {
@@ -334,53 +299,5 @@ class FBRessource
         return $this->estFullBloquer;
     }
 
-    protected function _testSiAgendaBloque(Sequence &$busySeq) : bool {
 
-        $testFBUserclone = clone($this);
-        $seqToTest = clone($busySeq);
-
-        // generation de créneaux standards
-        $fbParamsClone = clone($this->fbParams);
-        $fbParamsClone->fromDate = date('Y-m-d');
-        $fbParamsClone->duree = 60;
-        $fbParamsClone->plagesHoraires = array('9-12', '14-17');
-        $fbParamsClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
-
-        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone))->getCreneauxSeq();
-
-        $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
-        $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
-        $testFBUserclone->setSequence($seq);
-
-        $fbUsersTest = array($testFBUserclone);
-        $fbCompareTest = new FBCompare($fbUsersTest, $creneauxGeneratedTest, $this->dateTimeZone->getName(), 1);
-
-        $testCompare = $fbCompareTest->getNbResultatsAffichés();
-
-        if ($testCompare == 0) {
-            $this->estFullBloquer = true;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get the value of uidInfos
-     */
-    public function getUidInfos()
-    {
-        return $this->uidInfos;
-    }
-
-    /**
-     * Set the value of uidInfos
-     *
-     * @return  self
-     */
-    public function setUidInfos($uidInfos)
-    {
-        $this->uidInfos = $uidInfos;
-
-        return $this;
-    }
 }
