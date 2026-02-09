@@ -18,6 +18,11 @@ class FBRessource
     public FBParams $fbParams;
 
     /**
+     * @var string uid
+     */
+    public string $uid;
+
+    /**
      * @var string url
      */
     protected String $url;
@@ -53,11 +58,18 @@ class FBRessource
     */
     public bool $estFullBloquer = false;
 
-    public function __construct(String $url, String $dtz, FBParams $fbParams) {
+    public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams)
+    {
+        if (!isset(self::$duration)) {
+            self::setDuration($dureeEnMinutes);
+        }
+
         $this->fbParams = $fbParams;
+
+        $this->uid = $uid;
         $this->isChanged = false;
         $this->url = $url;
-
+        $this->creneauxGenerated = $creneaux;
         $this->setDateTimeZone($dtz);
 
         $fd = fopen($this->url, "r");
@@ -88,12 +100,12 @@ class FBRessource
         self::$duration = Duration::fromDateInterval($dateInterval);
     }
 
-    public function getDateTimeZone()
+    public function getDateTimeZone(): DateTimeZone
     {
         return $this->dateTimeZone;
     }
 
-    public function setDateTimeZone(String $dtz)
+    public function setDateTimeZone(String $dtz): void
     {
         $this->dateTimeZone = new DateTimeZone($dtz);
     }
@@ -297,6 +309,36 @@ class FBRessource
 
     public function getEstFullBloquer() {
         return $this->estFullBloquer;
+    }
+
+    protected function _testSiAgendaBloque(Sequence &$busySeq) : bool {
+
+        $testFBUserclone = clone($this);
+        $seqToTest = clone($busySeq);
+
+        // generation de créneaux standards
+        $fbParamsClone = clone($this->fbParams);
+        $fbParamsClone->fromDate = date('Y-m-d');
+        $fbParamsClone->duree = 60;
+        $fbParamsClone->plagesHoraires = array('9-12', '14-17');
+        $fbParamsClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
+
+        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone))->getCreneauxSeq();
+
+        $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
+        $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
+        $testFBUserclone->setSequence($seq);
+
+        $fbUsersTest = array($testFBUserclone);
+        $fbCompareTest = new FBCompare($fbUsersTest, $creneauxGeneratedTest, $this->dateTimeZone->getName(), 1);
+
+        $testCompare = $fbCompareTest->getNbResultatsAffichés();
+
+        if ($testCompare == 0) {
+            $this->estFullBloquer = true;
+            return true;
+        }
+        return false;
     }
 
 

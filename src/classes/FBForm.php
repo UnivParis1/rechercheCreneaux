@@ -5,7 +5,7 @@ namespace RechercheCreneaux;
 use stdClass;
 use Exception;
 use League\Period\Sequence;
-use RechercheCreneaux\FBRessourceUser;
+use RechercheCreneaux\ressource\FBRessourceUser;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
