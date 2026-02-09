@@ -10,7 +10,7 @@ use DateTimeZone;
 use DateTimeImmutable;
 use League\Period\Period;
 use League\Period\Sequence;
-use RechercheCreneaux\FBUser;
+use RechercheCreneaux\FBRessource;
 
 
 /**
@@ -41,7 +41,7 @@ class FBUtils {
      *
      * @return array[FBUser]
      */
-    public static function sortFBUsersByBusyCount(FBUser ... $fbUsers) : array {
+    public static function sortFBUsersByBusyCount(FBRessource ... $fbUsers) : array {
         $fbUserSort = $fbUsers;
         usort($fbUserSort, function(FBRessource $fbusr1, FBRessource $fbusr2)  {
             if (!isset($fbusr1->fbusys) || !isset($fbusr2->fbusys)) {

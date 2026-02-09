@@ -88,10 +88,10 @@ $(function() {
 
     // rajoute un champ url externe si aucun vide
 
-    testVide = false;
+    let testVide = false;
     $("#externalFBs .exturi:not(#refexturi) input[type=text]").each( (index, elem) => {
-      if (test == false) {
-        test = elem.value.length == 0 ? true : false;
+      if (testVide == false) {
+        testVide = elem.value.length == 0 ? true : false;
       }
     });
 

@@ -78,7 +78,7 @@ class FBInvite {
         foreach ($this->fbUsers as $fbUser)
             $this->listUserInfos[] = $fbUser->getUidInfos();
 
-        $this->organisateur = FBUser::_getUidInfos($stdEnv->uidCasUser, $stdEnv);
+        $this->organisateur = FBRessourceUser::_getUidInfos($stdEnv->uidCasUser, $stdEnv);
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
         $from = ['mailbox' =>  $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr",
