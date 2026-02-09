@@ -14,6 +14,7 @@ use RechercheCreneaux\Type\EventICSinfo;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
 use PHPMailer\PHPMailer\PHPMailer;
+use RechercheCreneaux\ressource\FBRessourceUser;
 
 enum TypeInviteAction : int {
     case New = -1;

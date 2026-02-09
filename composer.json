@@ -29,6 +29,7 @@
     "autoload": {
         "psr-4": {"RechercheCreneaux\\": "src/classes",
           "RechercheCreneaux\\Type\\": "src/classes/type",
+          "RechercheCreneaux\\Ressource\\": "src/classes/ressource",
 		  "RechercheCreneauxLib\\": "lib/"
 	}
     },

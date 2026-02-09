@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
+use RechercheCreneaux\ressource\FBRessourceUser;
 use RechercheCreneauxLib\ZoomUP1;
 use RechercheCreneaux\Type\Userinfo;
 use League\Period\Period;

@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace RechercheCreneaux;
+namespace RechercheCreneaux\ressource;
 
 use stdClass;
 use Exception;
 use League\Period\Sequence;
 use RechercheCreneaux\FBRessource;
+use RechercheCreneaux\FBParams;
+use RechercheCreneaux\FBCreneauxGeneres;
+use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\Type\Userinfo;
 use rfx\Type\Cast;
 
@@ -16,15 +19,9 @@ use rfx\Type\Cast;
  * La normalisation vise à faire correspondre les créneaux busy avec les créneaux générés dans le but de faciliter les opérations de comparaisons
  * Ex: si un créneau busy est à cheval sur 2 créneaux, remplacer le busy par ces 2 créneaux et les considéré comme busy
  */
-class FBRessourceUser extends FBRessource {
-
-    /**
-     * @var string uid
-     */
-    public string $uid;
-
-
-    /** @var bool $estDisqualifier
+class FBRessourceUser extends FBRessource
+{
+   /** @var bool $estDisqualifier
      * si son agenda n'est pas pris en compte dans les résultats
      * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
      * plus chargés
@@ -43,25 +40,19 @@ class FBRessourceUser extends FBRessource {
      *
      * @return void
      */
-    private function __construct(String $uid, String $dtz, String $url, bool $estOptionnel, FBParams $fbParams) {
-
-        parent::__construct($url, $dtz, $fbParams);
+    private function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, bool $estOptionnel, Sequence &$creneaux, FBParams $fbParams)
+    {
+        parent::__construct($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams);
         parent::setDateTimeZone($dtz);
 
-        $this->uid = $uid;
         $this->estOptionnel = $estOptionnel;
 
         $this->uidInfos = ($fbParams->stdEnv->wsgroup) ? self::_getUidInfos($uid, $fbParams->stdEnv) : null;
     }
 
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, bool $estOptionnel, FBParams $fbParams) : FBRessourceUser {
-        if (!isset(self::$duration)) {
-            self::setDuration($dureeEnMinutes);
-        }
-
         $finishedUrl = $url . $uid;
-        $fbUser = new self($uid, $dtz, $finishedUrl, $estOptionnel, $fbParams);
-        $fbUser->creneauxGenerated = $creneaux;
+        $fbUser = new self($uid, $dtz, $finishedUrl, $dureeEnMinutes, $estOptionnel, $creneaux, $fbParams);
 
         $fbUser->_selectFreebusy();
         $busySeq = $fbUser->_initSequence();
@@ -76,37 +67,8 @@ class FBRessourceUser extends FBRessource {
     }
 
 
-    private function _testSiAgendaBloque(Sequence &$busySeq) : bool {
 
-        $testFBUserclone = clone($this);
-        $seqToTest = clone($busySeq);
-
-        // generation de créneaux standards
-        $fbParamsClone = clone($this->fbParams);
-        $fbParamsClone->fromDate = date('Y-m-d');
-        $fbParamsClone->duree = 60;
-        $fbParamsClone->plagesHoraires = array('9-12', '14-17');
-        $fbParamsClone->joursDemandes = ['MO', 'TU', 'WE', 'TH', 'FR'];
-
-        $creneauxGeneratedTest = (new FBCreneauxGeneres($fbParamsClone))->getCreneauxSeq();
-
-        $testFBUserclone->setCreneauxGenerated($creneauxGeneratedTest);
-        $seq = $testFBUserclone->_instanceCreneaux($seqToTest);
-        $testFBUserclone->setSequence($seq);
-
-        $fbUsersTest = array($testFBUserclone);
-        $fbCompareTest = new FBCompare($fbUsersTest, $creneauxGeneratedTest, $this->dateTimeZone->getName(), 1);
-
-        $testCompare = $fbCompareTest->getNbResultatsAffichés();
-
-        if ($testCompare == 0) {
-            $this->estFullBloquer = true;
-            return true;
-        }
-        return false;
-    }
-
-    public function getEstOptionnel() {
+    public function getEstOptionnel(): bool {
         return $this->estOptionnel;
     }
 
