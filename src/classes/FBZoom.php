@@ -43,11 +43,11 @@ class FBZoom
             throw new Exception('null modalCreneauStart && modalCreneauEnd');
         }
 
-        $userMailStd = FBUser::_getUidInfos($fbParams->stdEnv->uidCasUser, $fbParams->stdEnv);
+        $userMailStd = FBRessourceUser::_getUidInfos($fbParams->stdEnv->uidCasUser, $fbParams->stdEnv);
 
         $users = [];
         foreach ($fbParams->uids as $uid)
-            $users[] = FBUser::_getUidInfos($uid, $fbParams->stdEnv);
+            $users[] = FBRessourceUser::_getUidInfos($uid, $fbParams->stdEnv);
 
         $zoom = new ZoomUP1([
             'client_id' => $stdEnv->zoomClientId,
