@@ -224,7 +224,7 @@ if (FBForm::validParams($fbParams)) {
                     <ul>
                         <?php foreach ($fbUsersUnsetted as $fbUser): ?>
                             <li>
-                                <?= $fbUser->getUidInfos()->displayName ?>
+                                <?= $fbUser->getDisplayName() ?>
                             </li>
                         <?php endforeach ?>
                     </ul>
