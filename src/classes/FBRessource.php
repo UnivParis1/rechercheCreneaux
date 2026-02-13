@@ -30,7 +30,7 @@ class FBRessource
     /**
      * @var string content
      */
-    protected String $content;
+    protected ?String $content;
 
     public bool $estOptionnel;
 
@@ -67,6 +67,8 @@ class FBRessource
     */
     public bool $estDisqualifier = false;
 
+    public bool $error;
+
     public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel)
     {
         if (!isset(self::$duration)) {
@@ -83,11 +85,22 @@ class FBRessource
         $this->creneauxGenerated = $creneaux;
         $this->setDateTimeZone($dtz);
 
-        $fd = fopen($this->url, "r");
-        $content = stream_get_contents($fd);
-        fclose($fd);
+        $curl_handle=curl_init();
 
-        $this->content = $content;
+        curl_setopt($curl_handle, CURLOPT_URL, $this->url);
+        curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Université Paris 1 Pantheon-Sorbonne rechercheCreneaux');
+
+        $content = curl_exec($curl_handle);
+
+        $httpcode = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
+
+        curl_close($curl_handle);
+
+        $this->error = $httpcode == 200 ? false : true;
+
+        $this->content = $this->error ? null: $content;
     }
 
     public function getDisplayName(): string {

@@ -35,20 +35,27 @@ class FBForm {
         $creneauxGenerated = (new FBCreneauxGeneres($fbParams))->getCreneauxSeq();
 
         $fbUsers = array();
-        foreach ($fbParams->uids as $uid) {
-            $estOptionnel = false;
-            if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
-                $estOptionnel = true;
-            }
+        foreach ($fbParams->uids as $valuid) {
+            $uid = $valuid['uid'];
 
-            $fbUsers[] = FBRessourceUP1::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
-        }
+            switch ($valuid['type']) {
+                case 'up1':
+                    $estOptionnel = false;
+                    if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
+                        $estOptionnel = true;
+                    }
 
-        if (isset($fbParams->extUids)) {
-            foreach ($fbParams->extUids as $uid => $aExts) {
-                if ($aExts['type'] == 'gmail') {
-                    $fbUsers[] = FBRessourceGmail::factory($uid, $stdEnv->dtz, $aExts['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
-                }
+                    $fbUsers[] = FBRessourceUP1::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
+                    break;
+
+                case 'gmail':
+                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
+
+                    $fbUsers[] = $fbUser;
+                    break;
+                default:
+                    throw new Exception("Valuid n'est pas de type up1 ou gmail");
+                    break;
             }
         }
 

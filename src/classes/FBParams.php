@@ -20,8 +20,6 @@ class FBParams {
 
     var ?array $uids;
 
-    var ?array $extUids;
-
     var ?int $nbcreneaux;
 
     var ?int $duree;
@@ -62,7 +60,7 @@ class FBParams {
 
         $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
-        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? $stdEnv->varsHTTPGet['listuids'] : null;
+        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false], $stdEnv->varsHTTPGet['listuids'] ) : null;
         $this->nbcreneaux = isset($stdEnv->varsHTTPGet['creneaux']) ? (int) $stdEnv->varsHTTPGet['creneaux'] : null;
         $this->duree = isset($stdEnv->varsHTTPGet['duree']) ? (int) $stdEnv->varsHTTPGet['duree'] : null;
         $this->plagesHoraires = isset($stdEnv->varsHTTPGet['plagesHoraires']) ? $stdEnv->varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
@@ -80,11 +78,10 @@ class FBParams {
         $this->summaryevento = isset($stdEnv->varsHTTPGet['summaryevento']) ? $stdEnv->varsHTTPGet['summaryevento'] : null;
         $this->jsonSessionInviteInfos = isset($_SESSION[$this->inviteEnregistrementSessionName]) ? json_encode($_SESSION[$this->inviteEnregistrementSessionName]) : null;
         $this->jsonSessionZoomInfos = isset($_SESSION[$this->zoomSessionName]) ? json_encode($_SESSION[$this->zoomSessionName]) : null;
-        
+
         if ((new DateTime($this->fromDate)) < (new DateTime())) {
             $this->fromDate = (new DateTime())->format('Y-m-d');
         }
-
 
         // si externalfbs est vrai dans la configuration .env , on continue l'execution du constructeur sinon on s'arrête
         if ( ! $stdEnv->externalfbs) {
@@ -93,11 +90,10 @@ class FBParams {
 
         $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
 
-
-        if ($externaluris && ($lenExturis = sizeof($externaluris) > 0)) {
+        if ($externaluris && sizeof($externaluris) > 0) {
             $i = 0;
             foreach ($externaluris as $externaluri) {
-                $this->extUids['ext-' . $i] = ['type' => 'gmail', 'uri' => $externaluri];
+                $this->uids[] = ['type' => 'gmail', 'uid' => "ext-$i", 'uri' => $externaluri, 'data' => false];
                 $i++;
             }
         }
