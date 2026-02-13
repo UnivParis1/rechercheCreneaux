@@ -5,7 +5,8 @@ namespace RechercheCreneaux;
 use stdClass;
 use Exception;
 use League\Period\Sequence;
-use RechercheCreneaux\ressource\FBRessourceUser;
+use RechercheCreneaux\ressource\FBRessourceUP1;
+use RechercheCreneaux\ressource\FBRessourceGmail;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
@@ -40,8 +41,17 @@ class FBForm {
                 $estOptionnel = true;
             }
 
-            $fbUsers[] = FBRessourceUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $estOptionnel, $fbParams);
+            $fbUsers[] = FBRessourceUP1::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
         }
+
+        if (isset($fbParams->extUids)) {
+            foreach ($fbParams->extUids as $uid => $aExts) {
+                if ($aExts['type'] == 'gmail') {
+                    $fbUsers[] = FBRessourceGmail::factory($uid, $stdEnv->dtz, $aExts['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
+                }
+            }
+        }
+
         $this->fbUsers = $fbUsers;
         $this->creneauxGenerated = $creneauxGenerated;
         $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
@@ -81,7 +91,7 @@ class FBForm {
         return false;
     }
 
-    public function getFBRessourceUsersDisqualifierOrBloquer() : ?array {
+    public function getFBRessourcesDisqualifierOuBloquer() : ?array {
 
         $fbUsers = array();
         foreach ($this->fbUsers as $fbUser) {

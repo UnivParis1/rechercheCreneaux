@@ -32,6 +32,8 @@ class FBRessource
      */
     protected String $content;
 
+    public bool $estOptionnel;
+
     /**
      * @var Duration duration
      */
@@ -58,13 +60,22 @@ class FBRessource
     */
     public bool $estFullBloquer = false;
 
-    public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams)
+   /** @var bool $estDisqualifier
+     * si son agenda n'est pas pris en compte dans les résultats
+     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
+     * plus chargés
+    */
+    public bool $estDisqualifier = false;
+
+    public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel)
     {
         if (!isset(self::$duration)) {
             self::setDuration($dureeEnMinutes);
         }
 
         $this->fbParams = $fbParams;
+
+        $this->estOptionnel = $estOptionnel;
 
         $this->uid = $uid;
         $this->isChanged = false;
@@ -77,6 +88,10 @@ class FBRessource
         fclose($fd);
 
         $this->content = $content;
+    }
+
+    public function getDisplayName(): string {
+        return $this->uid;
     }
 
    /**
@@ -123,25 +138,15 @@ class FBRessource
      *
      * @return  \League\Period\Sequence
      */
-    public function setCreneauxGenerated(&$creneauxGenerated)
+    public function setCreneauxGenerated(&$creneauxGenerated): \League\Period\Sequence
     {
         $this->creneauxGenerated =& $creneauxGenerated;
 
         return $creneauxGenerated;
     }
 
-    public function _selectFreebusy() {
-
-        $vcal = Vcalendar::factory()->parse($this->content);
-
-        if ($vcal->countComponents() !== 1) {
-            throw new Exception("FBUser: component !== 1");
-        }
-
-        $component = $vcal->getComponent();
-        $fbusys = $component->getAllFreebusy();
-
-        $this->fbusys = $fbusys;
+    public function getEstOptionnel(): bool {
+        return $this->estOptionnel;
     }
 
     protected function _initSequence() : Sequence {
