@@ -161,12 +161,12 @@ if (FBForm::validParams($fbParams)) {
                     <div id="divjours">
                         <p>Jours sélectionnés</p>
                         <fieldset>
-                            <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?>>Lundi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mardi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="WE" <?= in_array('WE', $fbParams->joursDemandes) ? 'checked' : '' ?>>Mercredi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="TH" <?= in_array('TH', $fbParams->joursDemandes) ? 'checked' : '' ?>>Jeudi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="FR" <?= in_array('FR', $fbParams->joursDemandes) ? 'checked' : '' ?>>Vendredi</input>
-                            <input type="checkbox" name="joursCreneaux[]" value="SA" <?= in_array('SA', $fbParams->joursDemandes) ? 'checked' : '' ?>>Samedi</input>
+                            <input type="checkbox" name="joursCreneaux[]" value="MO" <?= in_array('MO', $fbParams->joursDemandes) ? 'checked' : '' ?> />Lundi
+                            <input type="checkbox" name="joursCreneaux[]" value="TU" <?= in_array('TU', $fbParams->joursDemandes) ? 'checked' : '' ?> />Mardi
+                            <input type="checkbox" name="joursCreneaux[]" value="WE" <?= in_array('WE', $fbParams->joursDemandes) ? 'checked' : '' ?> />Mercredi
+                            <input type="checkbox" name="joursCreneaux[]" value="TH" <?= in_array('TH', $fbParams->joursDemandes) ? 'checked' : '' ?> />Jeudi
+                            <input type="checkbox" name="joursCreneaux[]" value="FR" <?= in_array('FR', $fbParams->joursDemandes) ? 'checked' : '' ?> />Vendredi
+                            <input type="checkbox" name="joursCreneaux[]" value="SA" <?= in_array('SA', $fbParams->joursDemandes) ? 'checked' : '' ?> />Samedi
                         </fieldset>
                         <br />
                         </div>
@@ -182,7 +182,6 @@ if (FBForm::validParams($fbParams)) {
                     <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
                 </div>
             </div>
-        </div>
         <?php if ($stdEnv->wsgroup): require_once 'modal.inc.php'; endif?>
         <?php if ($stdEnv->evento && $stdEnv->eventoWsUrl && $stdEnv->eventoShibentityid && isset($fbForm)): require_once 'modal_evento.inc.php'; endif?>
 

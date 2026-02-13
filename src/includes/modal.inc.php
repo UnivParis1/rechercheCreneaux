@@ -11,7 +11,7 @@
                     <span id="creneauInfo"></span>
                     <hr>
                     <p>Participants</p>
-                    <ul id="creneauMailParticipant_ul" />
+                    <ul id="creneauMailParticipant_ul"></ul>
                 </div>
                 <div class="col-5 border-start" id="creneauBoxInput">
                     <div class="row">
