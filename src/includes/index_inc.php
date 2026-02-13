@@ -1,5 +1,6 @@
 <?php
 
+
 declare(strict_types=1);
 
 namespace RechercheCreneaux;
@@ -7,6 +8,7 @@ namespace RechercheCreneaux;
 use DateTime;
 use DateInterval;
 use IntlDateFormatter;
+use Exception;
 use RechercheCreneaux\FBForm;
 use RechercheCreneaux\FBUtils;
 use RechercheCreneaux\FBInvite;
@@ -14,11 +16,28 @@ use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
 if (FBForm::validParams($fbParams)) {
-    $js_uids = json_encode($fbParams->uids);
-
-    $jsExtUids = isset($fbParams->extUids) ? json_encode($fbParams->extUids) : null;
-
     $fbForm = new FBForm($fbParams, $stdEnv);
+
+    foreach ($fbForm->getFbUsers() as $fbUser) {
+        $validx = false;
+        foreach ($fbParams->uids as $idx => $valuid) {
+            if ($valuid['uid'] == $fbUser->uid) {
+                $validx = $idx;
+            }
+        }
+        
+        if ($validx === false) {
+            throw new Exception("Erreur: impossible de trouver l'uid : {$fbUser->uid} dans les paramètres");
+        }
+
+        if ($fbUser->error) {
+            $fbParams->uids[$validx]['data'] = false;
+        } else {
+            $fbParams->uids[$validx]['data'] =  true;
+        }
+    }
+
+    $js_uids = json_encode($fbParams->uids);
 
     $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
 
@@ -83,7 +102,7 @@ if (FBForm::validParams($fbParams)) {
             <?php if ($fbParams->uids && isset($js_uids)): ?>
                 var jsuids = <?= "$js_uids" ?>;
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-                var jsuids = ['<?= $stdEnv->uidCasUser ?>'];
+                var jsuids = [ {type: 'up1', uid: '<?= $stdEnv->uidCasUser ?>'} ];
             <?php endif ?>
             <?php if (isset($jsonSessionInviteInfos)): ?>
                 var jsSessionInviteInfos = JSON.parse('<?= addslashes($jsonSessionInviteInfos) ?>');
@@ -101,12 +120,6 @@ if (FBForm::validParams($fbParams)) {
         <?php if (isset($isEventoSession) && $isEventoSession): ?>
             var idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
             var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
-        <?php endif ?>
-
-        <?php if ($stdEnv->externalfbs): ?>
-            <?php if (isset($jsExtUids) && $jsExtUids): ?>
-                var jsExtUids = JSON.parse('<?= addslashes($jsExtUids) ?>');
-            <?php endif ?>
         <?php endif ?>
     </script>
 

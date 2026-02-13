@@ -39,7 +39,7 @@ class FBCompare
     {
         // supprime les fbusers fullbloquer ou optionnel
         foreach ($arrayFBUsers as $key => $fbUser)
-            if ($fbUser->getEstFullBloquer() == true || $fbUser->estOptionnel == true)
+            if ($fbUser->error || $fbUser->getEstFullBloquer() == true || $fbUser->estOptionnel == true)
                 unset($arrayFBUsers[$key]);
 
         $this->arrayFBUsers = $arrayFBUsers;
