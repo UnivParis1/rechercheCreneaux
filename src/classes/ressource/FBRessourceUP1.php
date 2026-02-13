@@ -9,9 +9,8 @@ use Exception;
 use League\Period\Sequence;
 use RechercheCreneaux\FBRessource;
 use RechercheCreneaux\FBParams;
-use RechercheCreneaux\FBCreneauxGeneres;
-use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\Type\Userinfo;
+use Kigkonsult\Icalcreator\Vcalendar;
 use rfx\Type\Cast;
 
 /**
@@ -19,18 +18,8 @@ use rfx\Type\Cast;
  * La normalisation vise à faire correspondre les créneaux busy avec les créneaux générés dans le but de faciliter les opérations de comparaisons
  * Ex: si un créneau busy est à cheval sur 2 créneaux, remplacer le busy par ces 2 créneaux et les considéré comme busy
  */
-class FBRessourceUser extends FBRessource
+class FBRessourceUP1 extends FBRessource
 {
-   /** @var bool $estDisqualifier
-     * si son agenda n'est pas pris en compte dans les résultats
-     * dans le cas où la recherche donne 0 résultats, on élimine les agendas les
-     * plus chargés
-    */
-    public bool $estDisqualifier = false;
-
-
-    public bool $estOptionnel;
-
     private ?Userinfo $uidInfos;
 
     /**
@@ -40,19 +29,17 @@ class FBRessourceUser extends FBRessource
      *
      * @return void
      */
-    private function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, bool $estOptionnel, Sequence &$creneaux, FBParams $fbParams)
+    private function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel)
     {
-        parent::__construct($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams);
+        parent::__construct($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
         parent::setDateTimeZone($dtz);
-
-        $this->estOptionnel = $estOptionnel;
 
         $this->uidInfos = ($fbParams->stdEnv->wsgroup) ? self::_getUidInfos($uid, $fbParams->stdEnv) : null;
     }
 
-    public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, bool $estOptionnel, FBParams $fbParams) : FBRessourceUser {
+    public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel) : FBRessourceUP1 {
         $finishedUrl = $url . $uid;
-        $fbUser = new self($uid, $dtz, $finishedUrl, $dureeEnMinutes, $estOptionnel, $creneaux, $fbParams);
+        $fbUser = new self($uid, $dtz, $finishedUrl, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
 
         $fbUser->_selectFreebusy();
         $busySeq = $fbUser->_initSequence();
@@ -66,15 +53,14 @@ class FBRessourceUser extends FBRessource
         return $fbUser;
     }
 
-
-
-    public function getEstOptionnel(): bool {
-        return $this->estOptionnel;
-    }
-
     public function getUidInfos() : Userinfo {
         // ajout requête pour avoir mail et name sur api
         return $this->uidInfos;
+    }
+
+    public function getDisplayName() : string {
+
+        return $this->uidInfos->displayName;
     }
 
     /**
@@ -91,6 +77,20 @@ class FBRessourceUser extends FBRessource
             throw new Exception("_gellFullnameWithUid erreur récupération uid: $uid");
 
         return $infos;
+    }
+
+    public function _selectFreebusy(): void {
+
+        $vcal = Vcalendar::factory()->parse($this->content);
+
+        if ($vcal->countComponents() !== 1) {
+            throw new \Exception("FBUser: component !== 1");
+        }
+
+        $component = $vcal->getComponent();
+        $fbusys = $component->getAllFreebusy();
+
+        $this->fbusys = $fbusys;
     }
 
     /**

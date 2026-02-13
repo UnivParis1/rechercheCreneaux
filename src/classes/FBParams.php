@@ -93,32 +93,14 @@ class FBParams {
 
         $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
 
-        if ($externaluris && sizeof($externaluris) > 0) {
-            $this->extUids = [];
+
+        if ($externaluris && ($lenExturis = sizeof($externaluris) > 0)) {
             $i = 0;
-            foreach ($externaluris as $uri) {
-                try {
-                    $content = null;
-                    if ($fd = @fopen($uri, "r")) {
-                        $content = @stream_get_contents($fd);
-                        fclose($fd);
-                    }
-
-                    $data = false;
-                    if ($content)
-                        $data = $content;
-
-                    $this->extUids['ext-' . $i] = ['uri' => $uri, 'data' => $data];
-                } catch (Exception $e) {
-                    $this->extUids['ext-' . $i] = ['uri' => $uri, 'data' => false];
-                }
-
+            foreach ($externaluris as $externaluri) {
+                $this->extUids['ext-' . $i] = ['type' => 'gmail', 'uri' => $externaluri];
                 $i++;
             }
-        } else {
-            $this->extUids = null;
         }
-
     }
 
 }

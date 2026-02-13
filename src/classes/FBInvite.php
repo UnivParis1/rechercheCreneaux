@@ -14,7 +14,7 @@ use RechercheCreneaux\Type\EventICSinfo;
 use League\Period\Period as Period;
 use RechercheCreneauxLib\EasyPeasyICSUP1;
 use PHPMailer\PHPMailer\PHPMailer;
-use RechercheCreneaux\ressource\FBRessourceUser;
+use RechercheCreneaux\ressource\FBRessourceUP1;
 
 enum TypeInviteAction : int {
     case New = -1;
@@ -79,7 +79,7 @@ class FBInvite {
         foreach ($this->fbUsers as $fbUser)
             $this->listUserInfos[] = $fbUser->getUidInfos();
 
-        $this->organisateur = FBRessourceUser::_getUidInfos($stdEnv->uidCasUser, $stdEnv);
+        $this->organisateur = FBRessourceUP1::_getUidInfos($stdEnv->uidCasUser, $stdEnv);
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
         $from = ['mailbox' =>  $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr",

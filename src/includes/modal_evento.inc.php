@@ -47,7 +47,7 @@
                     <ul id='modalEventoParticipants'>
                     <?php if (isset($fbForm)): ?>
                     <?php foreach ($fbForm->getFbUsers() as $fbUser): ?>
-                        <li><?= $fbUser->getUidInfos()->displayName ?></li>
+                        <li><?= $fbUser->getDisplayName() ?></li>
                     <?php endforeach ?>
                     <?php endif ?>
                     </ul>
