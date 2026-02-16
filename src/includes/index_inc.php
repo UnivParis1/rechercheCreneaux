@@ -30,14 +30,14 @@ if (FBForm::validParams($fbParams)) {
             throw new Exception("Erreur: impossible de trouver l'uid : {$fbUser->uid} dans les paramètres");
         }
 
-        if ($fbUser->httpError) {
+        if ($fbUser->httpError || $fbUser->valid == false) {
             $fbParams->uids[$validx]['data'] = false;
         } else {
             $fbParams->uids[$validx]['data'] =  true;
         }
     }
 
-    $js_uids = json_encode($fbParams->uids);
+    $jsuids = json_encode($fbParams->uids);
 
     $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
 
@@ -99,8 +99,8 @@ if (FBForm::validParams($fbParams)) {
             var urlwsgroupUserInfos = '<?= str_replace('Trusted', '', $stdEnv->urlwsgroupUserInfos); ?>';
             var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
-            <?php if ($fbParams->uids && isset($js_uids)): ?>
-                var jsuids = <?= "$js_uids" ?>;
+            <?php if ($fbParams->uids && isset($jsuids)): ?>
+                var jsuids = <?= "$jsuids" ?>;
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
                 var jsuids = [ {type: 'up1', uid: '<?= $stdEnv->uidCasUser ?>'} ];
             <?php endif ?>

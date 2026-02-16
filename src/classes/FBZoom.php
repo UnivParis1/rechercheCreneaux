@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
-use RechercheCreneaux\ressource\FBRessourceUP1;
+use RechercheCreneaux\Ressource\FBRessourceUP1;
 use RechercheCreneauxLib\ZoomUP1;
 use RechercheCreneaux\Type\Userinfo;
 use League\Period\Period;
@@ -47,8 +47,14 @@ class FBZoom
         $userMailStd = FBRessourceUP1::_getUidInfos($fbParams->stdEnv->uidCasUser, $fbParams->stdEnv);
 
         $users = [];
-        foreach ($fbParams->uids as $uid)
-            $users[] = FBRessourceUP1::_getUidInfos($uid, $fbParams->stdEnv);
+        foreach ($fbParams->uids as $aUid) {
+            $uid = $aUid['uid'];
+            if ($aUid['type'] == 'gmail') {
+                $users[] = new Userinfo($uid, $uid, $uid);
+            } else {
+                $users[] = FBRessourceUP1::_getUidInfos($uid, $fbParams->stdEnv);
+            }
+        }
 
         $zoom = new ZoomUP1([
             'client_id' => $stdEnv->zoomClientId,

@@ -20,7 +20,7 @@ use rfx\Type\Cast;
  */
 class FBRessourceUP1 extends FBRessource
 {
-    private ?Userinfo $uidInfos;
+    public ?Userinfo $uidInfos;
 
     /**
      * __construct
@@ -55,11 +55,6 @@ class FBRessourceUP1 extends FBRessource
         $fbUser->sequence = $fbUser->_instanceCreneaux($busySeq);
 
         return $fbUser;
-    }
-
-    public function getUidInfos() : Userinfo {
-        // ajout requête pour avoir mail et name sur api
-        return $this->uidInfos;
     }
 
     public function getDisplayName() : string {

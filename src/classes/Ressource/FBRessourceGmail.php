@@ -23,6 +23,7 @@ class FBRessourceGmail extends FBRessource {
         $fbUser = new self($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
 
         if ($fbUser->httpError) {
+            $fbUser->valid = false;
             return $fbUser;
         }
 

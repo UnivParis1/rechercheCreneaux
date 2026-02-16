@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
-use DateTimeZone;
 use DateInterval;
 use DateTime;
-use RechercheCreneaux\FBParams;
-use League\Period\Period;
-use League\Period\Duration;
-use League\Period\Sequence;
+use DateTimeZone;
 use Kigkonsult\Icalcreator\Vcalendar;
+use League\Period\Duration;
+use League\Period\Period;
+use League\Period\Sequence;
+use RechercheCreneaux\FBParams;
+use RechercheCreneaux\Type\Userinfo;
 
 class FBRessource
 {
+    public ?Userinfo $uidInfos;
+
     public FBParams $fbParams;
 
     /**
@@ -361,5 +364,23 @@ class FBRessource
         return false;
     }
 
+    /**
+     * Get the value of uidInfos
+     */
+    public function getUidInfos()
+    {
+        return $this->uidInfos;
+    }
 
+    /**
+     * Set the value of uidInfos
+     *
+     * @return  self
+     */
+    public function setUidInfos($uidInfos)
+    {
+        $this->uidInfos = $uidInfos;
+
+        return $this;
+    }
 }
