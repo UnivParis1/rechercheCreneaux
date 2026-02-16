@@ -30,7 +30,7 @@ if (FBForm::validParams($fbParams)) {
             throw new Exception("Erreur: impossible de trouver l'uid : {$fbUser->uid} dans les paramètres");
         }
 
-        if ($fbUser->error) {
+        if ($fbUser->httpError) {
             $fbParams->uids[$validx]['data'] = false;
         } else {
             $fbParams->uids[$validx]['data'] =  true;

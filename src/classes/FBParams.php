@@ -60,7 +60,7 @@ class FBParams {
 
         $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
-        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false], $stdEnv->varsHTTPGet['listuids'] ) : null;
+        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false], $stdEnv->varsHTTPGet['listuids'] ) : null; // array_map permet d'enlever les éléments vide de ce paramètre
         $this->nbcreneaux = isset($stdEnv->varsHTTPGet['creneaux']) ? (int) $stdEnv->varsHTTPGet['creneaux'] : null;
         $this->duree = isset($stdEnv->varsHTTPGet['duree']) ? (int) $stdEnv->varsHTTPGet['duree'] : null;
         $this->plagesHoraires = isset($stdEnv->varsHTTPGet['plagesHoraires']) ? $stdEnv->varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
@@ -91,9 +91,24 @@ class FBParams {
         $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
 
         if ($externaluris && sizeof($externaluris) > 0) {
-            $i = 0;
+            $i = 1;
             foreach ($externaluris as $externaluri) {
-                $this->uids[] = ['type' => 'gmail', 'uid' => "ext-$i", 'uri' => $externaluri, 'data' => false];
+
+                $decodedUrl = urldecode($externaluri);
+
+                $aUid = ['type' => 'gmail', 'uri' => $externaluri, 'data' => false, 'valid' => false];
+
+                $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
+
+                if (str_starts_with($decodedUrl, "https://calendar.google.com") && preg_match($emailPattern, $decodedUrl, $matches)) {
+                    $email = $matches[0];
+                    $aUid['uid'] = $email;
+                    $aUid['valid'] = true;
+                } else {
+                    $aUid['uid'] = "err-$i";
+                }
+
+                $this->uids[] = $aUid;
                 $i++;
             }
         }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RechercheCreneaux\ressource;
+namespace RechercheCreneaux\Ressource;
 
 use League\Period\Sequence;
 use RechercheCreneaux\FBRessource;
@@ -22,10 +22,11 @@ class FBRessourceGmail extends FBRessource {
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel = false) : FBRessourceGmail {
         $fbUser = new self($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
 
-        if ($fbUser->error) {
+        if ($fbUser->httpError) {
             return $fbUser;
         }
 
+        $fbUser->valid = true;
         $fbUser->_selectFreebusy();
         $busySeq = $fbUser->_initSequence();
 
