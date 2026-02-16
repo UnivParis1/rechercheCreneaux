@@ -43,7 +43,10 @@ class FBUtils {
      */
     public static function sortFBUsersByBusyCount(FBUser ... $fbUsers) : array {
         $fbUserSort = $fbUsers;
-        usort($fbUserSort, function(FBUser $fbusr1, FBUser $fbusr2)  {
+        usort($fbUserSort, function(FBRessource $fbusr1, FBRessource $fbusr2)  {
+            if (!isset($fbusr1->fbusys) || !isset($fbusr2->fbusys)) {
+                return null;
+            }
             $nbBusys1 = count($fbusr1->fbusys);
             $nbBusys2 = count($fbusr2->fbusys);
 
