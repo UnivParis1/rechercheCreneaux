@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RechercheCreneaux\ressource;
+namespace RechercheCreneaux\Ressource;
 
 use stdClass;
 use Exception;
@@ -40,6 +40,10 @@ class FBRessourceUP1 extends FBRessource
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel) : FBRessourceUP1 {
         $finishedUrl = $url . $uid;
         $fbUser = new self($uid, $dtz, $finishedUrl, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
+
+        if ($fbUser->uidInfos) {
+            $fbUser->valid = true;
+        }
 
         $fbUser->_selectFreebusy();
         $busySeq = $fbUser->_initSequence();

@@ -67,7 +67,9 @@ class FBRessource
     */
     public bool $estDisqualifier = false;
 
-    public bool $error;
+    public bool $httpError = true;
+
+    public bool $valid = false;
 
     public function __construct(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel)
     {
@@ -98,9 +100,9 @@ class FBRessource
 
         curl_close($curl_handle);
 
-        $this->error = $httpcode == 200 ? false : true;
+        $this->httpError = $httpcode == 200 ? false : true;
 
-        $this->content = $this->error ? null: $content;
+        $this->content = $this->httpError ? null: $content;
     }
 
     public function getDisplayName(): string {
