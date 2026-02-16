@@ -10,6 +10,7 @@ use RechercheCreneaux\Ressource\FBRessourceGmail;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
+use RechercheCreneaux\Type\Userinfo;
 
 /**
  * Classe centrale de l'application, référençant les autres objets et paramètres
@@ -51,6 +52,7 @@ class FBForm {
                 case 'gmail':
                     $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
+                    $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
                     $fbUsers[] = $fbUser;
                     break;
                 default:

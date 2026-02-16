@@ -1,7 +1,22 @@
 define('calext', ['jquery'], function($) {
+  var entriesExts;
 
   $(function() {
-    let entriesExts = Array();
+    gererAffichageHaut();
+
+    $('#creneauMailInput').on('shown.bs.modal', showModal);
+  });
+
+  function showModal() {
+    for (let ext of entriesExts) {
+      if (ext.data == true) {
+        $('#creneauMailParticipant_ul').append("<li>" + ext.uid + "</li>");
+      }
+    }
+  }
+
+  function gererAffichageHaut() {
+    entriesExts = Array();
 
     jsuids.forEach(function(valuid) {
       if (valuid.type == 'gmail') {
@@ -52,8 +67,7 @@ define('calext', ['jquery'], function($) {
     if (!testVide) {
       addChampsInputExt();
     }
-
-  });
+  }
 
   function addChampsInputExt() {
     let extUri = $("#refexturi").clone(true).removeAttr('id').removeClass('d-none');
@@ -74,11 +88,13 @@ define('calext', ['jquery'], function($) {
 
     let valid = addExternalUri(divElem, extUrl, error);
 
-    if (valid == true) {
-      $("#externalFBs .exturi:not(#refexturi) input[type=text]").each((index, elem) => {
-        notInsertNew = (notInsertNew == false && elem.value.length == 0) ? true : false;
-      });
+    if (!valid) {
+      return false;
     }
+
+    $("#externalFBs .exturi:not(#refexturi) input[type=text]").each((index, elem) => {
+      notInsertNew = (notInsertNew == false && elem.value.length == 0) ? true : false;
+    });
 
     divElem.find("span.text-danger").remove();
     extUrl.attr('type', 'hidden');
@@ -95,7 +111,6 @@ define('calext', ['jquery'], function($) {
 
   function addExternalUri(divElem, extUrl, error) {
 
-
     if (!error && extUrl.val().startsWith("https://") == false) {
       let elemDanger = divElem.find('.text-danger');
       if (elemDanger.length == 0) {
@@ -105,12 +120,7 @@ define('calext', ['jquery'], function($) {
       return false;
     }
 
-    if (error) {
-      return false;
-    }
-
-    return true;
-
+    return error ? false : true;
   }
 
 });
