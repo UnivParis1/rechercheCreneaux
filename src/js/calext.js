@@ -1,5 +1,5 @@
 define('calext', ['jquery'], function($) {
-  var entriesExts;
+  var entriesExts = new Array();
 
   $(function() {
     gererAffichageHaut();
@@ -16,8 +16,6 @@ define('calext', ['jquery'], function($) {
   }
 
   function gererAffichageHaut() {
-    entriesExts = Array();
-
     jsuids.forEach(function(valuid) {
       if (valuid.type == 'gmail') {
         entriesExts.push(valuid);
@@ -121,6 +119,10 @@ define('calext', ['jquery'], function($) {
     }
 
     return error ? false : true;
+  }
+
+  return {
+    'entriesExts': entriesExts
   }
 
 });
