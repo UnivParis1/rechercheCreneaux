@@ -204,7 +204,7 @@ Cordialement,</p>
             $_SESSION['inviteEnregistrement'] = [];
 
         // envoi à l'organisateur
-        if ( ! $eventICSinfo = $this->sendICSKronolith(sendITipMail: ! $sendMessage) )
+        if ( ! $eventICSinfo = $this->sendICSKronolith(sendITipMail: $sendMessage) )
             throw new Exception("erreur communication ICS serveur");
 
         foreach ($this->listUserInfos as $userinfo) {

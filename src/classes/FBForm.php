@@ -68,7 +68,7 @@ class FBForm {
     public function invitationProcess(array $listDate) : bool {
         if (FBInvite::verifSiInvitation($this->fbParams)) {
             $fbInvite = new FBInvite($this, $this->fbParams, $this->stdEnv, $listDate);
-            $fbInvite->sendInvite();
+            $fbInvite->sendInvite( ($this->stdEnv->env == 'prod') ? true : false);
             // Lors d'un premier appel, initialisation de jsonSessionInviteInfos
             if ($this->fbParams->jsonSessionInviteInfos == null) {
                 if (!isset($_SESSION[$this->fbParams->inviteEnregistrementSessionName])) {
