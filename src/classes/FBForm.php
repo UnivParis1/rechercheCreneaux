@@ -5,10 +5,12 @@ namespace RechercheCreneaux;
 use stdClass;
 use Exception;
 use League\Period\Sequence;
-use RechercheCreneaux\FBRessourceUser;
+use RechercheCreneaux\Ressource\FBRessourceUP1;
+use RechercheCreneaux\Ressource\FBRessourceGmail;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
+use RechercheCreneaux\Type\Userinfo;
 
 /**
  * Classe centrale de l'application, référençant les autres objets et paramètres
@@ -34,14 +36,31 @@ class FBForm {
         $creneauxGenerated = (new FBCreneauxGeneres($fbParams))->getCreneauxSeq();
 
         $fbUsers = array();
-        foreach ($fbParams->uids as $uid) {
-            $estOptionnel = false;
-            if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
-                $estOptionnel = true;
-            }
+        foreach ($fbParams->uids as $valuid) {
+            $uid = $valuid['uid'];
 
-            $fbUsers[] = FBRessourceUser::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $estOptionnel, $fbParams);
+            switch ($valuid['type']) {
+                case 'up1':
+                    $estOptionnel = false;
+                    if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
+                        $estOptionnel = true;
+                    }
+
+                    $fbUsers[] = FBRessourceUP1::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
+                    break;
+
+                case 'gmail':
+                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
+
+                    $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
+                    $fbUsers[] = $fbUser;
+                    break;
+                default:
+                    throw new Exception("Valuid n'est pas de type up1 ou gmail");
+                    break;
+            }
         }
+
         $this->fbUsers = $fbUsers;
         $this->creneauxGenerated = $creneauxGenerated;
         $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
@@ -81,7 +100,7 @@ class FBForm {
         return false;
     }
 
-    public function getFBRessourceUsersDisqualifierOrBloquer() : ?array {
+    public function getFBRessourcesDisqualifierOuBloquer() : ?array {
 
         $fbUsers = array();
         foreach ($this->fbUsers as $fbUser) {
