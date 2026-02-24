@@ -39,6 +39,9 @@ class FBForm {
         foreach ($fbParams->uids as $valuid) {
             $uid = $valuid['uid'];
 
+            if ( ! $valuid['valid'])
+                continue;
+
             switch ($valuid['type']) {
                 case 'up1':
                     $estOptionnel = false;
