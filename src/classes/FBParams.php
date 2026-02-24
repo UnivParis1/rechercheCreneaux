@@ -60,7 +60,7 @@ class FBParams {
 
         $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
-        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false], $stdEnv->varsHTTPGet['listuids'] ) : null; // array_map permet d'enlever les éléments vide de ce paramètre
+        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false, 'valid' => true], $stdEnv->varsHTTPGet['listuids'] ) : null; // array_map permet d'enlever les éléments vide de ce paramètre
         $this->nbcreneaux = isset($stdEnv->varsHTTPGet['creneaux']) ? (int) $stdEnv->varsHTTPGet['creneaux'] : null;
         $this->duree = isset($stdEnv->varsHTTPGet['duree']) ? (int) $stdEnv->varsHTTPGet['duree'] : null;
         $this->plagesHoraires = isset($stdEnv->varsHTTPGet['plagesHoraires']) ? $stdEnv->varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
