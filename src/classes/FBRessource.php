@@ -28,7 +28,7 @@ class FBRessource
     /**
      * @var string url
      */
-    protected String $url;
+    public String $url;
 
     /**
      * @var string content

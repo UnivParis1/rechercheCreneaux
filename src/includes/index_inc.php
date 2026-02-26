@@ -22,7 +22,13 @@ if (FBForm::validParams($fbParams)) {
         $validx = false;
         foreach ($fbParams->uids as $idx => $valuid) {
             if ($valuid['uid'] == $fbUser->uid) {
-                $validx = $idx;
+                if (array_key_exists('uri', $valuid)) {
+                    if ($valuid['uri'] == $fbUser->url) {
+                        $validx = $idx;
+                    }
+                } else {
+                    $validx = $idx;
+                }
             }
         }
         
