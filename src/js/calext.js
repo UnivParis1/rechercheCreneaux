@@ -89,7 +89,6 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
       return false;
     }
 
-    entry.valid = true;
 
     divElem.find("span.text-danger").remove();
     inputUrl.attr('type', 'hidden');
@@ -98,15 +97,16 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
     let buttonAddExternalFB = divElem.find('.addExternalFB');
     buttonAddExternalFB.removeClass('addExternalFB').html('supprimer').addClass('rmExternalFB').off('click');
 
-    let iNewEntry;
+    let idxNewElem;
     if (!trigger) {
-      iNewEntry = entriesExts.push(entry) - 1;
+      entry.valid = true;
+      idxNewElem = entriesExts.push(entry) - 1;
     } else {
-      iNewEntry = entriesExts.findIndex((elem) => elem.uri == uri);
+      idxNewElem = entriesExts.findIndex((elem) => elem.uri == uri);
     }
 
     buttonAddExternalFB.on('click', (elem) => {
-      entriesExts.splice(iNewEntry, 1);
+      entriesExts.splice(idxNewElem, 1);
       elem.target.parentElement.parentElement.remove();
     });
   }
@@ -118,7 +118,18 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
     let divElem = $(event.target).parent().parent();
 
     let inputUrl = divElem.find("input[type='text']");
-    if (inputUrl.val().length == 0) {
+
+    // test la présence d'un champ HTML de saisie vide et stop si c'est le cas (évite d'ajouter des doublons pour les champs de saisies personnel extérieur)
+    if (inputUrl.length > 0 && inputUrl.val().length == 0) {
+      return false;
+    }
+
+    let exist = entriesExts.findIndex( (elem) => inputUrl.val() == elem.uri);
+
+    if (exist != -1) {
+      if (divElem.find('.text-danger').length == 0) {
+        divElem.prepend('<span class="text-danger text-align-center">entrée existante</span>');
+      }
       return false;
     }
 
@@ -127,7 +138,7 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
 
   function testExternalUri(divElem, inputUrl) {
 
-    if (inputUrl.val().startsWith("https://") == false) {
+    if (inputUrl.length > 0 && inputUrl.val().startsWith("https://") == false) {
       let elemDanger = divElem.find('.text-danger');
       if (elemDanger.length == 0) {
         let spanDanger = '<span class="text-danger text-align-center">Url mal formattée</span>';
