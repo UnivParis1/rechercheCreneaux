@@ -93,6 +93,9 @@ class FBParams {
         if ($externaluris && sizeof($externaluris) > 0) {
             $i = 1;
             foreach ($externaluris as $externaluri) {
+                // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
+                if ($this->uids && array_find($this->uids, fn($aUid) => array_key_exists('uri', $aUid) && $aUid['uri'] == $externaluri))
+                    throw new \Exception("Doublon sur les agenda extérieurs, contactez la DSIUN");
 
                 $decodedUrl = urldecode($externaluri);
 

@@ -1,5 +1,8 @@
 define('calext', ['jquery', 'on-change'], function($, onChange) {
 
+  var textDoublon = 'URL déja présente';
+  var textError = 'Erreur de données sur cette ressource';
+
   var entriesExts = [];
 
   $(function() {
@@ -61,7 +64,7 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
         divEntry.find('input').val(entry.uri);
 
         if (entry.data == false) {
-          divEntry.prepend('<span class="text-danger text-align-center">False datas</span>');
+          divEntry.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text(textError));
         } else {
           let divElem = buttonAdd.parent().parent();
           _ajouterInputVisuel(divElem, divElem.find("input[type='text']"), entry.uri, true);
@@ -124,12 +127,17 @@ define('calext', ['jquery', 'on-change'], function($, onChange) {
       return false;
     }
 
-    let exist = entriesExts.findIndex( (elem) => inputUrl.val() == elem.uri);
+    let exist = entriesExts.findIndex( (elem) => inputUrl.val() == elem.uri && elem.data);
 
     if (exist != -1) {
-      if (divElem.find('.text-danger').length == 0) {
-        divElem.prepend('<span class="text-danger text-align-center">entrée existante</span>');
+      let textDanger = divElem.find('.text-danger:not(#refDanger)');
+      if (textDanger.length == 0) {
+        // récupère le template du code depuis le dom HTML (index_inc.php)
+        divElem.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text(textDoublon));
+      } else {
+        textDanger.text(textDoublon);
       }
+      inputUrl.val('');
       return false;
     }
 
