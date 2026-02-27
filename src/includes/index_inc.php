@@ -158,23 +158,32 @@ if (FBForm::validParams($fbParams)) {
                         <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
                     </select>
                 </div>
-                <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
-
+               <div class="col col-lg-3 offset-6 offset-md-0 order-lg-1 border border-gray-500 border-dotted">
+                    <p>Envoyer requête</p>
+                    <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-md-3 col-lg-3 border-start border-top border-bottom border-gray-500 border-dotted p-3">
                 <?php if ($stdEnv->externalfbs): ?>
-                    <div id="externalFBs">
-                        <div id="refexturi" class="exturi row d-flex align-item-center d-none">
+                     <div id="externalFBs">
+                         <div id="refexturi" class="exturi row d-flex align-item-center d-none">
 
-                            <span id="refDanger" class="text-danger offset-3 px-0 d-none"></span>
-                            <label class="col-3 px-0 pt-1 me-2">Agenda distant</label>
-                            <div class="col-5 px-0 overflow-hidden">
-                                <input class="form-text" type="text" name="externaluris[]" />
-                            </div>
-                            <div class="col-3">
-                                <button class="addExternalFB">ajouter</button>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif ?>
+                             <span id="refDanger" class="text-danger offset-3 px-0 d-none"></span>
+                             <label class="col-3 px-0 pt-1 me-2">Agenda distant</label>
+                             <div class="col-5 px-0 overflow-hidden">
+                                 <input class="form-text" type="text" name="externaluris[]" />
+                             </div>
+                             <div class="col-3">
+                                 <button class="addExternalFB">ajouter</button>
+                             </div>
+                         </div>
+                     </div>
+                 <?php endif ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
 
                     <div id="divpersonselect">
                         <br />
@@ -220,10 +229,6 @@ if (FBForm::validParams($fbParams)) {
                         <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[0]; ?>" />
                         <input type='hidden' name="plagesHoraires[]" value="<?= $fbParams->plagesHoraires[1]; ?>" />
                     </div>
-                </div>
-               <div class="col col-lg-3 offset-6 offset-md-0 order-lg-1 border border-gray-500 border-dotted">
-                    <p>Envoyer requête</p>
-                    <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
                 </div>
             </div>
         <?php if ($stdEnv->wsgroup): require_once 'modal.inc.php'; endif?>
