@@ -163,25 +163,27 @@ if (FBForm::validParams($fbParams)) {
                     <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
                 </div>
             </div>
-            <div class="row">
-                <div class="col col-md-3 col-lg-3 border-start border-top border-bottom border-gray-500 border-dotted p-3">
-                <?php if ($stdEnv->externalfbs): ?>
-                     <div id="externalFBs">
-                         <div id="refexturi" class="exturi row d-flex align-item-center d-none">
 
-                             <span id="refDanger" class="text-danger offset-3 px-0 d-none"></span>
-                             <label class="col-3 px-0 pt-1 me-2">Agenda distant</label>
-                             <div class="col-5 px-0 overflow-hidden">
-                                 <input class="form-text" type="text" name="externaluris[]" />
-                             </div>
-                             <div class="col-3">
-                                 <button class="addExternalFB">ajouter</button>
-                             </div>
-                         </div>
-                     </div>
-                 <?php endif ?>
-                </div>
+            <?php if ($stdEnv->externalfbs): ?>
+            <div id="externalFBs" class="row border-start border-end pb-3">
+                    <p class="text-center">Agendas distant</p>
+                    <div id="refexturi" class="exturi row justify-content-center d-none">
+                        <div class="col-md-7">
+                            <span class="refDanger text-danger offset-3 px-0 d-none"></span>
+                            <label for="inputUrl" class="form-label">Url</label>
+                            <input type="uri" class="form-control" id="inputUrl" name="externaluris[]" placeholder="Ex: https://calendar.google.com/calendar/ical/utilisateur%40gmail.com/public/basic.ics" />
+                        </div>
+                        <div class="col-md-2 px-0 overflow-hidden">
+                            <span class="refDanger text-danger offset-3 px-0 d-none"></span>
+                            <label for="inputEmail" class="form-label">Email</label>
+                            <input id="inputEmail" type="email" class="form-control" placeholder="utilisateur@gmail.com" />
+                        </div>
+                        <div class="col-1 align-content-end mb-1">
+                            <button class="addExternalFB">ajouter</button>
+                        </div>
+                    </div>
             </div>
+            <?php endif ?>
             <div class="row">
                 <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
 
