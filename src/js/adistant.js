@@ -32,7 +32,7 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
   function ajouterOuPasNewInput() {
     let test = true;
 
-    $("#externalFBs .exturi:not(#refexturi)").each((element, obj) => {
+    $("#agendasDistant .exturi:not(#aclonerDistantUri)").each((element, obj) => {
       if ($(obj).find("input[type='text']").length > 0) {
         test = false;
       }
@@ -49,12 +49,12 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
 
     let i = 0;
     do {
-      let divEntry = $("#refexturi").clone(true);
+      let divEntry = $("#aclonerDistantUri").clone(true);
 
       divEntry.removeAttr('id');
       divEntry.removeClass('d-none');
 
-      $("#externalFBs").append(divEntry);
+      $("#agendasDistant").append(divEntry);
 
       let buttonAdd = divEntry.find('button.addExternalFB');
       buttonAdd.on("click", clickExt);
@@ -79,9 +79,9 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
   }
 
   function addChampsInputExt() {
-    let extUri = $("#refexturi").clone(true).removeAttr('id').removeClass('d-none');
+    let extUri = $("#aclonerDistantUri").clone(true).removeAttr('id').removeClass('d-none');
     extUri.on("click", clickExt);
-    extUri.insertAfter($("#externalFBs .exturi:not(#refexturi)").last());
+    extUri.insertAfter($("#agendasDistant .exturi:not(#aclonerDistantUri)").last());
   }
 
   function _ajouterInputVisuel(divElem, inputUrl, uri, trigger) {
@@ -117,7 +117,7 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
   function clickExt(event) {
     event.preventDefault();
 
-    // correspond à #externalFBs
+    // correspond à #agendasDistant
     let divElem = $(event.target).parent().parent();
 
     let inputUrl = divElem.find("input[type='text']");

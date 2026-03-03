@@ -165,9 +165,9 @@ if (FBForm::validParams($fbParams)) {
             </div>
 
             <?php if ($stdEnv->externalfbs): ?>
-            <div id="externalFBs" class="row border-start border-end pb-3">
+            <div id="agendasDistant" class="row border-start border-end pb-3">
                     <p class="text-center">Agendas distant</p>
-                    <div id="refexturi" class="exturi row justify-content-center d-none">
+                    <div id="aclonerDistantUri" class="exturi row justify-content-center d-none">
                         <div class="col-md-7">
                             <span class="refDanger text-danger offset-3 px-0 d-none"></span>
                             <label for="inputUrl" class="form-label">Url</label>
