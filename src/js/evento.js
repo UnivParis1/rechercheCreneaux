@@ -1,4 +1,4 @@
-define('evento', ['jquery', 'moment', './form', './calext'], function($, moment, form, calext) {
+define('evento', ['jquery', 'moment', './form', './adistant'], function($, moment, form, adistant) {
 
 $(function() {
     // test si l'evento en cours n'est pas clos
@@ -208,8 +208,8 @@ function eventoDatasRequest(args) {
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
 
-        if (calext.entriesExts.length > 0) {
-          calext.entriesExts.forEach((data) => {
+        if (adistant.entriesExts.length > 0) {
+          adistant.entriesExts.forEach((data) => {
             jsonData.new_guests.push(data.uid);
             jsonData.guests.push({email:data.uid,name:data.uid});
           });

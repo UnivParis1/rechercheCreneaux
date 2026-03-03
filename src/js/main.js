@@ -6,5 +6,5 @@ import * as bootstrap from 'bootstrap'
 import moment from 'moment';
 import onChange from 'on-change';
 
-require(['./form.js', './calext.js', './evento.js']);
+require(['./form.js', './adistant.js', './evento.js']);
 

@@ -1,4 +1,4 @@
-define('calext', ['jquery', 'on-change'], function($, onChange) {
+define('adistant', ['jquery', 'on-change'], function($, onChange) {
 
   var textDoublon = 'URL déja présente';
   var textError = 'Erreur de données sur cette ressource';
