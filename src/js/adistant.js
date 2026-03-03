@@ -56,7 +56,7 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
 
       $("#agendasDistant").append(divEntry);
 
-      let buttonAdd = divEntry.find('button.addExternalFB');
+      let buttonAdd = divEntry.find('button.ajouterDistantUri');
       buttonAdd.on("click", clickExt);
 
       if (lenExts > 0) {
@@ -97,8 +97,8 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
     inputUrl.attr('type', 'hidden');
 
     inputUrl.after($('<pre class="pb-3 pt-1">' + inputUrl.val() + '</pre>'));
-    let buttonAddExternalFB = divElem.find('.addExternalFB');
-    buttonAddExternalFB.removeClass('addExternalFB').html('supprimer').addClass('rmExternalFB').off('click');
+    let buttonAddExternalFB = divElem.find('.ajouterDistantUri');
+    buttonAddExternalFB.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
 
     let idxNewElem;
     if (!trigger) {

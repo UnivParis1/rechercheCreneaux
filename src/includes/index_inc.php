@@ -179,7 +179,7 @@ if (FBForm::validParams($fbParams)) {
                             <input id="inputEmail" type="email" class="form-control" placeholder="utilisateur@gmail.com" />
                         </div>
                         <div class="col-1 align-content-end mb-1">
-                            <button class="addExternalFB">ajouter</button>
+                            <button class="ajouterDistantUri">ajouter</button>
                         </div>
                     </div>
             </div>
