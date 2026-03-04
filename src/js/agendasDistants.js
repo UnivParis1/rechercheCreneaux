@@ -1,20 +1,27 @@
-define('adistant', ['jquery', 'on-change'], function($, onChange) {
+define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onChange, validator) {
 
-  var textDoublon = 'URL déja présente';
-  var textError = 'Erreur de données sur cette ressource';
-
-  var entriesExts = [];
+  var agendasDistants = [];
 
   $(function() {
 
     for (let valuid of jsuids) {
       if (valuid.type == 'gmail') {
-        entriesExts.push(valuid);
+        agendasDistants.push(valuid);
       }
     }
 
     // observer des changements sur objet, appel uniquement après après mis les valeurs existantes
-    entriesExts = onChange.default(entriesExts, () => ajouterOuPasNewInput());
+    agendasDistants = onChange.default(agendasDistants, function(path, value, previousValue, applyData) {
+//      console.log('this:', this);
+//      console.log('path:', path);
+//      console.log('value:', value);
+//      console.log('previousValue:', previousValue);
+//      console.log('applyData:', applyData);
+
+//      if (value.length > previousValue.length || value.length == 0) {
+        ajouterDOMLigneUriMail();
+//      }
+    });
 
     initierVisuelFBExternes();
 
@@ -22,34 +29,20 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
   });
 
   function showModal() {
-    for (let ext of entriesExts) {
+    for (let ext of agendasDistants) {
       if (ext.data == true) {
         $('#creneauMailParticipant_ul').append("<li>" + ext.uid + "</li>");
       }
     }
   }
 
-  function ajouterOuPasNewInput() {
-    let test = true;
-
-    $("#agendasDistant .exturi:not(#aclonerDistantUri)").each((element, obj) => {
-      if ($(obj).find("input[type='text']").length > 0) {
-        test = false;
-      }
-    });
-
-    if (test) {
-      addChampsInputExt();
-    }
-  }
-
   function initierVisuelFBExternes() {
 
-    let lenExts = (entriesExts && entriesExts.length > 0) ? entriesExts.length : 0;
+    let lenExts = (agendasDistants && agendasDistants.length > 0) ? agendasDistants.length : 0;
 
     let i = 0;
     do {
-      let divEntry = $("#aclonerDistantUri").clone(true);
+      let divEntry = $("#aclonerDivUriMail").clone(true);
 
       divEntry.removeAttr('id');
       divEntry.removeClass('d-none');
@@ -57,17 +50,17 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
       $("#agendasDistant").append(divEntry);
 
       let buttonAdd = divEntry.find('button.ajouterDistantUri');
-      buttonAdd.on("click", clickExt);
+      buttonAdd.on("click", cliquerAjouter);
 
       if (lenExts > 0) {
-        const entry = entriesExts[i];
+        const entry = agendasDistants[i];
         divEntry.find('input').val(entry.uri);
 
         if (entry.data == false) {
-          divEntry.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text(textError));
+          divEntry.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text('Erreur de données sur cette ressource'));
         } else {
           let divElem = buttonAdd.parent().parent();
-          _ajouterInputVisuel(divElem, divElem.find("input[type='text']"), entry.uri, true);
+          ajouterDOMLigneUriMail(divElem, divElem.find("input[type='text']"), entry.uri, true);
 
           if (i == lenExts - 1)
             ajouterOuPasNewInput();
@@ -78,88 +71,102 @@ define('adistant', ['jquery', 'on-change'], function($, onChange) {
     } while (i < lenExts);
   }
 
-  function addChampsInputExt() {
-    let extUri = $("#aclonerDistantUri").clone(true).removeAttr('id').removeClass('d-none');
-    extUri.on("click", clickExt);
-    extUri.insertAfter($("#agendasDistant .exturi:not(#aclonerDistantUri)").last());
+  function ajouterDOMLigneUriMail() {
+    let boutonUri = $("#aclonerDivUriMail").clone(true).removeAttr('id').removeClass('d-none');
+    boutonUri.find('button.ajouterDistantUri').on("click", cliquerAjouter);
+    boutonUri.insertAfter($("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").last());
   }
 
-  function _ajouterInputVisuel(divElem, inputUrl, uri, trigger) {
-    let entry = { type: 'gmail', uri: uri, data: false, valid: false };
+  function _processDatas(divElem, inputUrl, inputMail) {
+    let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true};
 
-    if (!testExternalUri(divElem, inputUrl)) {
-      entriesExts.push(entry);
-      return false;
+    if (agendasDistants.findIndex((elem) => elem.url == entry.url) == -1) {
+      agendasDistants.push(entry);
     }
 
+    let bouttonSupprimerAgenda = divElem.find('.ajouterDistantUri');
+    bouttonSupprimerAgenda.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
 
-    divElem.find("span.text-danger").remove();
-    inputUrl.attr('type', 'hidden');
-
-    inputUrl.after($('<pre class="pb-3 pt-1">' + inputUrl.val() + '</pre>'));
-    let buttonAddExternalFB = divElem.find('.ajouterDistantUri');
-    buttonAddExternalFB.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
-
-    let idxNewElem;
-    if (!trigger) {
-      entry.valid = true;
-      idxNewElem = entriesExts.push(entry) - 1;
-    } else {
-      idxNewElem = entriesExts.findIndex((elem) => elem.uri == uri);
-    }
-
-    buttonAddExternalFB.on('click', (elem) => {
-      entriesExts.splice(idxNewElem, 1);
+    bouttonSupprimerAgenda.on('click', (elem) => {
+      agendasDistants = agendasDistants.filter((elem) => elem.url != entry.url );
       elem.target.parentElement.parentElement.remove();
     });
   }
 
-  function clickExt(event) {
+  function cliquerAjouter(event) {
     event.preventDefault();
 
     // correspond à #agendasDistant
     let divElem = $(event.target).parent().parent();
 
-    let inputUrl = divElem.find("input[type='text']");
+    let inputUrl = divElem.find("input[type='uri']");
+    let inputMail = divElem.find("input[type='email']");
 
-    // test la présence d'un champ HTML de saisie vide et stop si c'est le cas (évite d'ajouter des doublons pour les champs de saisies personnel extérieur)
-    if (inputUrl.length > 0 && inputUrl.val().length == 0) {
+    let test = true;
+
+    let divInvalidMail = divElem.find('.divMail div.invalid-feedback');
+    if (! validator.isEmail(inputMail.val())) {
+      inputMail.removeClass('is-valid');
+      inputMail.addClass('is-invalid');
+      divInvalidMail.html('Email mauvais format');
+      test = false;
+    } else {
+      inputMail.removeClass('is-invalid');
+      inputMail.addClass('is-valid');
+    }
+
+    let divInvalidUrl = divElem.find('.divUrl div.invalid-feedback');
+    if (! validator.isURL(inputUrl.val())) {
+      inputUrl.removeClass('is-valid');
+      inputUrl.addClass('is-invalid');
+      divInvalidUrl.html('format URL invalide');
+      test = false;
+    } else {
+      inputUrl.removeClass('is-invalid');
+      inputUrl.addClass('is-valid');
+    }
+
+    if (! test) {
       return false;
     }
 
-    let exist = entriesExts.findIndex( (elem) => inputUrl.val() == elem.uri && elem.data);
+    test = true;
 
-    if (exist != -1) {
-      let textDanger = divElem.find('.text-danger:not(#refDanger)');
-      if (textDanger.length == 0) {
-        // récupère le template du code depuis le dom HTML (index_inc.php)
-        divElem.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text(textDoublon));
-      } else {
-        textDanger.text(textDoublon);
-      }
+    let existMail = agendasDistants.findIndex( (elem) => inputMail.val() == elem.mail);
+
+    if (existMail != -1) {
+      inputMail.removeClass('is-valid');
+      inputMail.addClass('is-invalid');
+      divInvalidMail.html('Email déja présent');
+      inputMail.val('');
+      test = false;
+    }
+
+    let existUrl = agendasDistants.findIndex( (elem) => inputUrl.val() == elem.url);
+
+    if (existUrl != -1) {
+      inputUrl.removeClass('is-valid');
+      inputUrl.addClass('is-invalid');
+      divInvalidUrl.html('URL déja présente');
       inputUrl.val('');
+      test = false;
+    }
+
+    if (! test) {
       return false;
     }
 
-    _ajouterInputVisuel(divElem, inputUrl, false);
-  }
+    inputUrl.prop('disabled', 'disabled');
+    inputUrl.prop('readonly', 'readonly');
 
-  function testExternalUri(divElem, inputUrl) {
+    inputMail.prop('disabled', 'disabled');
+    inputMail.prop('readonly', 'readonly');
 
-    if (inputUrl.length > 0 && inputUrl.val().startsWith("https://") == false) {
-      let elemDanger = divElem.find('.text-danger');
-      if (elemDanger.length == 0) {
-        let spanDanger = '<span class="text-danger text-align-center">Url mal formattée</span>';
-        divElem.prepend(spanDanger);
-      }
-      return false;
-    }
-
-    return true;
+    _processDatas(divElem, inputUrl, inputMail);
   }
 
   return {
-    'entriesExts': entriesExts
+    'agendasDistants': agendasDistants
   }
 
 });

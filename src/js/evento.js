@@ -1,4 +1,4 @@
-define('evento', ['jquery', 'moment', './form', './adistant'], function($, moment, form, adistant) {
+define('evento', ['jquery', 'moment', './form', './agendasDistants'], function($, moment, form, agendasDistants) {
 
 $(function() {
     // test si l'evento en cours n'est pas clos
@@ -208,8 +208,8 @@ function eventoDatasRequest(args) {
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
 
-        if (adistant.entriesExts.length > 0) {
-          adistant.entriesExts.forEach((data) => {
+        if (agendasDistants.entriesExts.length > 0) {
+          agendasDistants.entriesExts.forEach((data) => {
             jsonData.new_guests.push(data.uid);
             jsonData.guests.push({email:data.uid,name:data.uid});
           });

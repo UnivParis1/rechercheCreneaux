@@ -12,7 +12,8 @@ use stdClass;
  * Classe regroupant les paramètres globaux
  * Issu d'une stdclass, a été formalisée comme classe pour plus de clarté
  */
-class FBParams {
+class FBParams
+{
 
     var array $varsHTTPGet;
 
@@ -56,11 +57,12 @@ class FBParams {
 
     public string $zoomSessionName = 'zoomMeeting';
 
-    public function __construct(stdClass $stdEnv) {
+    public function __construct(stdClass $stdEnv)
+    {
 
         $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
-        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map( fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false, 'valid' => true], $stdEnv->varsHTTPGet['listuids'] ) : null; // array_map permet d'enlever les éléments vide de ce paramètre
+        $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map(fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false, 'valid' => true], $stdEnv->varsHTTPGet['listuids']) : null; // array_map permet d'enlever les éléments vide de ce paramètre
         $this->nbcreneaux = isset($stdEnv->varsHTTPGet['creneaux']) ? (int) $stdEnv->varsHTTPGet['creneaux'] : null;
         $this->duree = isset($stdEnv->varsHTTPGet['duree']) ? (int) $stdEnv->varsHTTPGet['duree'] : null;
         $this->plagesHoraires = isset($stdEnv->varsHTTPGet['plagesHoraires']) ? $stdEnv->varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
@@ -84,22 +86,23 @@ class FBParams {
         }
 
         // si externalfbs est vrai dans la configuration .env , on continue l'execution du constructeur sinon on s'arrête
-        if ( ! $stdEnv->externalfbs) {
+        if (! $stdEnv->agendasDistants) {
             return;
         }
 
-        $externaluris = isset($stdEnv->varsHTTPGet['externaluris']) && is_array($stdEnv->varsHTTPGet['externaluris']) ? array_filter($stdEnv->varsHTTPGet['externaluris']) : null;
+        $agendasDistantsUrl = isset($stdEnv->varsHTTPGet['agendasDistantsUrl']) && is_array($stdEnv->varsHTTPGet['agendasDistantsUrl']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsUrl']) : null;
+        $agendasDistantsMail = isset($stdEnv->varsHTTPGet['agendasDistantsMail']) && is_array($stdEnv->varsHTTPGet['agendasDistantsMail']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsMail']) : null;
 
-        if ($externaluris && sizeof($externaluris) > 0) {
+        if ($agendasDistantsUrl && sizeof($agendasDistantsUrl) > 0) {
             $i = 1;
-            foreach ($externaluris as $externaluri) {
+            foreach ($agendasDistantsUrl as $agendaDistantUrl) {
                 // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
-                if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('uri', $aUid) && $aUid['uri'] == $externaluri))
+                if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('uri', $aUid) && $aUid['uri'] == $agendaDistantUrl))
                     throw new \Exception("Doublon sur les agenda extérieurs, contactez la DSIUN");
 
-                $decodedUrl = urldecode($externaluri);
+                $decodedUrl = urldecode($agendaDistantUrl);
 
-                $aUid = ['type' => 'gmail', 'uri' => $externaluri, 'data' => false, 'valid' => false];
+                $aUid = ['type' => 'gmail', 'uri' => $agendaDistantUrl, 'data' => false, 'valid' => false];
 
                 $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
 
@@ -116,7 +119,4 @@ class FBParams {
             }
         }
     }
-
 }
-
-?>

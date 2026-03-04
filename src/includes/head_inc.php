@@ -16,7 +16,7 @@ $dotenv = Dotenv::createImmutable($relativeRoot);
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
-$dotenv->required(['ENV','APP_URL' ,'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
+$dotenv->required(['ENV', 'APP_URL', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
 $dotenv->required('RECHERCHE_SUR_X_JOURS')->isInteger();
 
 setlocale(LC_TIME, $_ENV['LOCALE']);
@@ -28,7 +28,7 @@ $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
 $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
-$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO', 'EXTERNALFBS'])->isBoolean();
+$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO', 'AGENDASDISTANTS'])->isBoolean();
 
 $stdEnv->appUrl = $_ENV['APP_URL'];
 $stdEnv->wsgroup = (bool) json_decode(strtolower($_ENV['WSGROUP']));
@@ -38,7 +38,7 @@ $stdEnv->cas = (bool) json_decode(strtolower($_ENV['CAS']));
 $stdEnv->zoom = (bool) json_decode(strtolower($_ENV['ZOOM']));
 $stdEnv->evento = (bool) json_decode(strtolower($_ENV['EVENTO']));
 $stdEnv->kronolith = (bool) json_decode(strtolower($_ENV['KRONOLITH']));
-$stdEnv->externalfbs = (bool) json_decode(strtolower($_ENV['EXTERNALFBS']));
+$stdEnv->agendasDistants = (bool) json_decode(strtolower($_ENV['AGENDASDISTANTS']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);

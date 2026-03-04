@@ -5,6 +5,7 @@ import '../scss/styles.scss';
 import * as bootstrap from 'bootstrap'
 import moment from 'moment';
 import onChange from 'on-change';
+import validator from 'validator';
 
-require(['./form.js', './adistant.js', './evento.js']);
+require(['./form.js', './agendasDistants.js', './evento.js']);
 
