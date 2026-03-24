@@ -99,71 +99,62 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
     // correspond à #agendasDistant
     let divElem = $(event.target).parent().parent();
 
-    let inputUrl = divElem.find("input[type='uri']");
-    let inputMail = divElem.find("input[type='email']");
+    let arrayTest = [];
 
+    arrayTest.push({field:'mail', input: divElem.find("input[type='email']"), divInvalid: divElem.find('.divMail div.invalid-feedback'), validate: validator.isEmail, errorTxt: 'Email mauvais format', errorExist: 'Email déja présent'});
+    arrayTest.push({field:'url', input: divElem.find("input[type='uri']"), divInvalid: divElem.find('.divUrl div.invalid-feedback'), validate: validator.isURL, errorTxt: 'format URL invalide', errorExist: 'URL déja présente'});
+
+    for (let array of arrayTest) {
+      array.testFormat = testDistantValidField(array.input, array.divInvalid, array.validate, array.errorTxt);
+      array.testExist = testExistField(array.input, array.field, array.divInvalid, array.errorExist);
+    }
+
+    let test = false;
+    for (let array of arrayTest) {
+      let input = array.input;
+
+      if (array.testFormat && array.testExist) {
+        input.prop('disabled', 'disabled');
+        input.prop('readonly', 'readonly');
+        test = true;
+        _processDatas(divElem, inputUrl, inputMail);
+      } else {
+        test = false;
+      }
+    }
+
+    return test;
+  }
+
+  function testDistantValidField(input, divInvalid, validate, errorTxt) {
     let test = true;
 
-    let divInvalidMail = divElem.find('.divMail div.invalid-feedback');
-    if (! validator.isEmail(inputMail.val())) {
-      inputMail.removeClass('is-valid');
-      inputMail.addClass('is-invalid');
-      divInvalidMail.html('Email mauvais format');
-      test = false;
-    } else {
-      inputMail.removeClass('is-invalid');
-      inputMail.addClass('is-valid');
+    if (! validate(input.val())) {
+      input.removeClass('is-valid');
+      input.addClass('is-invalid');
+      divInvalid.html(errorTxt);
+      return false; 
     }
 
-    let divInvalidUrl = divElem.find('.divUrl div.invalid-feedback');
-    if (! validator.isURL(inputUrl.val())) {
-      inputUrl.removeClass('is-valid');
-      inputUrl.addClass('is-invalid');
-      divInvalidUrl.html('format URL invalide');
-      test = false;
-    } else {
-      inputUrl.removeClass('is-invalid');
-      inputUrl.addClass('is-valid');
-    }
+    input.removeClass('is-invalid');
+    input.addClass('is-valid');
 
-    if (! test) {
-      return false;
-    }
-
-    test = true;
-
-    let existMail = agendasDistants.findIndex( (elem) => inputMail.val() == elem.mail);
-
-    if (existMail != -1) {
-      inputMail.removeClass('is-valid');
-      inputMail.addClass('is-invalid');
-      divInvalidMail.html('Email déja présent');
-      inputMail.val('');
-      test = false;
-    }
-
-    let existUrl = agendasDistants.findIndex( (elem) => inputUrl.val() == elem.url);
-
-    if (existUrl != -1) {
-      inputUrl.removeClass('is-valid');
-      inputUrl.addClass('is-invalid');
-      divInvalidUrl.html('URL déja présente');
-      inputUrl.val('');
-      test = false;
-    }
-
-    if (! test) {
-      return false;
-    }
-
-    inputUrl.prop('disabled', 'disabled');
-    inputUrl.prop('readonly', 'readonly');
-
-    inputMail.prop('disabled', 'disabled');
-    inputMail.prop('readonly', 'readonly');
-
-    _processDatas(divElem, inputUrl, inputMail);
+    return true;
   }
+
+  function testExistField(input, field, divInvalid, errorTxt) {
+    let exist = agendasDistants.findIndex( (elem) => input.val() == elem.field);
+
+    if (exist != -1) {
+      input.removeClass('is-valid');
+      input.addClass('is-invalid');
+      divInvalid.html(errorTxt);
+      input.val('');
+      return false;
+    }
+    return true;
+  }
+
 
   return {
     'agendasDistants': agendasDistants
