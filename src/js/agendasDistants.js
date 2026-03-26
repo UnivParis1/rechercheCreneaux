@@ -1,4 +1,4 @@
-define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onChange, validator) {
+define('agendasDistants', ['jquery', 'validator'], function($, validator) {
 
   var agendasDistants = [];
 
@@ -9,19 +9,6 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
         agendasDistants.push(valuid);
       }
     }
-
-    // observer des changements sur objet, appel uniquement après après mis les valeurs existantes
-    agendasDistants = onChange.default(agendasDistants, function(path, value, previousValue, applyData) {
-//      console.log('this:', this);
-//      console.log('path:', path);
-//      console.log('value:', value);
-//      console.log('previousValue:', previousValue);
-//      console.log('applyData:', applyData);
-
-//      if (value.length > previousValue.length || value.length == 0) {
-        ajouterDOMLigneUriMail();
-//      }
-    });
 
     initierVisuelFBExternes();
 
@@ -123,8 +110,8 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
       let input = array.input;
 
       if (array.testFormat && array.testExist) {
-        input.prop('disabled', 'disabled');
         input.prop('readonly', 'readonly');
+        input.addClass('form-control-plaintext');
         test = true;
       } else {
         test = false;
