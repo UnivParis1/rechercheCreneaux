@@ -1,0 +1,21 @@
+{
+  "name": "brunobetioli/easypeasyics",
+  "description": "Simple ICS Generator",
+  "keywords": [
+    "ICS",
+    "iCalendar"
+  ],
+  "authors": [
+    {
+      "name": "Bruno Betioli",
+      "email": "brunobetioli@yahoo.com.br",
+      "role": "Developer"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "BrunoBetioli\\EasyPeasyICS\\": "src/"
+    }
+  }
+}

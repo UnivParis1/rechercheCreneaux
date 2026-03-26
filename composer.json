@@ -1,47 +1,54 @@
 {
-    "name": "univ-paris1.fr/recherche-de-creneaux",
-    "description": "recherche de creneaux sur les agendas de l'université Paris 1 Panthéon Sorbonne, utilise les FREE/BUSY icalendar",
-    "type": "project",
-    "license": "Apache-2.0",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "php": ">=8.1",
-        "kigkonsult/icalcreator": "^2.41.83",
-        "league/period": "^5.3.1",
-        "rlanvin/php-rrule": "^2.4.1",
-        "vlucas/phpdotenv": "^5.6.0",
-        "apereo/phpcas": "^1.6",
-        "aghilanbaskar/zoom-library": "^1.0",
-        "hercule-tech/jours-feries-france": "^1.4",
-        "phpmailer/phpmailer": "^6.9",
-        "sabre/vobject": "^4.5.6",
-        "brunobetioli/easypeasyics": "^1.0",
-        "sabre/dav": "^4.7",
-        "rfx/cast": "^1.1"
-    },
-    "config": {
-        "allow-plugins": {
-            "composer/installers": true,
-            "oomphinc/composer-installers-extender": true
-        }
-    },
-    "autoload": {
-        "psr-4": {"RechercheCreneaux\\": "src/classes",
-          "RechercheCreneaux\\Type\\": "src/classes/type",
-		  "RechercheCreneauxLib\\": "lib/"
-	}
-    },
-    "require-dev": {
-        "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.5"
-    },
-    "scripts": {
-	    "safe-update-dev": [
-		    "composer update --ignore-platform-req=php"
-	    ],
-	    "safe-install-dev": [
-		    "composer instal --ignore-platform-req=php"
-	    ]
+  "name": "univ-paris1.fr/recherche-de-creneaux",
+  "description": "recherche de creneaux sur les agendas de l'université Paris 1 Panthéon Sorbonne, utilise les FREE/BUSY icalendar",
+  "type": "project",
+  "license": "Apache-2.0",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "path",
+      "url": "lib/easypeasyics/"
     }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "kigkonsult/icalcreator": "^2.41.83",
+    "league/period": "^5.3.1",
+    "rlanvin/php-rrule": "^2.4.1",
+    "vlucas/phpdotenv": "^5.6.0",
+    "apereo/phpcas": "^1.6",
+    "aghilanbaskar/zoom-library": "^1.0",
+    "hercule-tech/jours-feries-france": "^1.4",
+    "phpmailer/phpmailer": "^6.9",
+    "sabre/vobject": "^4.5.6",
+    "brunobetioli/easypeasyics": "*",
+    "sabre/dav": "^4.7",
+    "rfx/cast": "^1.1"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "oomphinc/composer-installers-extender": true
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "RechercheCreneaux\\": "src/classes",
+      "RechercheCreneaux\\Type\\": "src/classes/type",
+      "RechercheCreneauxLib\\": "lib/"
+    }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.10",
+    "phpunit/phpunit": "^10.5"
+  },
+  "scripts": {
+    "safe-update-dev": [
+      "composer update --ignore-platform-req=php"
+    ],
+    "safe-install-dev": [
+      "composer instal --ignore-platform-req=php"
+    ]
+  }
 }
