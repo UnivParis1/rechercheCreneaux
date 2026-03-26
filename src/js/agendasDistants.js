@@ -60,10 +60,8 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
           divEntry.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text('Erreur de données sur cette ressource'));
         } else {
           let divElem = buttonAdd.parent().parent();
+          // TODO : cas ou les urls sont renseignés GET
           ajouterDOMLigneUriMail(divElem, divElem.find("input[type='text']"), entry.uri, true);
-
-          if (i == lenExts - 1)
-            ajouterOuPasNewInput();
         }
       }
 
@@ -80,9 +78,10 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
   function _processDatas(divElem, inputUrl, inputMail) {
     let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true};
 
-    if (agendasDistants.findIndex((elem) => elem.url == entry.url) == -1) {
-      agendasDistants.push(entry);
+    if ( ! agendasDistants.filter((elem) => elem.url == entry.url).length == 0) {
+      return false;
     }
+    agendasDistants.push(entry);
 
     let bouttonSupprimerAgenda = divElem.find('.ajouterDistantUri');
     bouttonSupprimerAgenda.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
@@ -90,7 +89,17 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
     bouttonSupprimerAgenda.on('click', (elem) => {
       agendasDistants = agendasDistants.filter((elem) => elem.url != entry.url );
       elem.target.parentElement.parentElement.remove();
+
+      if (agendasDistants.length == 0 && $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == 0) {
+        ajouterDOMLigneUriMail();
+      }
     });
+
+    if (agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
+      ajouterDOMLigneUriMail();
+    }
+
+    return true;
   }
 
   function cliquerAjouter(event) {
@@ -117,18 +126,19 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
         input.prop('disabled', 'disabled');
         input.prop('readonly', 'readonly');
         test = true;
-        _processDatas(divElem, inputUrl, inputMail);
       } else {
         test = false;
+        break;
       }
     }
 
+    if (test) { 
+        _processDatas(divElem, arrayTest[1].input, arrayTest[0].input);
+    }
     return test;
   }
 
   function testDistantValidField(input, divInvalid, validate, errorTxt) {
-    let test = true;
-
     if (! validate(input.val())) {
       input.removeClass('is-valid');
       input.addClass('is-invalid');
@@ -143,13 +153,12 @@ define('agendasDistants', ['jquery', 'on-change', 'validator'], function($, onCh
   }
 
   function testExistField(input, field, divInvalid, errorTxt) {
-    let exist = agendasDistants.findIndex( (elem) => input.val() == elem.field);
+    let length = agendasDistants.filter( (elem) => input.val() == elem[field]).length;
 
-    if (exist != -1) {
+    if (length > 0) {
       input.removeClass('is-valid');
       input.addClass('is-invalid');
       divInvalid.html(errorTxt);
-      input.val('');
       return false;
     }
     return true;
