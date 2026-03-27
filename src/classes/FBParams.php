@@ -94,28 +94,27 @@ class FBParams
         $agendasDistantsMail = isset($stdEnv->varsHTTPGet['agendasDistantsMail']) && is_array($stdEnv->varsHTTPGet['agendasDistantsMail']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsMail']) : null;
 
         if ($agendasDistantsUrl && sizeof($agendasDistantsUrl) > 0) {
-            $i = 1;
-            foreach ($agendasDistantsUrl as $agendaDistantUrl) {
+            foreach($agendasDistantsUrl as $idx => $agendaDistantUrl) {
+                $agendaDistantMail = $agendasDistantsMail[$idx];
                 // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
-                if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('uri', $aUid) && $aUid['uri'] == $agendaDistantUrl))
+                if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('url', $aUid) && $aUid['url'] == $agendaDistantUrl))
                     throw new \Exception("Doublon sur les agenda extérieurs, contactez la DSIUN");
 
                 $decodedUrl = urldecode($agendaDistantUrl);
 
-                $aUid = ['type' => 'gmail', 'uri' => $agendaDistantUrl, 'data' => false, 'valid' => false];
+                $aUid = ['type' => 'gmail', 'url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'data' => false, 'valid' => false];
 
                 $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
 
                 if (str_starts_with($decodedUrl, "https://calendar.google.com") && preg_match($emailPattern, $decodedUrl, $matches)) {
                     $email = $matches[0];
-                    $aUid['uid'] = $email;
-                    $aUid['valid'] = true;
+                    if ($agendaDistantMail == $email)
+                        $aUid['valid'] = true;
                 } else {
-                    $aUid['uid'] = "err-$i";
+                    $aUid['uid'] = "err-$idx";
                 }
 
                 $this->uids[] = $aUid;
-                $i++;
             }
         }
     }

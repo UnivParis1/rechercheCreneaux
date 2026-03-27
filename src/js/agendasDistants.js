@@ -1,12 +1,13 @@
 define('agendasDistants', ['jquery', 'validator'], function($, validator) {
 
+  var initAgendasDistants = [];
   var agendasDistants = [];
 
   $(function() {
 
     for (let valuid of jsuids) {
       if (valuid.type == 'gmail') {
-        agendasDistants.push(valuid);
+        initAgendasDistants.push(valuid);
       }
     }
 
@@ -16,7 +17,7 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
   });
 
   function showModal() {
-    for (let ext of agendasDistants) {
+    for (let ext of initAgendasDistants) {
       if (ext.data == true) {
         $('#creneauMailParticipant_ul').append("<li>" + ext.uid + "</li>");
       }
@@ -25,35 +26,41 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
 
   function initierVisuelFBExternes() {
 
-    let lenExts = (agendasDistants && agendasDistants.length > 0) ? agendasDistants.length : 0;
-
     let i = 0;
     do {
       let divEntry = $("#aclonerDivUriMail").clone(true);
 
-      divEntry.removeAttr('id');
-      divEntry.removeClass('d-none');
+      divEntry.removeAttr('id').removeClass('d-none');
 
       $("#agendasDistant").append(divEntry);
 
       let buttonAdd = divEntry.find('button.ajouterDistantUri');
       buttonAdd.on("click", cliquerAjouter);
 
-      if (lenExts > 0) {
-        const entry = agendasDistants[i];
-        divEntry.find('input').val(entry.uri);
+      if (initAgendasDistants.length > 0) {
+        const entry = initAgendasDistants[i];
+        let inputUrl = divEntry.find('input#inputUrl');
+        let inputMail = divEntry.find('input#inputEmail');
 
-        if (entry.data == false) {
-          divEntry.prepend($('#refDanger').clone(true).removeAttr('id').removeClass('d-none').text('Erreur de données sur cette ressource'));
+        inputUrl.val(entry.url)
+        inputMail.val(entry.uid);
+
+        if (entry.data == false || entry.valid == false) {
+          inputUrl.removeClass('is-valid').addClass('is-invalid');
+          inputUrl.next().html('Erreur de données sur cette ressource');
+          initAgendasDistants.splice(i, 1);
+          i--;
         } else {
+          buttonAdd.trigger("click");
+        }
+
+        if (i == initAgendasDistants.length - 1) {
           let divElem = buttonAdd.parent().parent();
-          // TODO : cas ou les urls sont renseignés GET
-          ajouterDOMLigneUriMail(divElem, divElem.find("input[type='text']"), entry.uri, true);
+          ajouterDOMLigneUriMail(divElem, divElem.find("input[type='text']"), entry.url, true);
         }
       }
-
       i++;
-    } while (i < lenExts);
+    } while (i < initAgendasDistants.length);
   }
 
   function ajouterDOMLigneUriMail() {
@@ -62,13 +69,12 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
     boutonUri.insertAfter($("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").last());
   }
 
-  function _processDatas(divElem, inputUrl, inputMail) {
+  function _processDatas(divElem, inputUrl, inputMail, isUserEvent) {
     let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true};
 
-    if ( ! agendasDistants.filter((elem) => elem.url == entry.url).length == 0) {
-      return false;
+    if (typeof (agendasDistants.find((elem) => elem.url == entry.url)) == 'undefined') {
+      agendasDistants.push(entry);
     }
-    agendasDistants.push(entry);
 
     let bouttonSupprimerAgenda = divElem.find('.ajouterDistantUri');
     bouttonSupprimerAgenda.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
@@ -82,11 +88,9 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
       }
     });
 
-    if (agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
+    if (isUserEvent && agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
       ajouterDOMLigneUriMail();
     }
-
-    return true;
   }
 
   function cliquerAjouter(event) {
@@ -105,24 +109,19 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
       array.testExist = testExistField(array.input, array.field, array.divInvalid, array.errorExist);
     }
 
-    let test = false;
-    for (let array of arrayTest) {
-      let input = array.input;
-
-      if (array.testFormat && array.testExist) {
-        input.prop('readonly', 'readonly');
-        input.addClass('form-control-plaintext');
-        test = true;
-      } else {
-        test = false;
-        break;
+    let test;
+    arrayTest.forEach( (array) => {
+      test = (array.testFormat && array.testExist) ? true : false;
+      if (!test) {
+        return;
       }
-    }
+      array.input.addClass('form-control-plaintext');
+    });
 
     if (test) { 
-        _processDatas(divElem, arrayTest[1].input, arrayTest[0].input);
+      arrayTest.forEach( (array) => array.input.prop('readonly', 'readonly') );
+      _processDatas(divElem, arrayTest[1].input, arrayTest[0].input, (typeof event.isTrigger == 'undefined') ? true : false);
     }
-    return test;
   }
 
   function testDistantValidField(input, divInvalid, validate, errorTxt) {

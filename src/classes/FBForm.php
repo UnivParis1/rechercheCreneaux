@@ -53,7 +53,7 @@ class FBForm {
                     break;
 
                 case 'gmail':
-                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['uri'], $fbParams->duree, $creneauxGenerated, $fbParams);
+                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
                     $fbUsers[] = $fbUser;
