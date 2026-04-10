@@ -21,7 +21,7 @@ case $1 in
 			;;
 
 			"composer")
-				echo "rm composer.lock && rm -Ri vendor/ && composer update --ignore-platform-reqs";
+				echo "rm composer.lock && rm -Ri vendor/ && composer update";
 				rm composer.lock;
 				rm -Rif vendor/;
 				composer update;
