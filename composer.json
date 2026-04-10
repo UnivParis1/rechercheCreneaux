@@ -9,7 +9,12 @@
     {
       "type": "path",
       "url": "lib/easypeasyics/"
+    },
+    {
+      "type": "path",
+      "url": "lib/zoom-php/"
     }
+
   ],
   "require": {
     "php": ">=8.1",
@@ -18,7 +23,7 @@
     "rlanvin/php-rrule": "^2.4.1",
     "vlucas/phpdotenv": "^5.6.0",
     "apereo/phpcas": "^1.6",
-    "aghilanbaskar/zoom-library": "^1.0",
+    "aghilanbaskar/zoom-library": "*",
     "hercule-tech/jours-feries-france": "^1.4",
     "phpmailer/phpmailer": "^6.9",
     "sabre/vobject": "^4.5.6",
