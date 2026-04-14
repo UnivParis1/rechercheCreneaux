@@ -1,40 +1,17 @@
-const { event } = require("jquery");
-
 define('agendasDistants', ['jquery', 'validator'], function($, validator) {
 
   var initAgendasDistants = [];
   var agendasDistants = [];
-  globalThis.agendasDistants = agendasDistants;
 
   $(function() {
+    jsuids.forEach( (elem) => elem.type == 'gmail' ? initAgendasDistants.push(elem) : null );
 
-    for (let valuid of jsuids) {
-      if (valuid.type == 'gmail') {
-        initAgendasDistants.push(valuid);
-      }
-    }
-
-    initierVisuelFBExternes();
-
-    $('#creneauMailInput').on('shown.bs.modal', showModal);
-  });
-
-  function showModal() {
-    for (let ext of initAgendasDistants) {
-      if (ext.data == true) {
-        $('#creneauMailParticipant_ul').append("<li>" + ext.uid + "</li>");
-      }
-    }
-  }
-
-  function initierVisuelFBExternes() {
+    $('#creneauMailInput').on('shown.bs.modal', () => initAgendasDistants.forEach( (elem) => elem.data ? $('#creneauMailParticipant_ul').append("<li>" + elem.uid + "</li>") : null ) );
 
     let i = 0;
     do {
       let divEntry = $("#aclonerDivUriMail").clone(true);
-
       divEntry.removeAttr('id').removeClass('d-none');
-
       $("#agendasDistant").append(divEntry);
 
       let buttonAdd = divEntry.find('button.ajouterDistantUri');
@@ -55,14 +32,11 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
           inputUrl.next().html('Erreur de données sur cette ressource');
         }
 
-        if (i == initAgendasDistants.length - 1) {
-          let divElem = buttonAdd.parent().parent();
-          ajouterDOMLigneUriMail(divElem, divElem.find("input[type='text']"), entry.url, true);
-        }
+        (i == initAgendasDistants.length - 1) ? ajouterDOMLigneUriMail() : null;
       }
       i++;
     } while (i < initAgendasDistants.length);
-  }
+  });
 
   function ajouterDOMLigneUriMail() {
     let boutonUri = $("#aclonerDivUriMail").clone(true).removeAttr('id').removeClass('d-none');
@@ -87,18 +61,15 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
     let bouttonModifierAgenda = divElem.find('.ajouterDistantUri');
     let bouttonSupprimerAgenda = divElem.find('.supprimerDistantUri');
 
-    bouttonSupprimerAgenda.parent().removeClass('invisible');
-
     bouttonModifierAgenda.removeClass('ajouterDistantUri').html('modifier').addClass('modifierDistantUri').off('click');
-
     bouttonModifierAgenda.on('click', cliquerModifier);
 
+    bouttonSupprimerAgenda.parent().removeClass('invisible');
     bouttonSupprimerAgenda.on('click', cliquerSupprimer);
 
     if (isUserEvent && agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
       ajouterDOMLigneUriMail();
     }
-    globalThis.agendasDistants = agendasDistants;
   }
 
   function cliquerModifier(event) {
@@ -109,7 +80,6 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
             agendasDistants = agendasDistants.filter((elem) => elem.idx != i);
         }
       }
-      globalThis.agendasDistants = agendasDistants;
       cliquerAjouter(event);
   }
 
@@ -125,7 +95,6 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
           }
         }
       }
-      globalThis.agendasDistants = agendasDistants;
 
       if (agendasDistants.length == 0 && $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == 0) {
         ajouterDOMLigneUriMail();
