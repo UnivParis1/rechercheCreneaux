@@ -1,7 +1,10 @@
+const { event } = require("jquery");
+
 define('agendasDistants', ['jquery', 'validator'], function($, validator) {
 
   var initAgendasDistants = [];
   var agendasDistants = [];
+  globalThis.agendasDistants = agendasDistants;
 
   $(function() {
 
@@ -70,18 +73,55 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
   }
 
   function _processDatas(divElem, inputUrl, inputMail, isUserEvent) {
-    let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true};
+    let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true, idx: null};
 
-    if (typeof (agendasDistants.find((elem) => elem.url == entry.url)) == 'undefined') {
-      agendasDistants.push(entry);
+    let i=0;
+    for (let input of $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)")) {
+      if (divElem[0] == input) {
+        let aexist = agendasDistants.find((elem) => elem.idx == i);
+        if (!aexist) {
+          entry.idx = i;
+          agendasDistants.push(entry);
+        }
+      }
+      i++;
     }
+    globalThis.agendasDistants = agendasDistants;
 
-    let bouttonSupprimerAgenda = divElem.find('.ajouterDistantUri');
-    bouttonSupprimerAgenda.removeClass('ajouterDistantUri').html('supprimer').addClass('supprimerDistantUri').off('click');
+    let bouttonModifierAgenda = divElem.find('.ajouterDistantUri');
+    let bouttonSupprimerAgenda = divElem.find('.supprimerDistantUri');
 
-    bouttonSupprimerAgenda.on('click', (elem) => {
-      agendasDistants = agendasDistants.filter((elem) => elem.url != entry.url );
-      elem.target.parentElement.parentElement.remove();
+    bouttonSupprimerAgenda.parent().removeClass('visually-hidden');
+
+    bouttonModifierAgenda.removeClass('ajouterDistantUri').html('modifier').addClass('modifierDistantUri').off('click');
+
+    bouttonModifierAgenda.on('click', (event) => {
+      let cible = event.target.parentElement.parentElement;
+      let i=0;
+      let agendasDom = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
+      for (let input of agendasDom) {
+        if (input == cible) {
+            agendasDistants = agendasDistants.filter((elem) => elem.idx != i);
+        }
+        i++;
+      }
+      globalThis.agendasDistants = agendasDistants;
+      cliquerAjouter(event);
+    });
+
+    bouttonSupprimerAgenda.on('click', (event) => {
+      let cible = event.target.parentElement.parentElement;
+      let agendasDOM = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
+      for (i=0; i < agendasDOM.length; i++) {
+        if (agendasDOM[i] == cible) {
+          agendasDOM[i].remove();
+          agendasDistants = agendasDistants.filter((elem) => elem.idx != i);
+          for (j=i; j < agendasDistants.length; j++) {
+            agendasDistants[j].idx--;
+          }
+        }
+      }
+      globalThis.agendasDistants = agendasDistants;
 
       if (agendasDistants.length == 0 && $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == 0) {
         ajouterDOMLigneUriMail();
@@ -118,8 +158,7 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
       array.input.addClass('form-control-plaintext');
     });
 
-    if (test) { 
-      arrayTest.forEach( (array) => array.input.prop('readonly', 'readonly') );
+    if (test) {
       _processDatas(divElem, arrayTest[1].input, arrayTest[0].input, (typeof event.isTrigger == 'undefined') ? true : false);
     }
   }
@@ -149,7 +188,6 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
     }
     return true;
   }
-
 
   return {
     'agendasDistants': agendasDistants

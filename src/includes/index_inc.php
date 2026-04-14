@@ -185,6 +185,9 @@ if (FBForm::validParams($fbParams)) {
                     <div class="col-1 align-content-end mb-1">
                         <button class="ajouterDistantUri">ajouter</button>
                     </div>
+                    <div class="col-1 align-content-end mb-1 visually-hidden">
+                        <button class="supprimerDistantUri">supprimer</button>
+                    </div>
                 </div>
             </div>
         <?php endif ?>
