@@ -182,10 +182,10 @@ if (FBForm::validParams($fbParams)) {
                         <input id="inputEmail" type="email" class="form-control" name="agendasDistantsMail[]" placeholder="utilisateur@gmail.com" />
                         <div class="invalid-feedback"></div>
                     </div>
-                    <div class="col-1 align-content-end mb-1">
+                    <div class="col-1 align-content-center mb-1 me-n4 mt-2 pt-4">
                         <button class="ajouterDistantUri">ajouter</button>
                     </div>
-                    <div class="col-1 align-content-end mb-1 visually-hidden">
+                    <div class="col-1 align-content-center mb-1 invisible mt-2 pt-4">
                         <button class="supprimerDistantUri">supprimer</button>
                     </div>
                 </div>

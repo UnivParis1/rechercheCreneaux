@@ -48,13 +48,11 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
         inputUrl.val(entry.url)
         inputMail.val(entry.uid);
 
+        buttonAdd.trigger("click");
+
         if (entry.data == false || entry.valid == false) {
           inputUrl.removeClass('is-valid').addClass('is-invalid');
           inputUrl.next().html('Erreur de données sur cette ressource');
-          initAgendasDistants.splice(i, 1);
-          i--;
-        } else {
-          buttonAdd.trigger("click");
         }
 
         if (i == initAgendasDistants.length - 1) {
@@ -75,41 +73,47 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
   function _processDatas(divElem, inputUrl, inputMail, isUserEvent) {
     let entry = { type: 'gmail', url: inputUrl.val(), mail: inputMail.val(), data: false, valid: true, idx: null};
 
-    let i=0;
-    for (let input of $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)")) {
-      if (divElem[0] == input) {
+    let agendasDOM = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
+    for (i = 0;i < agendasDOM.length; i++) {
+      if (divElem[0] == agendasDOM[i]) {
         let aexist = agendasDistants.find((elem) => elem.idx == i);
         if (!aexist) {
           entry.idx = i;
           agendasDistants.push(entry);
         }
       }
-      i++;
     }
-    globalThis.agendasDistants = agendasDistants;
 
     let bouttonModifierAgenda = divElem.find('.ajouterDistantUri');
     let bouttonSupprimerAgenda = divElem.find('.supprimerDistantUri');
 
-    bouttonSupprimerAgenda.parent().removeClass('visually-hidden');
+    bouttonSupprimerAgenda.parent().removeClass('invisible');
 
     bouttonModifierAgenda.removeClass('ajouterDistantUri').html('modifier').addClass('modifierDistantUri').off('click');
 
-    bouttonModifierAgenda.on('click', (event) => {
+    bouttonModifierAgenda.on('click', cliquerModifier);
+
+    bouttonSupprimerAgenda.on('click', cliquerSupprimer);
+
+    if (isUserEvent && agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
+      ajouterDOMLigneUriMail();
+    }
+    globalThis.agendasDistants = agendasDistants;
+  }
+
+  function cliquerModifier(event) {
       let cible = event.target.parentElement.parentElement;
-      let i=0;
-      let agendasDom = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
-      for (let input of agendasDom) {
-        if (input == cible) {
+      let agendasDOM = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
+      for (i = 0; i < agendasDOM.length; i++) {
+        if (agendasDOM[i] == cible) {
             agendasDistants = agendasDistants.filter((elem) => elem.idx != i);
         }
-        i++;
       }
       globalThis.agendasDistants = agendasDistants;
       cliquerAjouter(event);
-    });
+  }
 
-    bouttonSupprimerAgenda.on('click', (event) => {
+  function cliquerSupprimer(event) {
       let cible = event.target.parentElement.parentElement;
       let agendasDOM = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
       for (i=0; i < agendasDOM.length; i++) {
@@ -126,11 +130,6 @@ define('agendasDistants', ['jquery', 'validator'], function($, validator) {
       if (agendasDistants.length == 0 && $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == 0) {
         ajouterDOMLigneUriMail();
       }
-    });
-
-    if (isUserEvent && agendasDistants.length == $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length) {
-      ajouterDOMLigneUriMail();
-    }
   }
 
   function cliquerAjouter(event) {

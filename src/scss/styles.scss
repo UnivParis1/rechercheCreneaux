@@ -21,6 +21,9 @@
 @import "../css/form";
 
 @import "nouislider/dist/nouislider.min";
+
+$enable-negative-margins: true;
+
 @import "bootstrap/scss/bootstrap";
 
 
