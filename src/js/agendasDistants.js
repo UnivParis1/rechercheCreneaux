@@ -23,6 +23,7 @@ define("agendasDistants", ["jquery", "validator"], function ($, validator) {
 			divEntry.removeAttr("id").removeClass("d-none");
 			$("#agendasDistant").append(divEntry);
 
+      divEntry.find("#inputUrl").on('blur', detectGoogmail);
 			let buttonAdd = divEntry.find("button.ajouterDistantUri");
 			buttonAdd.on("click", cliquerAjouter);
 
@@ -49,11 +50,23 @@ define("agendasDistants", ["jquery", "validator"], function ($, validator) {
 		} while (i < initAgendasDistants.length);
 	});
 
+  function detectGoogmail(event) {
+    let val = event.target.value;
+    
+    if (val.search('calendar.google.com')) {
+      let mail = val.split('/')[5].replace('%40', '@');
+      if (validator.isEmail(mail)) {
+        $(event.target.parentElement.parentElement).find('input#inputEmail').val(mail);
+      }
+    }
+  }
+
 	function ajouterDOMLigneUriMail() {
 		let boutonUri = $("#aclonerDivUriMail")
 			.clone(true)
 			.removeAttr("id")
 			.removeClass("d-none");
+    boutonUri.find("input#inputUrl").on('blur', detectGoogmail);
 		boutonUri.find("button.ajouterDistantUri").on("click", cliquerAjouter);
 		boutonUri.insertAfter(
 			$("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").last(),
