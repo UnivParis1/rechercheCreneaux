@@ -7,6 +7,7 @@ use Exception;
 use League\Period\Sequence;
 use RechercheCreneaux\Ressource\FBRessourceUP1;
 use RechercheCreneaux\Ressource\FBRessourceGmail;
+use RechercheCreneaux\Ressource\FBRessourceDefault;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\FBCreneauxGeneres;
@@ -41,9 +42,6 @@ class FBForm
         foreach ($fbParams->uids as $valuid) {
             $uid = $valuid['uid'];
 
-            if (! $valuid['valid'])
-                continue;
-
             switch ($valuid['type']) {
                 case 'up1':
                     $estOptionnel = false;
@@ -56,6 +54,12 @@ class FBForm
 
                 case 'gmail':
                     $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
+
+                    $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
+                    $fbUsers[] = $fbUser;
+                    break;
+                case 'default':
+                    $fbUser = FBRessourceDefault::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
                     $fbUsers[] = $fbUser;

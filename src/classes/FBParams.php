@@ -102,14 +102,14 @@ class FBParams
 
                 $decodedUrl = urldecode($agendaDistantUrl);
 
-                $aUid = ['type' => 'gmail', 'url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'data' => false, 'valid' => false];
+                $aUid = ['url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'data' => false, 'valid' => false];
 
                 $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
 
                 if (str_starts_with($decodedUrl, "https://calendar.google.com") && preg_match($emailPattern, $decodedUrl, $matches)) {
-                    $email = $matches[0];
-                    if ($agendaDistantMail == $email)
-                        $aUid['valid'] = true;
+                    $aUid['type'] = 'gmail';
+                } else {
+                    $aUid['type'] = 'default';
                 }
 
                 $this->uids[] = $aUid;

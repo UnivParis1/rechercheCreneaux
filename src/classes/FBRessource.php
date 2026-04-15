@@ -92,6 +92,11 @@ class FBRessource
 
         $curl_handle=curl_init();
 
+        if ($fbParams->stdEnv->env != 'prod') {
+            curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl_handle, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
         curl_setopt($curl_handle, CURLOPT_URL, $this->url);
         curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);

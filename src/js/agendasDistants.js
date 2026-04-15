@@ -4,7 +4,7 @@ define("agendasDistants", ["jquery", "validator"], function ($, validator) {
 
 	$(function () {
 		jsuids.forEach((elem) => {
-			if (elem.type == "gmail") {
+			if (elem.type != "up1") {
 				initAgendasDistants.push(elem);
 			}
 		});
@@ -62,7 +62,7 @@ define("agendasDistants", ["jquery", "validator"], function ($, validator) {
 
 	function _processDatas(divElem, inputUrl, inputMail, isUserEvent) {
 		let entry = {
-			type: "gmail",
+			type: "default",
 			url: inputUrl.val(),
 			mail: inputMail.val(),
 			data: false,

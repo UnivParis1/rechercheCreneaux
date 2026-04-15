@@ -49,10 +49,10 @@ class FBZoom
         $users = [];
         foreach ($fbParams->uids as $aUid) {
             $uid = $aUid['uid'];
-            if ($aUid['type'] == 'gmail') {
-                $users[] = new Userinfo($uid, $uid, $uid);
-            } else {
+            if ($aUid['type'] == 'up1') {
                 $users[] = FBRessourceUP1::_getUidInfos($uid, $fbParams->stdEnv);
+            } else {
+                $users[] = new Userinfo($uid, $uid, $uid);
             }
         }
 
