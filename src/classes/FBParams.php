@@ -94,7 +94,7 @@ class FBParams
         $agendasDistantsMail = isset($stdEnv->varsHTTPGet['agendasDistantsMail']) && is_array($stdEnv->varsHTTPGet['agendasDistantsMail']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsMail']) : null;
 
         if ($agendasDistantsUrl && sizeof($agendasDistantsUrl) > 0) {
-            foreach($agendasDistantsUrl as $idx => $agendaDistantUrl) {
+            foreach ($agendasDistantsUrl as $idx => $agendaDistantUrl) {
                 $agendaDistantMail = $agendasDistantsMail[$idx];
                 // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
                 if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('url', $aUid) && $aUid['url'] == $agendaDistantUrl))

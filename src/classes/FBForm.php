@@ -15,7 +15,8 @@ use RechercheCreneaux\Type\Userinfo;
 /**
  * Classe centrale de l'application, référençant les autres objets et paramètres
  */
-class FBForm {
+class FBForm
+{
 
     private array $fbUsers;
     private Sequence $creneauxGenerated;
@@ -29,7 +30,8 @@ class FBForm {
      * @param FBParams $fbParams
      * @param stdClass $stdEnv
      */
-    public function __construct(FBParams $fbParams, stdClass $stdEnv) {
+    public function __construct(FBParams $fbParams, stdClass $stdEnv)
+    {
         $this->fbParams = $fbParams;
         $this->stdEnv = $stdEnv;
 
@@ -39,7 +41,7 @@ class FBForm {
         foreach ($fbParams->uids as $valuid) {
             $uid = $valuid['uid'];
 
-            if ( ! $valuid['valid'])
+            if (! $valuid['valid'])
                 continue;
 
             switch ($valuid['type']) {
@@ -53,6 +55,7 @@ class FBForm {
                     break;
 
                 case 'gmail':
+                    die("code à écrire pour distant");
                     $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
@@ -76,21 +79,23 @@ class FBForm {
      *
      * @return bool
      */
-    public static function validParams(FBParams $fbParams) : bool {
+    public static function validParams(FBParams $fbParams): bool
+    {
         if (($fbParams->uids && sizeof($fbParams->uids) > 1)
-                && ($fbParams->plagesHoraires && sizeof($fbParams->plagesHoraires) > 0)
-                && $fbParams->nbcreneaux && $fbParams->duree)
-                {
-                    return true;
-                }
+            && ($fbParams->plagesHoraires && sizeof($fbParams->plagesHoraires) > 0)
+            && $fbParams->nbcreneaux && $fbParams->duree
+        ) {
+            return true;
+        }
 
         return false;
     }
 
-    public function invitationProcess(array $listDate) : bool {
+    public function invitationProcess(array $listDate): bool
+    {
         if (FBInvite::verifSiInvitation($this->fbParams)) {
             $fbInvite = new FBInvite($this, $this->fbParams, $this->stdEnv, $listDate);
-            $fbInvite->sendInvite( ($this->stdEnv->env == 'prod') ? true : false);
+            $fbInvite->sendInvite(($this->stdEnv->env == 'prod') ? true : false);
             // Lors d'un premier appel, initialisation de jsonSessionInviteInfos
             if ($this->fbParams->jsonSessionInviteInfos == null) {
                 if (!isset($_SESSION[$this->fbParams->inviteEnregistrementSessionName])) {
@@ -103,7 +108,8 @@ class FBForm {
         return false;
     }
 
-    public function getFBRessourcesDisqualifierOuBloquer() : ?array {
+    public function getFBRessourcesDisqualifierOuBloquer(): ?array
+    {
 
         $fbUsers = array();
         foreach ($this->fbUsers as $fbUser) {
@@ -114,33 +120,33 @@ class FBForm {
 
         if (count($fbUsers) > 0) {
             return $fbUsers;
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    public function getCreneauxGenerated() : Sequence {
+    public function getCreneauxGenerated(): Sequence
+    {
         return $this->creneauxGenerated;
     }
-    
+
     /**
      * getFbCompare
      *
      * @return FBCompare
      */
-    public function getFbCompare() {
+    public function getFbCompare()
+    {
         return $this->fbCompare;
     }
 
-    public function setFbCompare($fbCompare) {
+    public function setFbCompare($fbCompare)
+    {
         $this->fbCompare = $fbCompare;
     }
 
-    public function getFbUsers() {
+    public function getFbUsers()
+    {
         return $this->fbUsers;
     }
-
 }
-
-?>
