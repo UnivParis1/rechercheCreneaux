@@ -55,7 +55,6 @@ class FBForm
                     break;
 
                 case 'gmail':
-                    die("code à écrire pour distant");
                     $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));

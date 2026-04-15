@@ -110,8 +110,6 @@ class FBParams
                     $email = $matches[0];
                     if ($agendaDistantMail == $email)
                         $aUid['valid'] = true;
-                } else {
-                    $aUid['uid'] = "err-$idx";
                 }
 
                 $this->uids[] = $aUid;
