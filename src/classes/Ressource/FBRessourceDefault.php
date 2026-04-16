@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux\Ressource;
 
+use Exception;
 use League\Period\Sequence;
 use RechercheCreneaux\FBRessource;
 use RechercheCreneaux\FBParams;
@@ -27,22 +28,26 @@ class FBRessourceDefault extends FBRessource {
             return $fbUser;
         }
 
-        $fbUser->valid = true;
-        $fbUser->_selectFreebusy();
-        $busySeq = $fbUser->_initSequence();
+        if ( $fbUser->valid = $fbUser->_selectFreebusy() ) {
+            $busySeq = $fbUser->_initSequence();
 
-        if ($fbUser->_testSiAgendaBloque($busySeq)) {
-            $fbUser->estFullBloquer = true;
+            if ($fbUser->_testSiAgendaBloque($busySeq)) {
+                $fbUser->estFullBloquer = true;
+            }
+
+            $fbUser->sequence = $fbUser->_instanceCreneaux($busySeq);
         }
-
-        $fbUser->sequence = $fbUser->_instanceCreneaux($busySeq);
 
         return $fbUser;
     }
 
-    public function _selectFreebusy(): void
+    public function _selectFreebusy(): bool
     {
-        $vcal = Vcalendar::factory()->parse($this->content);
+        try {
+            $vcal = Vcalendar::factory()->parse($this->content);
+        } catch (Exception $e) {
+            return false;
+        }
 
         $components = $vcal->getComponents('Vevent');
 
@@ -59,5 +64,7 @@ class FBRessourceDefault extends FBRessource {
             $i++;
         }
         $this->fbusys = $fbusys;
+
+        return true;
     }
 }

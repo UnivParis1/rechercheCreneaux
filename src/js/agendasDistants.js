@@ -11,7 +11,7 @@ define("agendasDistants", ["jquery", "validator"], function ($, validator) {
 
 		$("#creneauMailInput").on("shown.bs.modal", () => {
 			initAgendasDistants.forEach((elem) => {
-				if (elem.data) {
+				if (elem.data && elem.valid) {
 					$("#creneauMailParticipant_ul").append("<li>" + elem.uid + "</li>");
 				}
 			});

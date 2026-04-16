@@ -208,8 +208,8 @@ function eventoDatasRequest(args) {
             jsonData.guests.push({email:datas.mail,name:datas.displayName});
         });
 
-        if (agendasDistants.entriesExts.length > 0) {
-          agendasDistants.entriesExts.forEach((data) => {
+        if (agendasDistants.agendasDistants.length > 0) {
+          agendasDistants.agendasDistants.forEach((data) => {
             jsonData.new_guests.push(data.uid);
             jsonData.guests.push({email:data.uid,name:data.uid});
           });
