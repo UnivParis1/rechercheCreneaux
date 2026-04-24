@@ -1,0 +1,20 @@
+{
+  "extends": "@type-config/standard",
+  "compilerOptions": {
+    "rootDir": "./src/ts/",
+    "target": "ES5",
+    "module": "amd",
+    "outDir": "./src/ts/dist",
+    "baseUrl": "./",
+    "declaration": false,
+    "ignoreDeprecations": "6.0",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "src/ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
