@@ -105,6 +105,7 @@ if (FBForm::validParams($fbParams)) {
 
             <?php if ($fbParams->uids && isset($jsuids)): ?>
                 var jsuids = <?= "$jsuids" ?>;
+                globalThis.jsuids = jsuid; 
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
                 var jsuids = [{
                     type: 'up1',
