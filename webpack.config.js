@@ -35,6 +35,14 @@ module.exports = {
 //    noParse: /src[\\/]css[\\/]/,
     rules: [
       {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+      {
         test: /\.woff2?$/,
         type: "asset/resource",
       },

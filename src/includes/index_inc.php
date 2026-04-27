@@ -104,10 +104,9 @@ if (FBForm::validParams($fbParams)) {
             var urlwsgroupUsersAndGroups = '<?= $stdEnv->urlwsgroupUsersAndGroups; ?>';
 
             <?php if ($fbParams->uids && isset($jsuids)): ?>
-                var jsuids = <?= "$jsuids" ?>;
-                globalThis.jsuids = jsuid; 
+                globalThis.jsuids = <?= "$jsuids" ?>;
             <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
-                var jsuids = [{
+                globalThis.jsuids = [{
                     type: 'up1',
                     uid: '<?= $stdEnv->uidCasUser ?>'
                 }];

@@ -1,3 +1,6 @@
+import '../img/listArrow.png';
+import '../css/form.css';
+import '../css/autocompleteUser.css';
 import '../scss/styles.scss';
 
 // babel s'occupe de transformer requirejs en commonJS, les librairies suivantes sont bien intégrés au code
