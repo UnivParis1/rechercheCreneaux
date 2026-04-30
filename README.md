@@ -87,12 +87,18 @@ Possibilité de créer un sondage sur plusieurs créneaux
 
 >+ **URL_FREEBUSY** : url api récupération du calendrier.
 
-### Configuration js
+### Feuilles de styles
 
-Le projet utilise webpack pour la configuration js
+Les fichiers css sont importés depuis le fichier scss styles.scss puis bundlés avec tout le reste
+
+### Configuration Typescript
+
+Initialement codé avec JS, les fichiers JS ont été recodés en Typescript
+
+Le projet utilise webpack pour la configuration typescript
 
 >+ fichier de configuration: webpack.config.js
->+ les js sont compilés dans le fichier ** public/build/bundle.js **
+>+ les ressources du projets sont compilés dans le fichier ** public/build/bundle.js **
 
 historiquement, le projet utilisait requirejs pour charger les fichiers js en Asynchronous Module Definition (AMD)
 

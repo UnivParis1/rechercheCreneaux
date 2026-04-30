@@ -1,34 +1,9 @@
-// Override Bootstrap's Sass default variables
-//
-// Nearly all variables in Bootstrap are written with the `!default` flag.
-// This allows you to override the default values of those variables before
-// you import Bootstrap's source Sass files.
-//
-// Overriding the default variable values is the best way to customize your
-// CSS without writing _new_ styles. For example, you can either change
-// `$body-color` or write more CSS that override's Bootstrap's CSS like so:
-// `body { color: red; }`.
-
-
-//
-// Bring in Bootstrap
-//
-
-// Option 1
-//
-// Import all of Bootstrap's CSS
-
-@import "../css/form.css";
-@import "../css/autocompleteUser.css";
-
-@import "nouislider/dist/nouislider.min";
-
 $enable-negative-margins: true;
-
 @import "bootstrap/scss/bootstrap";
-
 
 $bootstrap-icons-font-dir: "~bootstrap-icons/font/fonts";
 @import "~bootstrap-icons/font/bootstrap-icons.scss";
 // on import tous les styles ici
-
+@import "../css/form.css";
+@import "../css/autocompleteUser.css";
+@import "nouislider/dist/nouislider.min";

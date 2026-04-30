@@ -168,18 +168,18 @@ if (FBForm::validParams($fbParams)) {
         <?php if ($stdEnv->agendasDistants): ?>
             <div id="agendasDistant" class="row border-start border-end pb-3">
                 <p class="text-center">Agendas distant</p>
-                <div id="aclonerDivUriMail" class="aclonerUriClass row justify-content-center d-none">
+                <div id="aclonerDivUriMail" class="aclonerUriClass row justify-content-lg-center d-none">
                     <div class="divUrl col-md-7">
                         <label for="inputUrl" class="form-label">Url</label>
                         <input type="uri" class="form-control" id="inputUrl" name="agendasDistantsUrl[]" placeholder="Ex: https://calendar.google.com/calendar/ical/utilisateur%40gmail.com/public/basic.ics" />
                         <div class="invalid-feedback"></div>
                     </div>
-                    <div class="divMail col-md-2 px-0 overflow-hidden">
+                    <div class="divMail col-md-2 px-lg-0 overflow-hidden">
                         <label for="inputEmail" class="form-label">Email</label>
                         <input id="inputEmail" type="email" class="form-control" name="agendasDistantsMail[]" placeholder="utilisateur@gmail.com" />
                         <div class="invalid-feedback"></div>
                     </div>
-                    <div class="col-1 d-flex align-items-start pt-4 me-n3">
+                    <div class="col-3 col-lg-1 d-flex align-items-start pt-4 me-n3">
                         <button class="ajouterDistantUri mt-2">ajouter</button>
                     </div>
                     <div class="col-1 d-flex align-items-start pt-4 invisible">
