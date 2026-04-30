@@ -2,13 +2,12 @@
   "extends": "@type-config/standard",
   "compilerOptions": {
     "rootDir": "./",
-    "target": "ES5",
-    "module": "amd",
+    "target": "esnext",
     "outDir": "./build",
-    "baseUrl": "./",
     "declaration": false,
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+//    "ignoreDeprecations": "6.0",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": [
