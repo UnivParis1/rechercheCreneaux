@@ -8,17 +8,19 @@ const autoprefixer = require('autoprefixer')
 
 module.exports = {
   mode: 'development',
+  devtool: 'inline-source-map',
   context: path.join(__dirname, '.'),
   resolve: {
     alias: {
       jquery: node_dir + '/jquery/dist/jquery',
       noUiSlider: node_dir + '/nouislider/dist/nouislider',
-      autocompleteUser: 'src/js/autocompleteUser',
-      form: 'src/js/form.js'
-    }
+      autocompleteUser: 'src/ts/autocompleteUser',
+      form: 'src/ts/form'
+    },
+    tsconfig: true,
   },
   entry: {
-    main: './src/js/main.js'
+    main: './src/ts/main.ts'
   },
   output: {
     path: path.resolve(__dirname + '/public/build'),
@@ -35,10 +37,6 @@ module.exports = {
 //    noParse: /src[\\/]css[\\/]/,
     rules: [
       {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
-      },
-      {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
@@ -46,6 +44,17 @@ module.exports = {
         test: /\.woff2?$/,
         type: "asset/resource",
       },
+      {
+         test: /\.([cm]?ts|tsx)$/,
+         exclude: /node_modules/,
+         use: {
+             loader: "ts-loader",
+             options: {
+                transpileOnly: true,
+                projectReferences: true
+             }
+         }
+     },
       {
         test: /.js$/,
         exclude: /node_modules/,
@@ -103,6 +112,9 @@ module.exports = {
 
       }
     ]
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js', '.css', '.scss', '.png', '.gif']
   },
   ignoreWarnings: [
     {

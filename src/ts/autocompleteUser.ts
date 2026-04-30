@@ -1,25 +1,16 @@
-export {
-    JQuery,
-    $
-}
-
 import autocomplete from "autocompleter";
 import $ from 'jquery';
 
+
 declare global {
-    interface Global {
-        $: JQuery;
-        JQuery: JQuery
+    interface JQuery {
+      autocompleteGroup(this:any, searchGroupURL:string, options:any): JQuery;
+      autocompleteUserAndGroup(this:any, searchUserAndGroupURL:string, options:any): JQuery;
+      autocompleteUser(this:any, searchUserURL:string, options:any): JQuery;
+      autocompleteUser_remove(this:any): JQuery;
+      handlePlaceholderOnIE(): JQuery;
     }
 }
-interface JQuery {
-    autocompleteGroup(): JQuery;
-    autocompleteUserAndGroup(): JQuery;
-    autocompleteUser(): JQuery;
-    autocompleteUser_remove(): JQuery;
-    handlePlaceholderOnIE(): JQuery;
-}
-
 
 var autocompleteGroup:any = function (this:any, searchGroupURL:string, options:any) {
     if (!searchGroupURL) throw "missing param searchGroupURL";
@@ -625,3 +616,5 @@ $.fn.extend({
     autocompleteUser_remove:autocompleteUser_remove,
     handlePlaceholderOnIE:handlePlaceholderOnIE
 });
+
+export default JQuery;

@@ -1,17 +1,20 @@
 {
   "extends": "@type-config/standard",
   "compilerOptions": {
-    "rootDir": "./src/ts/",
+    "rootDir": "./",
     "target": "ES5",
     "module": "amd",
-    "outDir": "./src/ts/dist",
+    "outDir": "./build",
     "baseUrl": "./",
     "declaration": false,
     "ignoreDeprecations": "6.0",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": [
-    "src/ts"
+    "src/ts",
+    "src/css",
+    "src/scss"
   ],
   "exclude": [
     "node_modules",

@@ -1,16 +1,11 @@
-export {
-    agendasDistants
-};
-
+import $ from 'jquery';
+import validator from 'validator';
 
 declare global {
   interface Global {
     jsuids: string[];
   }
 }
-
-import $ from 'jquery';
-import validator from 'validator';
 
 var initAgendasDistants: Array<any> = new Array();
 var agendasDistants: Array<any> = new Array();
@@ -255,3 +250,5 @@ function testExistField(input: JQuery<HTMLElement>, field: any, divInvalid: JQue
 	}
 	return true;
 }
+
+export default agendasDistants;
