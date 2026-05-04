@@ -5,7 +5,6 @@
     "target": "esnext",
     "outDir": "./build",
     "declaration": false,
-//    "ignoreDeprecations": "6.0",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "plugins": [{ "name": "typescript-plugin-css-modules" }]

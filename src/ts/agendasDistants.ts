@@ -62,10 +62,13 @@ function detectGoogmail(event: any) {
   let val = event.target.value;
   
   if (val.search('calendar.google.com')) {
-    let mail = val.split('/')[5].replace('%40', '@');
-    if (validator.isEmail(mail)) {
-      $(event.target.parentElement.parentElement).find('input#inputEmail').val(mail);
-    }
+	let splited:Array<string> = val.split('/');
+	if (splited[5] != 'undefined') {
+	    let mail:string = splited[5].replace('%40', '@');
+	    if (validator.isEmail(mail)) {
+	      $(event.target.parentElement.parentElement).find('input#inputEmail').val(mail);
+	    }
+	}
   }
 }
 
