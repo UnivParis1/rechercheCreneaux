@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import validator from 'validator';
+import * as bootstrap from 'bootstrap';
 
 declare global {
   interface Global {
@@ -17,13 +18,17 @@ $(function () {
 		}
 	});
 
-	$("#creneauMailInput").on("shown.bs.modal", () => {
-		initAgendasDistants.forEach((elem) => {
-			if (elem.data && elem.valid) {
-				$("#creneauMailParticipant_ul").append("<li>" + elem.uid + "</li>");
-			}
+    const myModal = document.querySelector('#creneauMailInput');
+    if (myModal) {
+		new bootstrap.Modal(myModal);
+		myModal.addEventListener('show.bs.modal', () => {
+			initAgendasDistants.forEach((elem) => {
+				if (elem.data && elem.valid) {
+					$("#creneauMailParticipant_ul").append("<li>" + elem.uid + "</li>");
+				}
+			});
 		});
-	});
+	}
 
 	let i = 0;
 	do {

@@ -90,7 +90,7 @@ var eventoCheck = () => {
     let selector = $('#modalEventoCreneaux li > input:checked');
 
     if (selector.length == 0) {
-        evento.attr('disabled', 'disabled');
+        evento.prop('disabled', true);
         if (evento.hasClass('btn-success')) {
             evento.removeClass('btn-success');
         }

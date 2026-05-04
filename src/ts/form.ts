@@ -1,7 +1,7 @@
+import * as bootstrap from 'bootstrap';
 import $ from 'jquery';
 import './autocompleteUser';
 import moment from 'moment';
-import bootstrap from 'bootstrap';
 import './slider';
 
 moment.locale("fr");
@@ -50,8 +50,13 @@ $(function() {
   $("#form").on("submit", onSubmit);
   $("#reponse li a").on("click", onTimeClick);
   $(zoomButtonSelector).on("click", zoomClick);
-  $('#creneauMailInput').on('shown.bs.modal', bsModalShowZoom.bsModalShow);
-  $('#creneauMailInput').on('hidden.bs.modal', bsModalShowZoom.bsModalHide);
+
+  const myModal = document.querySelector('#creneauMailInput');
+  if (myModal) {
+    new bootstrap.Modal(myModal);
+    myModal.addEventListener('show.bs.modal', bsModalShowZoom.bsModalShow);
+    myModal.addEventListener('hidden.bs.modal', bsModalShowZoom.bsModalHide);
+  }
 
   setOptionsUid((globalThis as any).jsuids);
 
@@ -425,11 +430,11 @@ class bsModalShowZoom {
     $('#copySpan').remove();
     $(zoomButtonSelector).on('click', zoomClick);
 
-    $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea,#creneauBoxInput button").attr('disabled', 'true');
-    $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea").attr('required', 'false');
+    $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea,#creneauBoxInput button").prop('disabled', true);
+    $("#creneauBoxInput input[type='text'],#creneauBoxInput textarea").prop('required', 'false');
 
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('disabled', 'true');
-    $("#creneauBoxInput ~ input[type='datetime-local']").attr('required', 'false');
+    $("#creneauBoxInput ~ input[type='datetime-local']").prop('disabled', true);
+    $("#creneauBoxInput ~ input[type='datetime-local']").prop('required', false);
   }
 }
 
