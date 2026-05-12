@@ -30,6 +30,7 @@ var autocompleteGroup:any = function (this:any, searchGroupURL:string, options:a
   var input:any = this[0];
 
     var source = function( request:any, response:any ) {
+    input.classList.add('ac-loading');
     if (input.kraaden_autocomplete_installed.navigate) {
       var pivot_item = input.kraaden_autocomplete_installed.navigate
       delete input.kraaden_autocomplete_installed.navigate;
@@ -57,7 +58,7 @@ var autocompleteGroup:any = function (this:any, searchGroupURL:string, options:a
           }
           response(data);
       }
-      });
+      }).always(() => input.classList.remove('ac-loading'));
     };
 
   var navigate = settings.subAndSuperGroupsURL && onNavigate(input);
@@ -108,6 +109,7 @@ var autocompleteUserAndGroup:any = function (this:any, searchUserAndGroupURL:str
     var input = this[0];
 
     var source = function( request:any, response:any ) {
+      input.classList.add('ac-loading');
       var wsParams = $.extend({ 
           maxRows: settings.maxRows,
           user_attrs: settings.user_attrs
@@ -152,7 +154,7 @@ var autocompleteUserAndGroup:any = function (this:any, searchUserAndGroupURL:str
                  
           response(l);
       }
-      });
+      }).always(() => input.classList.remove('ac-loading'));
     };
 
     // disable browser proposing previous values
@@ -413,6 +415,7 @@ var autocompleteUser:any = function (this:any, searchUserURL:string, options:any
     var input = this[0];
 
     var source = function( request:any, response:any ) {
+    input.classList.add('ac-loading');
     wsParams.token = request.term = request.term.trim();
       $.ajax({
       url: searchUserURL,
@@ -447,7 +450,7 @@ var autocompleteUser:any = function (this:any, searchUserURL:string, options:any
 
           response(data);
       }
-      });
+      }).always(() => input.classList.remove('ac-loading'));
     };
 
     // disable browser proposing previous values
