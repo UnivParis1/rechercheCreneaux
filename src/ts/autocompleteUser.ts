@@ -66,7 +66,7 @@ var autocompleteGroup:any = function (this:any, searchGroupURL:string, options:a
   input.autocomplete = "off";     
 
   input.kraaden_autocomplete_installed = autocomplete({ 
-      showOnFocus: true,
+      showOnFocus: false,
       minLength: settings.minLength,
       debounceWaitMs: 200,
       preventSubmit: 2, // settings.disableEnterKey ? 1 : 0
@@ -159,7 +159,7 @@ var autocompleteUserAndGroup:any = function (this:any, searchUserAndGroupURL:str
     input.autocomplete = "off";
 
     input.kraaden_autocomplete_installed = autocomplete({ 
-      showOnFocus: true,
+      showOnFocus: false,
       minLength: settings.minLength,
       disableAutoSelect: settings.disableAutoSelect,
       debounceWaitMs: 200,
@@ -454,7 +454,7 @@ var autocompleteUser:any = function (this:any, searchUserURL:string, options:any
     input.autocomplete = "off";
 
     input.kraaden_autocomplete_installed = autocomplete({ 
-      showOnFocus: true,
+      showOnFocus: false,
       minLength: settings.minLength,
       debounceWaitMs: 200,
       preventSubmit: 2, // settings.disableEnterKey ? 1 : 0
