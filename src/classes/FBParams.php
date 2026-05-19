@@ -6,6 +6,7 @@ namespace RechercheCreneaux;
 
 use DateTime;
 use Dotenv\Dotenv;
+use Exception;
 use phpCAS;
 use stdClass;
 
@@ -209,6 +210,15 @@ class FBParams
             $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
         }
 
+        if ($stdEnv->agendasDistantsUpload == true) {
+            $dotenv->required(['AGENDASDISTANTSUPLOAD_PATH']);
+            $pathupload = $_ENV['AGENDASDISTANTSUPLOAD_PATH'];
+
+            if ( ! (file_exists($pathupload) && is_dir($pathupload) && is_writable($pathupload)))
+                throw new Exception("$pathupload n'est pas accessible en écriture pour agendasdistantsupload");
+
+            $stdEnv->agendasDistantsUploadPath = $pathupload;
+        }
 
         $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
 

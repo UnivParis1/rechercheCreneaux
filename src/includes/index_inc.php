@@ -15,6 +15,9 @@ use RechercheCreneaux\FBInvite;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
+global $stdEnv;
+global $fbParams;
+
 if (FBForm::validParams($fbParams)) {
     $fbForm = new FBForm($fbParams, $stdEnv);
 
@@ -169,7 +172,15 @@ if (FBForm::validParams($fbParams)) {
             <div id="agendasDistant" class="row border-start border-end pb-3">
                 <p class="text-center">Agendas distant</p>
                 <div id="aclonerDivUriMail" class="aclonerUriClass row justify-content-lg-center d-none">
-                    <div class="divUrl col-md-7">
+                    <?php if ($stdEnv->agendasDistantsUpload): ?>
+                    <div class="divFile col-2 overflow-hidden">
+                        <label for="inputFile" class="form-label">Fichier ICS</label>
+                        <input type="file" id="inputFile" class="mt-2">
+                        <div class="invalid-feedback"></div>
+                        <input type="hidden" name="agendasDistantsFile[]" disabled />
+                    </div>
+                    <?php endif ?>
+                    <div class="divUrl col-md-<?= $stdEnv->agendasDistantsUpload ? "4": "7" ?>">
                         <label for="inputUrl" class="form-label">Url</label>
                         <input type="uri" class="form-control" id="inputUrl" name="agendasDistantsUrl[]" placeholder="Ex: https://calendar.google.com/calendar/ical/utilisateur%40gmail.com/public/basic.ics" />
                         <div class="invalid-feedback"></div>

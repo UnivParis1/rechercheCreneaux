@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $, { event } from 'jquery';
 import validator from 'validator';
 import * as bootstrap from 'bootstrap';
 
@@ -7,6 +7,75 @@ declare global {
     jsuids: string[];
   }
 }
+
+class Upload {
+	file: File;
+	constructor (file: File) {
+		this.file = file;
+	}
+	public getType() {
+		return this.file.type;
+	}
+	public getSize() {
+        return this.file.size;
+	}
+	public getName() {
+		return this.file.name;
+	}
+	public doUpload(inputElem: HTMLElement) {
+	    var that = this;
+	    var formData = new FormData();
+
+	    // Append the file to the FormData object
+	    formData.append("file", this.file, this.getName());
+	    formData.append("upload_file", "true");
+
+	    $.ajax({
+	        type: "POST",
+	        url: "uploadICS.php",
+	        xhr: function () {
+	            // Get the native XHR object
+	            var myXhr = $.ajaxSettings.xhr();
+	            if (myXhr.upload) {
+	                // Monitor upload progress
+	                myXhr.upload.addEventListener('progress', that.progressHandling, false);
+	            }
+	            return myXhr;
+	        },
+	        success: function (dataraw) {
+				let data = JSON.parse(dataraw);
+
+				if (data.status == true) {
+					let hidden=$(inputElem).parent().find('input[type="hidden"]');
+					hidden.removeAttr("disabled");
+					hidden.attr('value', data.name + "=" + data.fullname);
+				}
+	        },
+	        error: function (error) {
+	            // Handle upload errors
+	            console.error("Upload error:", error);
+	        },
+	        async: true,
+	        data: formData,
+	        cache: false,
+	        contentType: false, // Essential for FormData
+	        processData: false, // Essential for FormData
+	        timeout: 60000 // Optional timeout
+	    });
+	}
+
+	public progressHandling(event:any) {
+	    var percent = 0;
+	    var position = event.loaded || event.position;
+	    var total = event.total;
+
+	    if (event.lengthComputable) {
+	        percent = Math.ceil(position / total * 100);
+	    }
+		console.log("Upload file: " + percent + "%");
+	}
+}
+
 
 var initAgendasDistants: Array<any> = new Array();
 var agendasDistants: Array<any> = new Array();
@@ -30,13 +99,26 @@ $(function () {
 		});
 	}
 
+	$("#inputFile").on('change', (event) => {
+		let inputUrl = event.target.parentElement?.nextElementSibling?.children[1];
+		const file = (event.target as HTMLInputElement).files![0];
+
+		if (typeof inputUrl != "undefined") {
+			var upload:Upload = new Upload(file);
+			upload.doUpload(event.target);
+
+			// grise les url
+			$(inputUrl).prop('disabled', true);
+		}
+	});
+
 	let i = 0;
 	do {
 		let divEntry = $("#aclonerDivUriMail").clone(true);
 		divEntry.removeAttr("id").removeClass("d-none");
 		$("#agendasDistant").append(divEntry);
 
-     divEntry.find("#inputUrl").on('blur', detectGoogmail);
+        divEntry.find("#inputUrl").on('blur', detectGoogmail);
 		let buttonAdd = divEntry.find("button.ajouterDistantUri");
 		buttonAdd.on("click", cliquerAjouter);
 
@@ -65,7 +147,7 @@ $(function () {
 
 function detectGoogmail(event: any) {
   let val = event.target.value;
-  
+
   if (val.search('calendar.google.com')) {
 	let splited:Array<string> = val.split('/');
 	if (typeof splited[5] != 'undefined') {
@@ -85,7 +167,7 @@ function ajouterDOMLigneUriMail() {
 		.clone(true)
 		.removeAttr("id")
 		.removeClass("d-none");
-   boutonUri.find("input#inputUrl").on('blur', detectGoogmail);
+    boutonUri.find("input#inputUrl").on('blur', detectGoogmail);
 	boutonUri.find("button.ajouterDistantUri").on("click", cliquerAjouter);
 	boutonUri.insertAfter(
 		$("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").last(),
