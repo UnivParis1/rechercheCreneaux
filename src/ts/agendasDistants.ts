@@ -48,7 +48,7 @@ class Upload {
 				if (data.status == true) {
 					let hidden=$(inputElem).parent().find('input[type="hidden"]');
 					hidden.removeAttr("disabled");
-					hidden.attr('value', data.name + "=" + data.fullname);
+					hidden.attr('value', data.name + "=" + data.filename);
 				}
 	        },
 	        error: function (error) {

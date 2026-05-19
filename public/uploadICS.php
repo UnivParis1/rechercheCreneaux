@@ -33,20 +33,17 @@ else
     $datas['msg'] = "Invalid file";
 
 function wfile(array $files,stdClass $stdEnv): array {
-        $msg = "success";
         $name = $files["file"]['full_path'];
         $tmp_name = $files["file"]["tmp_name"];
-        $status = true;
 
         $content = file_get_contents($tmp_name);
+        $filename = basename($tmp_name);
 
-        $temp = explode('/', $tmp_name);
-        $nametmp = end($temp);
 
-        $fullname = $stdEnv->agendasDistantsUploadPath . $nametmp;
-        file_put_contents($fullname, $content);
+        $filecopy = $stdEnv->agendasDistantsUploadPath . $filename;
+        file_put_contents($filecopy, $content);
 
-        return ['status' => $status, 'name' => $name, 'fullname' => $fullname, 'msg' => $msg];
+        return ['status' => true, 'name' => $name, 'filename' => $filename, 'msg' => 'success'];
 }
 
 echo json_encode($datas);
