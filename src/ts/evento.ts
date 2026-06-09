@@ -1,17 +1,8 @@
 import listDisplayname from "./form";
 import agendasDistants from "./agendasDistants";
+import * as bootstrap from 'bootstrap';
 import moment from "moment";
 import $ from 'jquery';
-
-declare global {
-  interface Global {
-    isEventoSession: boolean,
-    idEvento: any,
-    urlEvento: any,
-    eventoWsUrl: string,
-    jsuids: string[],
-  }
-}
 
 var isEventoSession:boolean = (globalThis as any).isEventoSession;
 var idEvento:any = (globalThis as any).idEvento;
@@ -127,6 +118,14 @@ var eventoFormCheck = () => {
 }
 
 $(function() {
+    let modalEvento = document.querySelector('#modalEvento');
+    let spinnerEvento = document.querySelector('#spinnerEvento');
+
+    if (modalEvento && spinnerEvento) {
+        bootstrap.Modal.getOrCreateInstance(modalEvento);
+        bootstrap.Modal.getOrCreateInstance(spinnerEvento);
+    }
+
     // test si l'evento en cours n'est pas clos
     if (isEventoSession == true && typeof  idEvento != 'undefined' && typeof  urlEvento != 'undefined') {
         eventoAjaxSurvey(eventoDatasRequest({id: idEvento, path: urlEvento}), 'GET', eventoWsUrl + "survey" + "/" + idEvento, function(response: any) {
@@ -153,7 +152,7 @@ $(function() {
 
     $('input[name="idxCreneauxChecked[]"]').on("click", eventoCheck);
 
-    $('#modalEvento').on('shown.bs.modal', () => {
+    modalEvento?.addEventListener('show.bs.modal', () => {
         $("#eventoModalHeader div span[type='button'] i").removeClass('bi-check2');
         $("#eventoModalHeader div span[type='button'] i").addClass('bi-clipboard');
         $("#evento + span[type='button'] i").removeClass('bi-check2');
@@ -166,8 +165,10 @@ $(function() {
             return;
         }
 
-        $('#modalEvento').modal('hide');
-        $('#spinnerEvento').modal('show');
+        if (modalEvento && spinnerEvento) {
+            bootstrap.Modal.getOrCreateInstance(modalEvento).hide();
+            bootstrap.Modal.getOrCreateInstance(spinnerEvento).show();
+        }
 
         let titre = $("input[name='titrevento']").val();
         let desc = $("textarea[name='summaryevento']").val();
@@ -353,20 +354,15 @@ function eventoAjaxSurvey(datas:any, type:any, url:any, traiteReponseAjax:any) {
         data: JSON.stringify(datas),
         crossDomain: true,
         xhrFields: {withCredentials: true}
-        };
+    };
 
-    let req = $.ajax(url, settings);
-
-
-        req.fail( () => console.log('fail'));
-        req.done( (response) => {
-            traiteReponseAjax(response, datas);
-            console.log("success");
-        });
-
-        req.always( () => {
-            $(".modal-backdrop").hide();
-            $('#spinnerEvento').hide();
-            console.log("complete");
-        });
+    $.ajax(url, settings).fail( () => console.log('fail'))
+                         .done( (response) => {
+                              traiteReponseAjax(response, datas);
+                              console.log("success");
+                          }).always( () => {
+                              $(".modal-backdrop").hide();
+                              $('#spinnerEvento').hide();
+                              console.log("complete");
+                          });
 }

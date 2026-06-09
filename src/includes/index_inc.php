@@ -122,11 +122,14 @@ if (FBForm::validParams($fbParams)) {
             var urlwsphoto = '<?= $stdEnv->urlwsphoto; ?>';
         <?php endif ?>
 
-        var isEventoSession = <?php echo (isset($isEventoSession) && $isEventoSession) ? "true" : "false" ?>;
+        <?php if ($stdEnv->evento): ?>
+            globalThis.eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";
+            globalThis.isEventoSession = <?php echo (isset($isEventoSession) && $isEventoSession) ? "true" : "false" ?>;
 
-        <?php if (isset($isEventoSession) && $isEventoSession): ?>
-            var idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
-            var urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
+            <?php if (isset($isEventoSession) && $isEventoSession): ?>
+                globalThis.idEvento = "<?php echo $fbEventoSession->event['id'] ?>";
+                globalThis.urlEvento = "<?php echo $fbEventoSession->event['path'] ?>";
+            <?php endif ?>
         <?php endif ?>
     </script>
 

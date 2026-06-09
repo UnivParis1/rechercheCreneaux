@@ -1,4 +1,3 @@
-<script>const eventoWsUrl="<?= $stdEnv->eventoWsUrl ?>";</script>
 <script>
     // méthode copie url evento index
     function copyClipboard(event) {
