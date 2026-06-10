@@ -4,11 +4,6 @@ import * as bootstrap from 'bootstrap';
 import moment from "moment";
 import $ from 'jquery';
 
-var isEventoSession:boolean = (globalThis as any).isEventoSession;
-var idEvento:any = (globalThis as any).idEvento;
-var urlEvento:any = (globalThis as any).urlEvento;
-var eventoWsUrl:string = (globalThis as any).eventoWsUrl;
-
 var eventoDraftBase:any = {
 	"id": "",
 	"title": "arenseigner",
@@ -118,6 +113,11 @@ var eventoFormCheck = () => {
 }
 
 $(function() {
+    let isEventoSession:boolean = (globalThis as any).isEventoSession;
+    let idEvento:any = (globalThis as any).idEvento;
+    let urlEvento:any = (globalThis as any).urlEvento;
+    let eventoWsUrl:string = (globalThis as any).eventoWsUrl;
+
     let modalEvento = document.querySelector('#modalEvento');
     let spinnerEvento = document.querySelector('#spinnerEvento');
 
