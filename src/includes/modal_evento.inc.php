@@ -1,15 +1,17 @@
 <script>
-    // méthode copie url evento index
-    function copyClipboard(event) {
-        let url = $("#evento + span[type='button'] i").attr('data-creneau-url');
+// méthode copie url evento index
+function copyClipboard(event) {
 
-        if ($(event.target).hasClass('bi-clipboard')) {
-            $(event.target).removeClass('bi-clipboard');
-            $(event.target).addClass('bi-check2');
-        }
+    let qs = document.querySelector("#evento + span[type='button'] i");
+    let url = qs.attributes.getNamedItem('data-creneau-url').value;
 
-        navigator.clipboard.writeText(url);
+    if (event.target.classList.contains('bi-clipboard')) {
+        event.target.classList.remove('bi-clipboard');
+        event.target.classList.add('bi-check2');
     }
+
+    navigator.clipboard.writeText(url);
+}
 </script>
 <!-- Modal -->
 <div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalInputLabel" aria-hidden="true">
