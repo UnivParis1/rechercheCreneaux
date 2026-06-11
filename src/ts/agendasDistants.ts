@@ -36,7 +36,7 @@ $(function () {
 		divEntry.removeAttr("id").removeClass("d-none");
 		$("#agendasDistant").append(divEntry);
 
-     divEntry.find("#inputUrl").on('blur', detectGoogmail);
+        divEntry.find("#inputUrl").on('blur', detectGoogmail);
 		let buttonAdd = divEntry.find("button.ajouterDistantUri");
 		buttonAdd.on("click", cliquerAjouter);
 
@@ -73,7 +73,14 @@ function detectGoogmail(event: any) {
 		if (typeof mailval != "undefined") {
 		    let mail:string = mailval.replace('%40', '@');
 		    if (validator.isEmail(mail)) {
-		      $(event.target.parentElement.parentElement).find('input#inputEmail').val(mail);
+				// récupère la node parent encapsulant la ligne d'ajout de l'agenda externe courant
+                let rootLine:JQuery<HTMLElement> = $(event.target.parentElement.parentElement);
+                rootLine.find('input#inputEmail').val(mail);
+				rootLine.find('button.ajouterDistantUri').trigger("click");
+
+				if ($("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == agendasDistants.length) {
+					ajouterDOMLigneUriMail();
+				}
 		    }
 		}
 	}
@@ -85,7 +92,7 @@ function ajouterDOMLigneUriMail() {
 		.clone(true)
 		.removeAttr("id")
 		.removeClass("d-none");
-   boutonUri.find("input#inputUrl").on('blur', detectGoogmail);
+    boutonUri.find("input#inputUrl").on('blur', detectGoogmail);
 	boutonUri.find("button.ajouterDistantUri").on("click", cliquerAjouter);
 	boutonUri.insertAfter(
 		$("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").last(),
@@ -128,11 +135,7 @@ function _processDatas(divElem: any, inputUrl: JQuery<HTMLElement>, inputMail: J
 	bouttonSupprimerAgenda.parent().removeClass("invisible");
 	bouttonSupprimerAgenda.on("click", cliquerSupprimer);
 
-	if (
-		isUserEvent &&
-		agendasDistants.length ==
-			$("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length
-	) {
+	if ($("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)").length == agendasDistants.length && isUserEvent) {
 		ajouterDOMLigneUriMail();
 	}
 }
