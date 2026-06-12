@@ -29,7 +29,8 @@
     "sabre/vobject": "*",
     "brunobetioli/easypeasyics": "*",
     "sabre/dav": "*",
-    "rfx/cast": "*"
+    "rfx/cast": "*",
+    "craigk5n/php-icalendar-core": "*"
   },
   "config": {
     "allow-plugins": {

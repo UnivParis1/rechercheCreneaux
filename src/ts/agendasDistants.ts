@@ -51,25 +51,27 @@ $(function () {
 
 			buttonAdd.trigger("click");
 
-            if (entry.code != 200 || entry.valid == false) {
+            if (entry.valid == false) {
                 let errorTxt:string;
-                if (entry.code == 200) {
-                    errorTxt = "Les données retournées ne correspondent pas au format iCalendar";
-                } else {
-                    switch (entry.code) {
-                        case 404:
-                            errorTxt = "Assurez-vous que l'URL d'agenda renseignée est accessible en public";
-                            break;
-                        case 500:
-                            errorTxt = "Erreur ressource distante";
-                            break;
-                        case 0:
-                            errorTxt = "url serveur non accessible";
-                            break;
-                        default:
-                            errorTxt = "Erreur inconnue:" + entry.code + " : code retour non géré";
-                            break;
-                       }
+                switch (entry.code) {
+                    case 0:
+                        errorTxt = "url serveur non accessible";
+                        break;
+                    case (200):
+                        errorTxt = "Les données renvoyés par l'URL ne sont pas au format iCalendar";
+                        break;
+                    case (301):
+                    case (302):
+                        errorTxt = "Les redirections ne sont pas gérés, code retourné: " + entry.code;
+                        break;
+                    case 404:
+                        errorTxt = "Assurez-vous que l'URL d'agenda renseignée est accessible en public";
+                        break;
+                    case 500:
+                        errorTxt = "Erreur ressource distante";
+                        break;
+                    default:
+                        errorTxt = "Erreur inconnue: " + entry.code + " : code retour non géré";
                 }
 
 				inputUrl.removeClass("is-valid").addClass("is-invalid");

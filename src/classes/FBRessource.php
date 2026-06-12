@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RechercheCreneaux;
 
+use Exception;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
@@ -13,6 +14,8 @@ use League\Period\Period;
 use League\Period\Sequence;
 use RechercheCreneaux\FBParams;
 use RechercheCreneaux\Type\Userinfo;
+use Icalendar\Parser\Parser;
+use Icalendar\Validation\ErrorSeverity;
 
 class FBRessource
 {
@@ -385,5 +388,21 @@ class FBRessource
         $this->uidInfos = $uidInfos;
 
         return $this;
+    }
+
+    protected static function validICSFile(string $data):bool {
+        $parserStrict = new Parser(Parser::STRICT);
+
+        try {
+            $parserStrict->parse($data);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        $warnings = $parserStrict->getWarnings();
+        if (count($warnings) > 0)
+            return false;
+
+        return true;
     }
 }
