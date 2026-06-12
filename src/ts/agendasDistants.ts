@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $, { error } from 'jquery';
 import validator from 'validator';
 import * as bootstrap from 'bootstrap';
 
@@ -24,7 +24,7 @@ $(function () {
 		new bootstrap.Modal(myModal);
 		myModal.addEventListener('show.bs.modal', () => {
 			initAgendasDistants.forEach((elem) => {
-				if (elem.data && elem.valid) {
+				if (elem.code == 200 && elem.valid) {
 					$("#creneauMailParticipant_ul").append("<li>" + elem.uid + "</li>");
 				}
 			});
@@ -51,9 +51,29 @@ $(function () {
 
 			buttonAdd.trigger("click");
 
-			if (entry.data == false || entry.valid == false) {
+            if (entry.code != 200 || entry.valid == false) {
+                let errorTxt:string;
+                if (entry.code == 200) {
+                    errorTxt = "Les données retournées ne correspondent pas au format iCalendar";
+                } else {
+                    switch (entry.code) {
+                        case 404:
+                            errorTxt = "Assurez-vous que l'URL d'agenda renseignée est accessible en public";
+                            break;
+                        case 500:
+                            errorTxt = "Erreur ressource distante";
+                            break;
+                        case 0:
+                            errorTxt = "url serveur non accessible";
+                            break;
+                        default:
+                            errorTxt = "Erreur inconnue:" + entry.code + " : code retour non géré";
+                            break;
+                       }
+                }
+
 				inputUrl.removeClass("is-valid").addClass("is-invalid");
-				inputUrl.next().html("Erreur de données sur cette ressource");
+				inputUrl.next().html(errorTxt);
 			}
 
 			if (i == initAgendasDistants.length - 1) {
@@ -103,7 +123,7 @@ function _processDatas(divElem: any, inputUrl: JQuery<HTMLElement>, inputMail: J
 		type: "default",
 		url: inputUrl.val(),
 		mail: inputMail.val(),
-		data: false,
+		code: -1,
 		valid: true,
 		idx: -1, 
 	};
@@ -141,12 +161,10 @@ function _processDatas(divElem: any, inputUrl: JQuery<HTMLElement>, inputMail: J
 function cliquerModifier(event: any) {
 	let agendasDistants = (globalThis as any).agendasDistants;
 	let cible = event.target.parentElement.parentElement;
-	let agendasDOM = $(
-		"#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)",
-	);
+	let agendasDOM = $("#agendasDistant .aclonerUriClass:not(#aclonerDivUriMail)");
 	for (let i = 0; i < agendasDOM.length; i++) {
 		if (agendasDOM[i] == cible) {
-			agendasDistants = agendasDistants.filter((elem: any) => elem.idx != i);
+			(globalThis as any).agendasDistants = agendasDistants.filter((elem: any) => elem.idx != i);
 		}
 	}
 	cliquerAjouter(event);
@@ -248,9 +266,7 @@ function testDistantValidField(input: JQuery<HTMLElement>, divInvalid: JQuery<HT
 }
 
 function testExistField(input: JQuery<HTMLElement>, field: any, divInvalid: JQuery<HTMLElement>, errorTxt: string) {
-	let length = (globalThis as any).agendasDistants.filter(
-		(elem: any) => input.val() == elem[field],
-	).length;
+	let length = (globalThis as any).agendasDistants.filter( (elem: any) => input.val() == elem[field] ).length;
 
 	if (length > 0) {
 		input.removeClass("is-valid");

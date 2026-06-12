@@ -102,7 +102,7 @@ class FBParams
 
                 $decodedUrl = urldecode($agendaDistantUrl);
 
-                $aUid = ['url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'data' => false, 'valid' => false];
+                $aUid = ['url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'code' => -1, 'valid' => false];
 
                 $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
 
