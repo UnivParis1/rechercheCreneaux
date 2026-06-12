@@ -23,7 +23,7 @@ class FBRessourceDefault extends FBRessource {
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel = false) : FBRessourceDefault {
         $fbUser = new self($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
 
-        if ($fbUser->httpError) {
+        if ($fbUser->httpCode != 200) {
             $fbUser->valid = false;
             return $fbUser;
         }

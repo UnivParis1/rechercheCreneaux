@@ -70,7 +70,7 @@ class FBRessource
     */
     public bool $estDisqualifier = false;
 
-    public bool $httpError = true;
+    public int $httpCode = -1;
 
     public bool $valid = false;
 
@@ -104,13 +104,11 @@ class FBRessource
 
         $content = curl_exec($curl_handle);
 
-        $httpcode = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
+        $this->httpCode = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
 
         curl_close($curl_handle);
 
-        $this->httpError = $httpcode == 200 ? false : true;
-
-        $this->content = $this->httpError ? null: $content;
+        $this->content = $this->httpCode == 200 ? $content : null;
     }
 
     public function getDisplayName(): string {
