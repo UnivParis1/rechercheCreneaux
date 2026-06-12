@@ -99,13 +99,16 @@ function getCurrentOptions() {
 }
 
 function testOptions(vals:any) {
-  if (vals.size < 2) {
+
+  let agendasDistants = (globalThis as any).agendasDistants;
+  let total:number = vals.size + agendasDistants.length;
+  if (total < 2) {
     return false;
   }
 
   let panticipantsChecked = $(idperson_ul + " li input:checked[name='listUidsOptionnels[]']");
 
-  if ((vals.size - panticipantsChecked.length) < 2) {
+  if ((total - panticipantsChecked.length) < 2) {
     return false;
   }
 
