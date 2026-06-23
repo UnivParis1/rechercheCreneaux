@@ -293,6 +293,12 @@ Cordialement,</p>
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS());
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer '. rand(10000,99999), 'Content-Type: text/calendar']);
+
+        if ($this->stdEnv->env  == 'local') {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
         $response = curl_exec($ch);
         curl_close($ch);
 
