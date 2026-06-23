@@ -108,12 +108,12 @@ class FBCreneauxGeneres {
             $dateMinMax =  clone $dtCreneau;
             $dateMinMax = $dateEndMax->setTime($minTime['h'], $minTime['i']);
 
-            $interval = Period::fromDateRange(new DatePeriod(
+            $interval = Period::fromRange(new DatePeriod(
                 $dateMinMax,
                 new DateInterval('PT'. $dureeMinutes.'M'),
                 $dateEndMax));
 
-            foreach ($interval->dateRangeForward($this->getDuration()) as $newCreneau) {
+            foreach ($interval->rangeForward($this->getDuration()) as $newCreneau) {
                 $newCreneauEnd = $newCreneau->add($this->getDuration()->dateInterval);
                 if ($newCreneauEnd > $dateEndMax)
                     continue;

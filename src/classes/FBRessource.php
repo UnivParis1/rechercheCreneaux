@@ -287,7 +287,7 @@ class FBRessource
         $duration = self::getDuration();
 
         $arrayNewPeriods = array();
-        foreach ($periodToSplit->dateRangeForward($duration) as $datetime) {
+        foreach ($periodToSplit->rangeForward($duration) as $datetime) {
             $endDate = $datetime->add($duration->dateInterval);
             $p = Period::fromDate($datetime, $endDate);
             $arrayNewPeriods[] = $p;
