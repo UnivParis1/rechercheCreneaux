@@ -287,20 +287,10 @@ Cordialement,</p>
      */
     private function sendICSKronolith($sendITipMail = false): ?EventICSinfo{
         $url = $this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail . ( ($sendITipMail == true) ? '&sendITipMail=true' : '' );
+        $headers = ['Authorization: Bearer '. rand(10000,99999), 'Content-Type: text/calendar'];
+        $payload = $this->_genereICS();
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_genereICS());
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer '. rand(10000,99999), 'Content-Type: text/calendar']);
-
-        if ($this->stdEnv->env  == 'local') {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        }
-
-        $response = curl_exec($ch);
-        curl_close($ch);
+        $response = FBUtils::wsPostCall($this->stdEnv->env, $url, $headers, $payload);
 
         if ( ! $eventStd = json_decode($response))
             return null;
