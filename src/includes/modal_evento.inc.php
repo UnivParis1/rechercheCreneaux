@@ -48,7 +48,10 @@ function copyClipboard(event) {
                     <ul id='modalEventoParticipants'>
                     <?php if (isset($fbForm)): ?>
                     <?php foreach ($fbForm->getFbUsers() as $fbUser): ?>
-                        <li><?= $fbUser->getDisplayName() ?></li>
+                        <?php //HACK DIRTY: affiche les ressources dont l'uid != 23 et qui contient @ pour enlever les kronolith ressources ?>
+                        <?php if (! (strlen($fbUser->uid) === 23 && !str_contains( $fbUser->uidInfos->mail,'@')) ): ?>
+                            <li><?= $fbUser->getDisplayName() ?></li>
+                        <?php endif ?>
                     <?php endforeach ?>
                     <?php endif ?>
                     </ul>

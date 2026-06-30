@@ -101,7 +101,9 @@ function getCurrentOptions() {
 function testOptions(vals:any) {
 
   let agendasDistants = (globalThis as any).agendasDistants;
-  let total:number = vals.size + agendasDistants.length;
+  let agendasRessourceLen = $("div#kronolithTagCals input[type=checkbox]:checked").length;
+  let total:number = vals.size + agendasDistants.length + agendasRessourceLen;
+
   if (total < 2) {
     return false;
   }

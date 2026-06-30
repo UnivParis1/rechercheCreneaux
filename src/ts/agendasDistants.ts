@@ -14,7 +14,7 @@ var initAgendasDistants: Array<any> = new Array();
 
 $(function () {
 	(globalThis as any).jsuids.forEach((elem: any) => {
-		if (elem.type != "up1") {
+		if (elem.type == "gmail" || elem.type == "default") {
 			initAgendasDistants.push(elem);
 		}
 	});
