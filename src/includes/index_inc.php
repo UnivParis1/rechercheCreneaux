@@ -105,7 +105,7 @@ if (FBForm::validParams($fbParams)) {
 
             <?php if ($fbParams->uids && isset($jsuids)): ?>
                 globalThis.jsuids = <?= "$jsuids" ?>;
-            <?php elseif (is_null($fbParams->uids) && isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
+            <?php elseif (isset($stdEnv->uidCasUser) && strlen($stdEnv->uidCasUser) > 0): ?>
                 globalThis.jsuids = [{
                     type: 'up1',
                     uid: '<?= $stdEnv->uidCasUser ?>'
@@ -192,6 +192,19 @@ if (FBForm::validParams($fbParams)) {
             </div>
         <?php endif ?>
 
+        <?php if ($stdEnv->kronolithTagCals): ?>
+            <div id="kronolithTagCals" class="row border-start border-end pb-3">
+                <p class="text-center">Agenda(s) Ressource(s)</p>
+                <fieldset class="text-center">
+                <?php foreach ($fbParams->uids as $uid): ?>
+                    <?php if ($uid['type'] === 'up1cal'): ?>
+                        <input name="agdRsrc[]" type="checkbox" class="" value="<?= $uid['uid'] ?>" <?= $uid['checked'] ? "checked" : "" ?>>
+                        <?= $uid['name'] ?>
+                    <?php endif ?>
+                <?php endforeach ?>
+                </fieldset>
+            </div>
+        <?php endif ?>
         <div class="row">
             <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
 

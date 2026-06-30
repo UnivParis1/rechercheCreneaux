@@ -86,33 +86,66 @@ class FBParams
         }
 
         // si externalfbs est vrai dans la configuration .env , on continue l'execution du constructeur sinon on s'arrête
-        if (! $stdEnv->agendasDistants) {
-            return;
+        if ($stdEnv->agendasDistants) {
+            $agendasDistantsUrl = isset($stdEnv->varsHTTPGet['agendasDistantsUrl']) && is_array($stdEnv->varsHTTPGet['agendasDistantsUrl']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsUrl']) : null;
+            $agendasDistantsMail = isset($stdEnv->varsHTTPGet['agendasDistantsMail']) && is_array($stdEnv->varsHTTPGet['agendasDistantsMail']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsMail']) : null;
+
+            if ($agendasDistantsUrl && sizeof($agendasDistantsUrl) > 0) {
+                foreach ($agendasDistantsUrl as $idx => $agendaDistantUrl) {
+                    $agendaDistantMail = $agendasDistantsMail[$idx];
+                    // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
+                    if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('url', $aUid) && $aUid['url'] == $agendaDistantUrl))
+                        throw new \Exception("Doublon sur les agenda extérieurs, contactez la DSIUN");
+
+                    $decodedUrl = urldecode($agendaDistantUrl);
+
+                    $aUid = ['url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'code' => -1, 'valid' => false];
+
+                    $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
+
+                    if (str_starts_with($decodedUrl, "https://calendar.google.com") && preg_match($emailPattern, $decodedUrl, $matches)) {
+                        $aUid['type'] = 'gmail';
+                    } else {
+                        $aUid['type'] = 'default';
+                    }
+
+                    $this->uids[] = $aUid;
+                }
+            }
         }
 
-        $agendasDistantsUrl = isset($stdEnv->varsHTTPGet['agendasDistantsUrl']) && is_array($stdEnv->varsHTTPGet['agendasDistantsUrl']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsUrl']) : null;
-        $agendasDistantsMail = isset($stdEnv->varsHTTPGet['agendasDistantsMail']) && is_array($stdEnv->varsHTTPGet['agendasDistantsMail']) ? array_filter($stdEnv->varsHTTPGet['agendasDistantsMail']) : null;
+        if ($stdEnv->kronolithTagCals == true) {
+            $agdDmds = $stdEnv->varsHTTPGet['agdRsrc'] ?? [];
 
-        if ($agendasDistantsUrl && sizeof($agendasDistantsUrl) > 0) {
-            foreach ($agendasDistantsUrl as $idx => $agendaDistantUrl) {
-                $agendaDistantMail = $agendasDistantsMail[$idx];
-                // test si des agendas externes sont en doublons (ne devrait pas arriver, controle js sur les entrées)
-                if ($this->uids && array_filter($this->uids, fn($aUid) => array_key_exists('url', $aUid) && $aUid['url'] == $agendaDistantUrl))
-                    throw new \Exception("Doublon sur les agenda extérieurs, contactez la DSIUN");
+            $url = "{$stdEnv->kronolithTagCalsUrl}" . "{$stdEnv->uidCasUser}";
+            try {
+                $contextStream = $stdEnv->env == 'local' ? stream_context_create(['ssl' => [ 'verify_peer' => false, 'verify_peer_name' => false]]) : null;
+                $response = file_get_contents($url, false, $contextStream);
+                $agdRsrcs = json_decode($response);
+            } catch (Exception $e) {
+                error_log($e->getMessage());
+                throw new Exception("Veuillez contacter la DSIUN, {$e->getMessage()}");
+            }
 
-                $decodedUrl = urldecode($agendaDistantUrl);
+            if (false === is_array($agdRsrcs)) {
+                $erreurMsg = "Erreur agendas ressources horde, si vous voyez ce message, veuillez contacter la DSIUN";
+                error_log($erreurMsg);
+                throw new Exception($erreurMsg);
+            }
 
-                $aUid = ['url' => $agendaDistantUrl, 'uid' => $agendaDistantMail, 'code' => -1, 'valid' => false];
 
-                $emailPattern = '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/';
+            foreach($agdRsrcs as $agdRsrc) {
+                $cal = $agdRsrc->calendar;
 
-                if (str_starts_with($decodedUrl, "https://calendar.google.com") && preg_match($emailPattern, $decodedUrl, $matches)) {
-                    $aUid['type'] = 'gmail';
-                } else {
-                    $aUid['type'] = 'default';
+                $test = false;
+                foreach($agdDmds as $agdDmd) {
+                    if ($agdDmd == $cal) {
+                        $test = true;
+                        break;
+                    }
                 }
 
-                $this->uids[] = $aUid;
+                $this->uids[] = ['type' => 'up1cal', 'uid' => $agdRsrc->calendar, 'name' => $agdRsrc->name, 'checked' => $test ? true : false];
             }
         }
     }

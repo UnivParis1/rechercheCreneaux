@@ -34,7 +34,8 @@ class FBRessourceUP1 extends FBRessource
         parent::__construct($uid, $dtz, $url, $dureeEnMinutes, $creneaux, $fbParams, $estOptionnel);
         parent::setDateTimeZone($dtz);
 
-        $this->uidInfos = ($fbParams->stdEnv->wsgroup) ? self::_getUidInfos($uid, $fbParams->stdEnv) : null;
+        // hack sert à qualifier le type personne ou calendrier, si la taille est 23 c'est un calendrier (personne n'a d'uid > 12) TODO: ajouter un type en paramètre pour plus de clarté
+        $this->uidInfos = ($fbParams->stdEnv->wsgroup && strlen($uid) != 23  ? self::_getUidInfos($uid, $fbParams->stdEnv) : null);
     }
 
     public static function factory(String $uid, String $dtz, String $url, int $dureeEnMinutes, Sequence &$creneaux, FBParams $fbParams, bool $estOptionnel) : FBRessourceUP1 {

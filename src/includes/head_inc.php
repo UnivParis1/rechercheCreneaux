@@ -6,6 +6,7 @@ namespace RechercheCreneaux;
 
 use stdClass;
 use Dotenv\Dotenv;
+use Exception;
 use phpCAS;
 use RechercheCreneaux\FBParams;
 
@@ -39,6 +40,7 @@ $stdEnv->zoom = (bool) json_decode(strtolower($_ENV['ZOOM']));
 $stdEnv->evento = (bool) json_decode(strtolower($_ENV['EVENTO']));
 $stdEnv->kronolith = (bool) json_decode(strtolower($_ENV['KRONOLITH']));
 $stdEnv->agendasDistants = (bool) json_decode(strtolower($_ENV['AGENDASDISTANTS']));
+$stdEnv->kronolithTagCals = (bool) json_decode(strtolower($_ENV['KRONOLITH_TAG_CALS']));
 
 if ($stdEnv->wsgroup === true) {
     $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
@@ -98,6 +100,14 @@ if ($stdEnv->kronolith == true) {
     $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
 }
 
+if ($stdEnv->kronolithTagCals == true) {
+    if ($stdEnv->cas == false)
+        throw new Exception("CAS est obligatoire si on veut récupérer les agendas taggés de l'utilisateur courant depuis horde-kronolith");
+
+    $dotenv->required(['KRONOLITH_TAG_CALS_URL']);
+    $stdEnv->kronolithTagCalsUrl = $_ENV['KRONOLITH_TAG_CALS_URL'];
+    $stdEnv->kronolithUrlFreebusy = $_ENV['KRONOLITH_URL_FREEBUSY'];
+}
 
 $stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
 
