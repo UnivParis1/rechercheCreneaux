@@ -197,6 +197,10 @@ class FBUtils {
         $html = "<span>Mails envoyés à : </span><br />";
         $idx=0;
         foreach ($aMails as $aMail) {
+            // Si le mail ne contient pas d'arobase, ne pas l'afficher dans mails envoyés
+            if (! str_contains($aMail[1]['mail'], '@') )
+                continue;
+
             $html .= (($idx == 0) ? "":", ") . $aMail[1]['displayName'];
             $idx++;
         }
