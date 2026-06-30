@@ -6,6 +6,7 @@ use stdClass;
 use Exception;
 use League\Period\Sequence;
 use RechercheCreneaux\Ressource\FBRessourceUP1;
+use RechercheCreneaux\Ressource\FBRessourceKronolith;
 use RechercheCreneaux\Ressource\FBRessourceGmail;
 use RechercheCreneaux\Ressource\FBRessourceDefault;
 use RechercheCreneaux\FBParams;
@@ -44,10 +45,18 @@ class FBForm
             $uid = $valuid['uid'];
 
             switch ($valuid['type']) {
+                case 'up1cal':
+                    if ($valuid['checked']) {
+                        $fbUser = FBRessourceUP1::factory($uid, $stdEnv->timezone, $stdEnv->kronolithUrlFreebusy, $fbParams->duree, $creneauxGenerated, $fbParams, false);
+                        $fbUser->setUidInfos(new Userinfo($valuid['name'],$valuid['name'],$valuid['name']));
+                        $fbUser->valid = true;
+                        $fbUsers[] = $fbUser;
+                    }
+                    break;
                 case 'up1':
                     $estOptionnel = ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) ? true : false;
                     $fbUsers[] = FBRessourceUP1::factory($uid, $this->stdEnv->timezone, $stdEnv->urlFreebusy, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
-                    break;
+		    break;
                 case 'gmail':
                     $fbUser = FBRessourceGmail::factory($uid, $stdEnv->timezone, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
