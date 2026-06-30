@@ -123,8 +123,8 @@ class FBForm
                 $fbUsers[] = $fbUser;
             }
         }
-
-        if (count($fbUsers) > 0) {
+        $totalBlock = count($fbUsers);
+        if ($totalBlock > 0 && $totalBlock < count($this->fbUsers)) {
             return $fbUsers;
         } else {
             return null;
