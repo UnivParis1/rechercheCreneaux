@@ -169,7 +169,7 @@ if (FBForm::validParams($fbParams)) {
         </div>
 
         <?php if ($stdEnv->agendasDistants): ?>
-            <div id="agendasDistant" class="row border-start border-end pb-3">
+            <div id="agendasDistant" class="row border-start border-end border-bottom border-gray-500 border-dotted pb-3">
                 <p class="text-center">Agenda(s) distant(s)</p>
                 <div id="aclonerDivUriMail" class="aclonerUriClass row justify-content-lg-center mb-3 d-none">
                     <div class="divUrl col-md-7">
