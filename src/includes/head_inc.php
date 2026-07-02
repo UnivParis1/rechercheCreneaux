@@ -16,7 +16,7 @@ $dotenv = Dotenv::createImmutable($relativeRoot);
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
-$dotenv->required(['ENV', 'APP_URL', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE']);
+$dotenv->required(['ENV', 'APP_URL', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE', 'MAILFROM']);
 $dotenv->required('RECHERCHE_SUR_X_JOURS')->isInteger();
 
 setlocale(LC_TIME, $_ENV['LOCALE']);
@@ -26,6 +26,7 @@ $stdEnv->env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 
 $stdEnv->url = $_ENV['URL_FREEBUSY'];
 $stdEnv->dtz = $_ENV['TIMEZONE'];
+$stdEnv->mailfrom = $_ENV['MAILFROM'];
 $stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
 
 $dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO', 'AGENDAS_DISTANTS'])->isBoolean();

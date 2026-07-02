@@ -82,7 +82,7 @@ class FBInvite {
         $this->organisateur = FBRessourceUP1::_getUidInfos($stdEnv->uidCasUser, $stdEnv);
 
         // ajout du from spécifié dans .env dans les headers si besoin en local
-        $from = ['mailbox' =>  $stdEnv->mailfrom ?? "creneaux-noreply@univ-paris1.fr",
+        $from = ['mailbox' =>  $stdEnv->mailfrom,
                  'name'    => "{$this->organisateur->displayName} via Créneau-facile"];
 
         $this->from = (object) $from;
