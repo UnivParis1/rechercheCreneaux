@@ -7,6 +7,7 @@ namespace RechercheCreneaux;
 use DateTime;
 use Exception;
 use stdClass;
+use phpCAS;
 
 /**
  * Classe regroupant les paramètres globaux
@@ -57,9 +58,8 @@ class FBParams
 
     public string $zoomSessionName = 'zoomMeeting';
 
-    public function __construct(stdClass $stdEnv)
+    private function __construct(stdClass $stdEnv)
     {
-
         $this->stdEnv = $stdEnv;
         $this->actionFormulaireValider = isset($stdEnv->varsHTTPGet['actionFormulaireValider']) ? $stdEnv->varsHTTPGet['actionFormulaireValider'] : 'rechercheDeCreneaux';
         $this->uids = isset($stdEnv->varsHTTPGet['listuids']) ? array_map(fn($uid) => ['type' => 'up1', 'uid' => $uid, 'data' => false, 'valid' => true], $stdEnv->varsHTTPGet['listuids']) : null; // array_map permet d'enlever les éléments vide de ce paramètre
@@ -68,7 +68,7 @@ class FBParams
         $this->plagesHoraires = isset($stdEnv->varsHTTPGet['plagesHoraires']) ? $stdEnv->varsHTTPGet['plagesHoraires'] : array('9-12', '14-17');
         $this->joursDemandes = isset($stdEnv->varsHTTPGet['joursCreneaux']) ? $stdEnv->varsHTTPGet['joursCreneaux'] : array('MO', 'TU', 'WE', 'TH', 'FR');
         $this->fromDate = isset($stdEnv->varsHTTPGet['fromDate']) ? $stdEnv->varsHTTPGet['fromDate'] : (new DateTime())->format('Y-m-d');
-        $this->rechercheSurXJours = isset($stdEnv->varsHTTPGet['rechercheSurXJours']) ? intval($stdEnv->varsHTTPGet['rechercheSurXJours']) : $stdEnv->rechercheSurXJours;
+        $this->rechercheSurXJours = isset($stdEnv->varsHTTPGet['rechercheSurXJours']) ? intval($stdEnv->varsHTTPGet['rechercheSurXJours']) : intval($stdEnv->rechercheSurXJours);
         $this->idxCreneauxChecked = isset($stdEnv->varsHTTPGet['idxCreneauxChecked']) ? $stdEnv->varsHTTPGet['idxCreneauxChecked'] : null;
         $this->titleEvent = isset($stdEnv->varsHTTPGet['titrecreneau']) ? $stdEnv->varsHTTPGet['titrecreneau'] : null;
         $this->descriptionEvent = isset($stdEnv->varsHTTPGet['summarycreneau']) ? $stdEnv->varsHTTPGet['summarycreneau'] : null;
@@ -115,5 +115,39 @@ class FBParams
                 $this->uids[] = $aUid;
             }
         }
+    }
+
+    private function logToCas() {
+        phpCAS::client('2.0', $this->stdEnv->casHost, intval($this->stdEnv->casPort), $this->stdEnv->casPath, $this->stdEnv->appUrl);
+        phpCAS::setNoCasServerValidation();
+
+        phpCAS::forceAuthentication();
+
+        if (!phpCAS::isAuthenticated()) {
+            header('HTTP/1.1 401 Unauthorized');
+            echo "Recherche_de_creneaux CAS Error authentificated";
+            exit;
+        }
+        $this->stdEnv->uidCasUser = phpCAS::getUser();
+    }
+
+    public static function factory(stdClass &$stdEnv): self {
+        global $_GET;
+
+        $stdEnv->varsHTTPGet = filter_var_array($_GET);
+
+        date_default_timezone_set($stdEnv->timezone);
+        setlocale(LC_TIME, $stdEnv->locale);
+
+        $fbParam = new self($stdEnv);
+
+        if ($stdEnv->cas == true)
+            $fbParam->logToCas();
+
+        if ($stdEnv->zoom)
+            if (!file_exists($stdEnv->zoomLibCredentialPath))
+                file_put_contents($stdEnv->zoomLibCredentialPath, '');
+
+        return $fbParam;
     }
 }

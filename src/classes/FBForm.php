@@ -44,22 +44,16 @@ class FBForm
 
             switch ($valuid['type']) {
                 case 'up1':
-                    $estOptionnel = false;
-                    if ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) {
-                        $estOptionnel = true;
-                    }
-
-                    $fbUsers[] = FBRessourceUP1::factory($uid, $stdEnv->dtz, $stdEnv->url, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
+                    $estOptionnel = ($fbParams->listUidsOptionnels && array_search($uid, $fbParams->listUidsOptionnels) !== false) ? true : false;
+                    $fbUsers[] = FBRessourceUP1::factory($uid, $this->stdEnv->timezone, $stdEnv->urlFreebusy, $fbParams->duree, $creneauxGenerated, $fbParams, $estOptionnel);
                     break;
-
                 case 'gmail':
-                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
-
+                    $fbUser = FBRessourceGmail::factory($uid, $stdEnv->timezone, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
                     $fbUsers[] = $fbUser;
                     break;
                 case 'default':
-                    $fbUser = FBRessourceDefault::factory($uid, $stdEnv->dtz, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
+                    $fbUser = FBRessourceDefault::factory($uid, $stdEnv->timezone, $valuid['url'], $fbParams->duree, $creneauxGenerated, $fbParams);
 
                     $fbUser->setUidInfos(new Userinfo($uid, $fbUser->getDisplayName(), $uid));
                     $fbUsers[] = $fbUser;
@@ -72,7 +66,7 @@ class FBForm
 
         $this->fbUsers = $fbUsers;
         $this->creneauxGenerated = $creneauxGenerated;
-        $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->dtz, $fbParams->nbcreneaux);
+        $this->fbCompare = new FBCompare($fbUsers, $this->creneauxGenerated, $stdEnv->timezone, $fbParams->nbcreneaux);
     }
 
     /**

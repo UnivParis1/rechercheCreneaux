@@ -69,7 +69,7 @@ class FBInvite {
         $this->modalCreneauStart = $fbParams->modalCreneauStart;
         $this->modalCreneauEnd = $fbParams->modalCreneauEnd;
         $this->stdEnv = $stdEnv;
-        $this->dtz = $stdEnv->dtz;
+        $this->timezone = $stdEnv->timezone;
         $this->titleEvent = $fbParams->titleEvent;
         $this->descriptionEvent = $fbParams->descriptionEvent;
         $this->lieuEvent = $fbParams->lieuEvent;
@@ -127,13 +127,13 @@ Lieu :
 « {$this->lieuEvent} »
 
 Pour accepter l'événement :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept
+https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept
 
 Pour accepter l'événement à titre provisoire :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative
+https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative
 
 Pour décliner l'événement :
-https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline
+https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline
 
 
 Cordialement,
@@ -154,13 +154,13 @@ Cordialement,
 « {$this->lieuEvent} »</p>
 
 <p>Pour accepter l'événement :<br />
-<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept</a></p>
+<a href=\"https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept\">https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=accept</a></p>
 
 <p>Pour accepter l'événement à titre provisoire :<br />
-<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative</a></p>
+<a href=\"https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative\">https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=tentative</a></p>
 
 <p>Pour décliner l'événement :<br />
-<a href=\"https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline\">https://{$this->stdEnv->kronolith_host}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline</a></p>
+<a href=\"https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline\">https://{$this->stdEnv->kronolithHost}/kronolith/attend.php?c={$eventInfos->calendarID}&e={$eventInfos->eventID}&u={$userinfo->mail}&a=decline</a></p>
 
 <p>
 Cordialement,</p>
@@ -286,7 +286,7 @@ Cordialement,</p>
      * @return EventICSinfo
      */
     private function sendICSKronolith($sendITipMail = false): ?EventICSinfo{
-        $url = $this->stdEnv->kronolith_import_url_user . '?user='. $this->organisateur->mail . ( ($sendITipMail == true) ? '&sendITipMail=true' : '' );
+        $url = $this->stdEnv->kronolithImportUrlUser . '?user='. $this->organisateur->mail . ( ($sendITipMail == true) ? '&sendITipMail=true' : '' );
         $headers = ['Authorization: Bearer '. rand(10000,99999), 'Content-Type: text/calendar'];
         $payload = $this->_genereICS();
 

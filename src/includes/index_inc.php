@@ -47,7 +47,7 @@ if (FBForm::validParams($fbParams)) {
     if ($nbResultatsAffichés == 0 && sizeof($fbForm->getFbUsers()) > 2) {
         $fbUserSortNbs = array_reverse(FBUtils::sortFBUsersByBusyCount(...$fbForm->getFbUsers()));
 
-        if (!is_null($stdNewFBCompare = FBCompare::algo_search_results($fbUserSortNbs, $fbForm->getCreneauxGenerated(), $stdEnv->dtz, $fbParams->nbcreneaux))) {
+        if (!is_null($stdNewFBCompare = FBCompare::algo_search_results($fbUserSortNbs, $fbForm->getCreneauxGenerated(), $stdEnv->timezone, $fbParams->nbcreneaux))) {
             $fbForm->setFbCompare($stdNewFBCompare->fbCompare);
             $fbUsersUnsetted = $stdNewFBCompare->fbUsersUnsetted;
             $nbResultatsAffichés = $fbForm->getFbCompare()->getNbResultatsAffichés();
@@ -96,7 +96,7 @@ if (FBForm::validParams($fbParams)) {
 
 <body>
     <script>
-        var jstimezone = "<?= $stdEnv->dtz ?>";
+        var jstimezone = "<?= $stdEnv->timezone ?>";
         var jsduree = <?= (is_null($fbParams->duree) ? 60 : $fbParams->duree); ?>;
         let slider = document.getElementById('slider');
         <?php if ($stdEnv->wsgroup): ?>

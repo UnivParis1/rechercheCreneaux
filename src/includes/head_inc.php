@@ -6,104 +6,56 @@ namespace RechercheCreneaux;
 
 use stdClass;
 use Dotenv\Dotenv;
-use phpCAS;
+use Exception;
 use RechercheCreneaux\FBParams;
 
 global $relativeRoot;
 
+function convCamelCase(string $string): string {
+    return lcfirst(str_replace('_', '', ucwords($string, '_')));
+}
 // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
 $dotenv = Dotenv::createImmutable($relativeRoot);
 $dotenv->load();
 
 // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
 $dotenv->required(['ENV', 'APP_URL', 'URL_FREEBUSY', 'TIMEZONE', 'LOCALE', 'MAILFROM']);
-$dotenv->required('RECHERCHE_SUR_X_JOURS')->isInteger();
-
-setlocale(LC_TIME, $_ENV['LOCALE']);
 
 $stdEnv = new stdClass();
-$stdEnv->env = (isset($_ENV['ENV'])) ? $_ENV['ENV'] : 'dev';
 
-$stdEnv->url = $_ENV['URL_FREEBUSY'];
-$stdEnv->dtz = $_ENV['TIMEZONE'];
-$stdEnv->mailfrom = $_ENV['MAILFROM'];
-$stdEnv->rechercheSurXJours = intval($_ENV['RECHERCHE_SUR_X_JOURS']);
+$parametresBooleens = ['ENV', 'APP_URL','URL_FREEBUSY','TIMEZONE', 'LOCALE','RECHERCHE_SUR_X_JOURS', 'MAILFROM'];
 
-$dotenv->required(['WSGROUP', 'PHOTO_SHOW', 'PROLONGATION_BANDEAU', 'CAS', 'ZOOM', 'EVENTO', 'AGENDAS_DISTANTS'])->isBoolean();
+foreach($parametresBooleens as $v) {
+    if (! array_key_exists($v, $_ENV))
+        throw new Exception("{$v} absent du fichier environnement");
 
-$stdEnv->appUrl = $_ENV['APP_URL'];
-$stdEnv->wsgroup = (bool) json_decode(strtolower($_ENV['WSGROUP']));
-$stdEnv->photoShow = (bool) json_decode(strtolower($_ENV['PHOTO_SHOW']));
-$stdEnv->prolongationBandeau = (bool) json_decode(strtolower($_ENV['PROLONGATION_BANDEAU']));
-$stdEnv->cas = (bool) json_decode(strtolower($_ENV['CAS']));
-$stdEnv->zoom = (bool) json_decode(strtolower($_ENV['ZOOM']));
-$stdEnv->evento = (bool) json_decode(strtolower($_ENV['EVENTO']));
-$stdEnv->kronolith = (bool) json_decode(strtolower($_ENV['KRONOLITH']));
-$stdEnv->agendasDistants = (bool) json_decode(strtolower($_ENV['AGENDAS_DISTANTS']));
-
-if ($stdEnv->wsgroup === true) {
-    $dotenv->required(['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS']);
-    $stdEnv->urlwsgroupUsersAndGroups = $_ENV['URLWSGROUP_USERS_AND_GROUPS'];
-    $stdEnv->urlwsgroupUserInfos = $_ENV['URLWSGROUP_USER_INFOS'];
+    $camelcase = convCamelCase(strtolower($v));
+    $stdEnv->{$camelcase} = $_ENV[$v];
 }
 
-if ($stdEnv->photoShow === true) {
-    $dotenv->required('URLWSPHOTO');
-    $stdEnv->urlwsphoto = $_ENV['URLWSPHOTO'];
-}
+$afonctions = ['WSGROUP' => ['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS'],
+       'PHOTO_SHOW' => ['URLWSPHOTO'],
+       'PROLONGATION_BANDEAU' => ['PROLONGATION_ENT_JS', 'PROLONGATION_ENT_ARGS_CURRENT'],
+       'CAS' => ['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL'],
+       'ZOOM'=> ['ZOOM_ACCOUNT_ID', 'ZOOM_CLIENT_ID', 'ZOOM_CLIENT_SECRET', 'ZOOM_LIB_CREDENTIAL_PATH'],
+       'EVENTO' => ['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID'],
+       'KRONOLITH' => ['KRONOLITH_HOST', 'KRONOLITH_IMPORT_URL_USER'],
+       'AGENDAS_DISTANTS' => [] ];
 
-if ($stdEnv->prolongationBandeau === true) {
-    $dotenv->required(['PROLONGATION_ENT_JS', 'PROLONGATION_ENT_ARGS_CURRENT']);
+foreach ($afonctions as $fonction => $subv) {
+    if (! array_key_exists($fonction, $_ENV))
+        throw new Exception("{$fonction} absent du fichier environnement");
 
-    $stdEnv->prolongationEntJs = $_ENV['PROLONGATION_ENT_JS'];
-    $stdEnv->prolongationEntArgsCurrent = $_ENV['PROLONGATION_ENT_ARGS_CURRENT'];
-}
+    $fonctionc = convCamelCase(strtolower($fonction));
 
-if ($stdEnv->cas === true) {
-    $dotenv->required(['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL']);
+    $isTrue = (bool) json_decode(strtolower($_ENV[$fonction]));
+    $stdEnv->{$fonctionc} = $isTrue;
 
-    phpCAS::client(CAS_VERSION_2_0, $_ENV['CAS_HOST'], intval($_ENV['CAS_PORT']), $_ENV['CAS_PATH'], $_ENV['APP_URL']);
-    phpCAS::setNoCasServerValidation();
-
-    phpCAS::forceAuthentication();
-
-    if (!phpCAS::isAuthenticated()) {
-        header('HTTP/1.1 401 Unauthorized');
-        echo "Recherche_de_creneaux CAS Error authentificated";
-        exit;
-    }
-    $stdEnv->uidCasUser = phpCAS::getUser();
-}
-
-if ($stdEnv->zoom === true) {
-    $dotenv->required(['ZOOM_ACCOUNT_ID', 'ZOOM_CLIENT_ID', 'ZOOM_CLIENT_SECRET', 'ZOOM_LIB_CREDENTIAL_PATH']);
-    $stdEnv->zoomAccountId = $_ENV['ZOOM_ACCOUNT_ID'];
-    $stdEnv->zoomClientId = $_ENV['ZOOM_CLIENT_ID'];
-    $stdEnv->zoomClientSecret = $_ENV['ZOOM_CLIENT_SECRET'];
-    $stdEnv->zoomLibCredentialPath = $_ENV['ZOOM_LIB_CREDENTIAL_PATH'];
-
-    if (!file_exists($stdEnv->zoomLibCredentialPath)) {
-        file_put_contents($stdEnv->zoomLibCredentialPath, '');
+    if ($isTrue) {
+        foreach($subv as $sub) {
+            $subc = convCamelCase(strtolower($sub));
+            $stdEnv->{$subc} = $_ENV[$sub];
+        }
     }
 }
-
-if ($stdEnv->evento == true) {
-    $dotenv->required(['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID']);
-    $stdEnv->eventoWsUrl = $_ENV['EVENTO_WS_URL'];
-    $stdEnv->eventoShibentityid = $_ENV['EVENTO_SHIBENTITYID'];
-}
-
-if ($stdEnv->kronolith == true) {
-    $dotenv->required(['KRONOLITH_HOST', 'KRONOLITH_IMPORT_URL_USER']);
-    $stdEnv->kronolith_host = $_ENV['KRONOLITH_HOST'];
-    $stdEnv->kronolith_import_url_user = $_ENV['KRONOLITH_IMPORT_URL_USER'];
-}
-
-
-$stdEnv->mailfrom = $_ENV['MAILFROM'] ?? null;
-
-date_default_timezone_set($stdEnv->dtz);
-
-$stdEnv->varsHTTPGet = filter_var_array($_GET);
-
-$fbParams = new FBParams($stdEnv);
+$fbParams = FBParams::factory($stdEnv);

@@ -159,7 +159,7 @@ class FBZoom
           if (!array_key_exists('start_time', $meet))
             continue;
 
-          $mstartDate = (new DateTimeImmutable($meet['start_time']))->setTimezone(new DateTimeZone($stdEnv->dtz));
+          $mstartDate = (new DateTimeImmutable($meet['start_time']))->setTimezone(new DateTimeZone($stdEnv->timezone));
           $mPeriod = Period::fromDate($mstartDate, $mstartDate->add(new DateInterval('PT'. $meet['duration'] .'M')));
       
           if ($dPeriod->overlaps($mPeriod))
