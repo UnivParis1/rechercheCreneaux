@@ -137,6 +137,11 @@ if (FBForm::validParams($fbParams)) {
     </script>
 
     <form id="form" class="container-lg" action="">
+        <?php if (isset($stdEnv->hiddenGetFields)): ?>
+            <?php foreach ($stdEnv->hiddenGetFields as $hiddenField): ?>
+                <input type="hidden" name="<?= $hiddenField ?>" value=true />
+            <?php endforeach ?>
+        <?php endif ?>
         <input type="hidden" name="actionFormulaireValider" value="rechercheDeCreneaux" />
         <div class="row">
             <div class="col-5 col-md-4 col-lg-3 border border-gray-500 border-dotted p-3">

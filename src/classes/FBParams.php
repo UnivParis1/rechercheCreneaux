@@ -158,6 +158,8 @@ class FBParams
     private static function initStdEnv(): stdClass
     {
         global $relativeRoot;
+        global $_GET;
+
         // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
         $dotenv = Dotenv::createImmutable($relativeRoot);
         $dotenv->load();
@@ -168,6 +170,12 @@ class FBParams
 
         $stdEnv = new stdClass();
 
+        $fctEnAvance = false;
+        if (isset($envars['AVANCE_VERSION']) && $envars['AVANCE_VERSION'] == "true") {
+            $stdEnv->hiddenGetFields = [];
+            $fctEnAvance = true;
+        }
+
         foreach(self::$paramsRequis as $v) {
             if (! array_key_exists($v, $envars))
                 throw new Exception("{$v} absent du fichier environnement");
@@ -176,14 +184,20 @@ class FBParams
             $stdEnv->{$camelcase} = $envars[$v];
         }
 
-        foreach (self::$diagrammeParams as $fonction => $subv) {
-            if (! array_key_exists($fonction, $envars))
-                throw new Exception("{$fonction} absent du fichier environnement");
+        foreach (self::$diagrammeParams as $fonctionnalité => $subv) {
+            if (! array_key_exists($fonctionnalité, $envars))
+                throw new Exception("{$fonctionnalité} absent du fichier environnement");
 
-            $fonctionc = self::convCamelCase(strtolower($fonction));
+            $fonctionnalitéc = self::convCamelCase(strtolower($fonctionnalité));
 
-            $isTrue = (bool) json_decode(strtolower($envars[$fonction]));
-            $stdEnv->{$fonctionc} = $isTrue;
+            $isTrue = (bool) json_decode(strtolower($envars[$fonctionnalité]));
+
+            // preview d'une fonctionnaliténalité
+            if (!$isTrue && $fctEnAvance && (isset($_GET[$fonctionnalité]) && $_GET[$fonctionnalité] == "true") ) {
+                $stdEnv->hiddenGetFields[] = $fonctionnalité;
+                $isTrue =  true;
+            }
+            $stdEnv->{$fonctionnalitéc} = $isTrue;
 
             if ($isTrue) {
                 foreach($subv as $sub) {
