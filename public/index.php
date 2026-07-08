@@ -9,6 +9,4 @@ require_once $absPath . '/vendor/autoload.php';
 
 session_start();
 
-require_once $absPath . "/src/includes/head_inc.php";
-
-require_once $absPath . "/src/includes/index_inc.php";
+require_once $absPath . "/src/includes/main_inc.php";

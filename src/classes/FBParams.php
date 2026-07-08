@@ -8,6 +8,7 @@ use DateTime;
 use Exception;
 use stdClass;
 use phpCAS;
+use Dotenv\Dotenv;
 
 /**
  * Classe regroupant les paramètres globaux
@@ -15,6 +16,25 @@ use phpCAS;
  */
 class FBParams
 {
+    /*
+    * array $parmaRequis
+    * paramètres devant se trouver dans le fichier .env
+    */
+    private static array $paramsRequis = ['ENV', 'APP_URL','URL_FREEBUSY','TIMEZONE', 'LOCALE','RECHERCHE_SUR_X_JOURS', 'MAILFROM'];
+
+    /*
+    * array $diagrammeParams
+    * définit le tableau des paramètres venant de .env
+    * ex: si PHOTO_SHOW est true, URLWSPHOTO devra être présent dans .env
+    */
+    private static array $diagrammeParams = ['WSGROUP' => ['URLWSGROUP_USERS_AND_GROUPS', 'URLWSGROUP_USER_INFOS'],
+       'PHOTO_SHOW' => ['URLWSPHOTO'],
+       'PROLONGATION_BANDEAU' => ['PROLONGATION_ENT_JS', 'PROLONGATION_ENT_ARGS_CURRENT'],
+       'CAS' => ['CAS_HOST', 'CAS_PORT', 'CAS_PATH', 'APP_URL'],
+       'ZOOM'=> ['ZOOM_ACCOUNT_ID', 'ZOOM_CLIENT_ID', 'ZOOM_CLIENT_SECRET', 'ZOOM_LIB_CREDENTIAL_PATH'],
+       'EVENTO' => ['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID'],
+       'KRONOLITH' => ['KRONOLITH_HOST', 'KRONOLITH_IMPORT_URL_USER'],
+       'AGENDAS_DISTANTS' => [] ];
 
     var array $varsHTTPGet;
 
@@ -131,10 +151,56 @@ class FBParams
         $this->stdEnv->uidCasUser = phpCAS::getUser();
     }
 
-    public static function factory(stdClass &$stdEnv): self {
-        global $_GET;
+    private static function convCamelCase(string $string): string {
+        return lcfirst(str_replace('_', '', ucwords($string, '_')));
+    }
 
-        $stdEnv->varsHTTPGet = filter_var_array($_GET);
+    private static function initStdEnv(): stdClass
+    {
+        global $relativeRoot;
+        // Variable dans .env initialisées ENV, URL_FREEBUSY pour l'appel aux agendas, TIMEZONE et LOCALE
+        $dotenv = Dotenv::createImmutable($relativeRoot);
+        $dotenv->load();
+
+        $envars = $_ENV;
+        // valeures requises dans le fichier .env exception levée si ce n'est pas le cas
+        $dotenv->required(self::$paramsRequis);
+
+        $stdEnv = new stdClass();
+
+        foreach(self::$paramsRequis as $v) {
+            if (! array_key_exists($v, $envars))
+                throw new Exception("{$v} absent du fichier environnement");
+
+            $camelcase = self::convCamelCase(strtolower($v));
+            $stdEnv->{$camelcase} = $envars[$v];
+        }
+
+        foreach (self::$diagrammeParams as $fonction => $subv) {
+            if (! array_key_exists($fonction, $envars))
+                throw new Exception("{$fonction} absent du fichier environnement");
+
+            $fonctionc = self::convCamelCase(strtolower($fonction));
+
+            $isTrue = (bool) json_decode(strtolower($envars[$fonction]));
+            $stdEnv->{$fonctionc} = $isTrue;
+
+            if ($isTrue) {
+                foreach($subv as $sub) {
+                    $subc = self::convCamelCase(strtolower($sub));
+                    $stdEnv->{$subc} = $envars[$sub];
+                }
+            }
+        }
+        return $stdEnv;
+    }
+
+    public static function factory(): self {
+        global $_GET;
+        $getvars = $_GET;
+
+        $stdEnv = self::initStdEnv();
+        $stdEnv->varsHTTPGet = filter_var_array($getvars);
 
         date_default_timezone_set($stdEnv->timezone);
         setlocale(LC_TIME, $stdEnv->locale);

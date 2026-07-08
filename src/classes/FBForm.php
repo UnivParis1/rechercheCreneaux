@@ -31,9 +31,10 @@ class FBForm
      * @param FBParams $fbParams
      * @param stdClass $stdEnv
      */
-    public function __construct(FBParams $fbParams, stdClass $stdEnv)
+    public function __construct(FBParams $fbParams)
     {
         $this->fbParams = $fbParams;
+        $stdEnv = $fbParams->stdEnv;
         $this->stdEnv = $stdEnv;
 
         $creneauxGenerated = (new FBCreneauxGeneres($fbParams))->getCreneauxSeq();

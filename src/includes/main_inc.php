@@ -15,8 +15,11 @@ use RechercheCreneaux\FBInvite;
 use RechercheCreneaux\FBCompare;
 use RechercheCreneaux\TypeInviteAction;
 
+$fbParams = FBParams::factory();
+$stdEnv = $fbParams->stdEnv;
+
 if (FBForm::validParams($fbParams)) {
-    $fbForm = new FBForm($fbParams, $stdEnv);
+    $fbForm = new FBForm($fbParams);
 
     foreach ($fbForm->getFbUsers() as $fbUser) {
         $validx = false;
