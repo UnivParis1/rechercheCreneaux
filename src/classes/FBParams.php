@@ -139,15 +139,35 @@ class FBParams
         }
     }
 
+    private static function setCookieHorde(string $url, string $cookiefile) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_COOKIEFILE, $cookiefile);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiefile);
+        curl_exec($ch);
+        curl_close($ch);
+
+        return $cookiefile;
+    }
+
     private function initAgendaTagRessources()
     {
         $stdEnv = $this->stdEnv;
         $agdDmds = $stdEnv->varsHTTPGet['agdRsrc'] ?? [];
 
         $url = "{$stdEnv->kronolithTagCalsUrl}" . "{$stdEnv->uidCasUser}";
+
+        $cookiefile = "/tmp/sessionhordecreneau.txt";
+        $cookie = self::setCookieHorde($url, $cookiefile);
         try {
-            $contextStream = $stdEnv->env == 'local' ? stream_context_create(['ssl' => [ 'verify_peer' => false, 'verify_peer_name' => false]]) : null;
-            $response = file_get_contents($url, false, $contextStream);
+            $ch = curl_init($url);
+
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
+            curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
+            $response = curl_exec($ch);
             $agdRsrcs = json_decode($response);
         } catch (Exception $e) {
             error_log($e->getMessage());
