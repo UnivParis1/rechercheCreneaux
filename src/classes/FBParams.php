@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RechercheCreneaux;
 
 use DateTime;
+use League\Period\Period;
 use Exception;
 use stdClass;
 use phpCAS;
@@ -34,7 +35,7 @@ class FBParams
        'ZOOM'=> ['ZOOM_ACCOUNT_ID', 'ZOOM_CLIENT_ID', 'ZOOM_CLIENT_SECRET', 'ZOOM_LIB_CREDENTIAL_PATH'],
        'EVENTO' => ['EVENTO_WS_URL', 'EVENTO_SHIBENTITYID'],
        'KRONOLITH' => ['KRONOLITH_HOST', 'KRONOLITH_IMPORT_URL_USER'],
-       'KRONOLITH_TAG_CALS' => ['KRONOLITH_TAG_CALS_URL', 'KRONOLITH_URL_FREEBUSY'],
+       'KRONOLITH_TAG_CALS' => ['KRONOLITH_TAG_CALS_URL', 'KRONOLITH_URL_FREEBUSY', 'KRONOLITH_COOKIE_PATH'],
        'AGENDAS_DISTANTS' => [] ];
 
     var array $varsHTTPGet;
@@ -139,7 +140,12 @@ class FBParams
         }
     }
 
-    private static function setCookieHorde(string $url, string $cookiefile) {
+    private static function setCookieHorde(string $url, string $cookiefile): void
+    {
+        // si le cookie existe depuis moins de 20 minutes, ne rien faire
+        if (file_exists($cookiefile) && (Period::fromTimestamp(filemtime($cookiefile), time())->timeDuration()) < 1200)
+            return;
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -147,8 +153,6 @@ class FBParams
         curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiefile);
         curl_exec($ch);
         curl_close($ch);
-
-        return $cookiefile;
     }
 
     private function initAgendaTagRessources()
@@ -158,15 +162,16 @@ class FBParams
 
         $url = "{$stdEnv->kronolithTagCalsUrl}" . "{$stdEnv->uidCasUser}";
 
-        $cookiefile = "/tmp/sessionhordecreneau.txt";
-        $cookie = self::setCookieHorde($url, $cookiefile);
+        $cookiehorde = $this->stdEnv->kronolithCookiePath;
+        self::setCookieHorde($url, $cookiehorde);
         try {
             $ch = curl_init($url);
 
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
-            curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
+            curl_setopt($ch, CURLOPT_COOKIEFILE, $cookiehorde);
+            curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiehorde);
+
             $response = curl_exec($ch);
             $agdRsrcs = json_decode($response);
         } catch (Exception $e) {
@@ -179,7 +184,6 @@ class FBParams
             error_log($erreurMsg);
             throw new Exception($erreurMsg);
         }
-
 
         foreach($agdRsrcs as $agdRsrc) {
             $cal = $agdRsrc->calendar;
