@@ -138,18 +138,6 @@ class FBUtils {
         return $seq;
     }
 
-    public static function _cmpSeqContainPeriod(Sequence $creneaugenSeq, Period $periodToCompare ) : int {
-        foreach ($creneaugenSeq as $period) {
-            // creneau > busy
-            if ($period->contains($periodToCompare)) {
-                return -1;
-            }elseif ($periodToCompare->contains($period)) {// creneau < busy
-                return 1;
-            }
-        }
-        return 0;
-    }
-
     public static function _cmpSeqOverlapPeriod(Sequence $creneaugenSeq, Period $periodToCompare ) : bool {
         foreach ($creneaugenSeq as $period) {
             if ($period->overlaps($periodToCompare)) {

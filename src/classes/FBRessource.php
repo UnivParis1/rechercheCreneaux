@@ -193,7 +193,7 @@ class FBRessource
 
         foreach ($busySeq as $busyPeriod) {
 
-            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod, $busySeq);
+            $busyInclus = $this->_instanceCreneauxBusysInclus($creneaugenSeq, $busyPeriod);
 
             if ($busySeq->indexOf($busyPeriod) !== false) {
                 $busyOverlap = $this->_instanceCreneauxBusysOverlap($creneaugenSeq, $busyPeriod, $busySeq);
@@ -260,58 +260,11 @@ class FBRessource
      * @param  Period $busyPeriod
      * @return bool
      */
-    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod, Sequence &$busySeq) : bool {
-        $cmpBusyCreneau = FBUtils::_cmpSeqContainPeriod($creneaugenSeq, $busyPeriod);
-
-        if ($cmpBusyCreneau == 0) {
-            return false;
-        }
-
-        switch ($cmpBusyCreneau) {
-            case 1:
-                // creneau < busy
-                $busySeq = $this->_normCreneauxInferieurDuree($busyPeriod, $busySeq);
-                break;
-            case -1:
-                // creneau > busy
-                $busySeq = $this->_normCreneauxSuperieurDuree($busyPeriod, $busySeq);
-                break;
-            default:
-                throw new Exception("Erreur comparaison creneau _normCreneaux");
-        }
-
-        return true;
-    }
-    private function _normCreneauxInferieurDuree(Period $periodToSplit, &$sequence) : Sequence {
-        $offset = $sequence->indexOf($periodToSplit);
-        $duration = self::getDuration();
-
-        $arrayNewPeriods = array();
-        foreach ($periodToSplit->rangeForward($duration) as $datetime) {
-            $endDate = $datetime->add($duration->dateInterval);
-            $p = Period::fromDate($datetime, $endDate);
-            $arrayNewPeriods[] = $p;
-        }
-
-        $sequence->remove($offset);
-
-        $indexNew = $offset;
-        foreach ($arrayNewPeriods as $newPeriod) {
-            $sequence->insert($indexNew, $newPeriod);
-            $indexNew++;
-        }
-        $this->isChanged = true;
-        return $sequence;
-    }
-
-    private function _normCreneauxSuperieurDuree(Period $period, Sequence &$busySeq) : Sequence {
-        $idx = $busySeq->indexOf($period);
-        $duration = $this->getDuration();
-        $busySeq->remove($idx);
-        $newPeriod = $period->withDurationAfterStart($duration);
-        $busySeq->insert($idx, $newPeriod);
-        $this->isChanged = true;
-        return $busySeq;
+    private function _instanceCreneauxBusysInclus(Sequence $creneaugenSeq, Period $busyPeriod) : bool {
+        foreach ($creneaugenSeq as $period)
+            if ($period->contains($busyPeriod) || $busyPeriod->contains($period))
+                return true;
+        return false;
     }
 
     private function _removePeriod(Period $period, Sequence &$busySeq) : Sequence {
