@@ -201,16 +201,19 @@ if (FBForm::validParams($fbParams)) {
         <?php endif ?>
 
         <?php if ($stdEnv->kronolithTagCals): ?>
-            <div id="kronolithTagCals" class="row border-start border-end pb-3">
-                <p class="text-center">Agenda(s) Ressource(s)</p>
-                <fieldset class="text-center">
-                <?php foreach ($fbParams->uids as $uid): ?>
-                    <?php if ($uid['type'] === 'up1cal'): ?>
-                        <input name="agdRsrc[]" type="checkbox" class="" value="<?= $uid['uid'] ?>" <?= $uid['checked'] ? "checked" : "" ?>>
-                        <?= $uid['name'] ?>
-                    <?php endif ?>
-                <?php endforeach ?>
-                </fieldset>
+            <div id="kronolithTagCals" class="row border-start border-end d-flex justify-content-center">
+                <div class="col-5 border border-gray-500 border-dotted">
+                    <p class="text-center">Agenda(s) Ressource(s)</p>
+                    <select name="agdRsrc[]" class="form-select text-center">
+                        <option>Sélectionnez</option>
+                    <?php foreach ($fbParams->uids as $uid): ?>
+                        <?php if ($uid['type'] === 'up1cal'): ?>
+                            <option value="<?= $uid['uid'] ?>" <?= $uid['checked'] ? "selected" : "" ?>>
+                            <?= $uid['name'] ?>
+                        <?php endif ?>
+                    <?php endforeach ?>
+                    </select>
+                </div>
             </div>
         <?php endif ?>
         <div class="row">
