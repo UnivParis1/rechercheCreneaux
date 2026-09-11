@@ -11,11 +11,10 @@ require_once dirname(__DIR__).'/vendor/autoload.php';
 
 session_start();
 
-require_once dirname(__DIR__)."/src/includes/head_inc.php";
-
+$fbParams = FBParams::factory();
 $data = [];
 try {
-  $zoom = new FBZoom($fbParams, $stdEnv);
+  $zoom = new FBZoom($fbParams);
   $datas = $zoom->createZoomMeeting();
 } catch (\Exception $ex) {
   $datas = ['status' => false, 'msg' => $ex->getMessage()];

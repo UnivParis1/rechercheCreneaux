@@ -28,7 +28,8 @@ class FBZoom
     private int $duree;
     private string $sessionName;
 
-    public function __construct(FBParams $fbParams, stdClass $stdEnv) {
+    public function __construct(FBParams $fbParams) {
+        $stdEnv = $fbParams->stdEnv;
         $titleEvent = $fbParams->titleEvent;
         $descriptionEvent = $fbParams->descriptionEvent;
         $duree = $fbParams->duree;
