@@ -170,7 +170,23 @@ if (FBForm::validParams($fbParams)) {
                     <option value="720" <?= ($fbParams->duree == 720) ? ' selected' : '' ?>>12h</option>
                 </select>
             </div>
-            <div class="col col-lg-3 offset-6 offset-md-0 order-lg-1 border border-gray-500 border-dotted">
+
+            <?php if ($stdEnv->kronolithTagCals): ?>
+            <div id="kronolithTagCals" class="col-6 offset-md-3 order-md-last border border-gray-500 border-dotted p-3">
+                <p class="text-center">Agenda(s) Ressource(s)</p>
+                <select name="agdRsrc[]" class="form-select text-center">
+                    <option>Sélectionnez</option>
+                <?php foreach ($fbParams->uids as $uid): ?>
+                    <?php if ($uid['type'] === 'up1cal'): ?>
+                        <option value="<?= $uid['uid'] ?>" <?= $uid['checked'] ? "selected" : "" ?>>
+                        <?= $uid['name'] ?>
+                    <?php endif ?>
+                <?php endforeach ?>
+                </select>
+            </div>
+            <?php endif ?>
+
+            <div class="col-6 <?=$stdEnv->kronolithTagCals?"":"offset-3"?> col-md-2 col-lg-3 offset-md-0 border border-gray-500 border-dotted">
                 <p>Envoyer requête</p>
                 <input class="btn btn-sm btn-primary rounded text-wrap" type="submit" name="submitRequete" value="Recherche de disponibilité" />
             </div>
@@ -200,24 +216,8 @@ if (FBForm::validParams($fbParams)) {
             </div>
         <?php endif ?>
 
-        <?php if ($stdEnv->kronolithTagCals): ?>
-            <div id="kronolithTagCals" class="row border-start border-end d-flex justify-content-center">
-                <div class="col-5 border border-gray-500 border-dotted">
-                    <p class="text-center">Agenda(s) Ressource(s)</p>
-                    <select name="agdRsrc[]" class="form-select text-center">
-                        <option>Sélectionnez</option>
-                    <?php foreach ($fbParams->uids as $uid): ?>
-                        <?php if ($uid['type'] === 'up1cal'): ?>
-                            <option value="<?= $uid['uid'] ?>" <?= $uid['checked'] ? "selected" : "" ?>>
-                            <?= $uid['name'] ?>
-                        <?php endif ?>
-                    <?php endforeach ?>
-                    </select>
-                </div>
-            </div>
-        <?php endif ?>
         <div class="row">
-            <div class="col-11 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
+            <div class="col-12 col-md-7 col-lg-4 order-lg-2 border border-dotted p-3">
 
                 <div id="divpersonselect">
                     <br />
@@ -230,7 +230,7 @@ if (FBForm::validParams($fbParams)) {
                     <span>* Les participants optionnels ne sont pas pris en compte dans les calculs de disponibilités</span>
                 </div>
             </div>
-            <div class="col-4 col-lg-2 order-lg-4 p-3 border border-gray-500 border-dotted">
+            <div class="col-4 col-md-5 col-lg-2 order-lg-4 p-3 border border-gray-500 border-dotted">
                 <p>A partir du</p>
                 <input class="col-11 col-xs-11 col-sm-10 col-md-7 col-lg-11 col-xl-9 col-xxl-8" required type="date" name="fromDate" min="<?= (new DateTime())->format('Y-m-d') ?>"
                     max="<?= (new DateTime())->add(new DateInterval('P120D'))->format('Y-m-d') ?>"
@@ -244,7 +244,7 @@ if (FBForm::validParams($fbParams)) {
                     <option value="120" <?= ($fbParams->rechercheSurXJours == 120) ? ' selected' : '' ?>>120 jours</option>
                 </select>
             </div>
-            <div class="col-8 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
+            <div class="col-8 col-md-12 col-lg-6 order-lg-3 border border-gray-500 border-dotted p-3">
                 <div id="divjours">
                     <p>Jours sélectionnés</p>
                     <fieldset>
